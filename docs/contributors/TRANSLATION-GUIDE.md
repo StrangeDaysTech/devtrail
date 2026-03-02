@@ -62,7 +62,7 @@ The AI agent will then use Spanish templates when creating documentation.
 | **Main Documentation** | README.md, CONTRIBUTING.md, CODE_OF_CONDUCT.md | `docs/i18n/{lang}/` |
 | **Adopter Documentation** | ADOPTION-GUIDE.md | `docs/i18n/{lang}/adopters/` |
 | **Templates** | TEMPLATE-*.md (8 files) | `.devtrail/templates/i18n/{lang}/` |
-| **Governance** | PRINCIPLES.md, DOCUMENTATION-POLICY.md, AGENT-RULES.md, QUICK-REFERENCE.md | `.devtrail/00-governance/i18n/{lang}/` |
+| **Governance** | PRINCIPLES.md, DOCUMENTATION-POLICY.md, AGENT-RULES.md, GIT-BRANCHING-STRATEGY.md, QUICK-REFERENCE.md | `.devtrail/00-governance/i18n/{lang}/` |
 
 ### Files NOT to Translate
 

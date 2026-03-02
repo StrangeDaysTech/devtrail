@@ -286,7 +286,7 @@ El CLI automáticamente:
    ```markdown
    ## Documentación
 
-   Este proyecto usa [DevTrail](enlace) para gobernanza de documentación.
+   Este proyecto usa [DevTrail](https://github.com/StrangeDaysTech/devtrail) para gobernanza de documentación.
 
    - Todos los cambios significativos deben documentarse en `.devtrail/`
    - Cambios asistidos por IA requieren entradas AILOG
@@ -324,7 +324,16 @@ El CLI automáticamente:
 
 ### Personalizar Identificadores de Agente
 
-Cada plataforma de IA tiene su propio archivo de configuración. Actualiza el identificador de agente para que coincida con tu versionado:
+Cada plataforma de IA tiene su propio archivo de configuración que:
+
+1. Identifica al agente (ej. `claude-code-v1.0`)
+2. Define cuándo documentar (>10 líneas, cambios de seguridad, etc.)
+3. Establece límites de autonomía
+4. Especifica ubicación de plantillas
+5. Requiere reporte de documentación
+6. **Impone flujo de trabajo Git** (nomenclatura de ramas, conventional commits, sin commits directos a `main`)
+
+Actualiza el identificador de agente para que coincida con tu versionado:
 
 ```yaml
 # En cualquier archivo de config de agente
@@ -408,6 +417,7 @@ bash scripts/pre-commit-docs.sh
 - [ ] Al menos un archivo de config de agente existe (`CLAUDE.md`, `GEMINI.md`, etc.)
 - [ ] Documentos de gobernanza presentes en `.devtrail/00-governance/`
 - [ ] Plantillas presentes en `.devtrail/templates/`
+- [ ] Estrategia de branching Git documentada en `.devtrail/03-implementation/`
 - [ ] `QUICK-REFERENCE.md` es accesible
 - [ ] Scripts de validación se ejecutan sin errores
 - [ ] (Opcional) Hook pre-commit está instalado

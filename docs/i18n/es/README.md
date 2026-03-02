@@ -6,7 +6,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](../../../LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Documentation](https://img.shields.io/badge/docs-ADOPTION--GUIDE-orange.svg)](adopters/ADOPTION-GUIDE.md)
+[![Handbook](https://img.shields.io/badge/docs-Handbook-orange.svg)](../../../.devtrail/QUICK-REFERENCE.md)
 [![Strange Days Tech](https://img.shields.io/badge/by-Strange_Days_Tech-purple.svg)](https://strangedays.tech)
 
 [Inicio Rápido](#inicio-rápido) •
@@ -43,7 +43,7 @@ Cada cambio significativo—ya sea hecho por un humano o una IA—está document
 
 ## Características
 
-### Documentación Estructurada
+### 📋 Documentación Estructurada
 
 Ocho tipos de documentos que cubren todo el ciclo de vida del desarrollo:
 
@@ -58,7 +58,7 @@ Ocho tipos de documentos que cubren todo el ciclo de vida del desarrollo:
 | **AIDEC** | Decisiones de IA | Elecciones hechas por IA con alternativas |
 | **ETH** | Revisiones Éticas | Privacidad, sesgo, IA responsable |
 
-### Soporte para Agentes IA
+### 🤖 Soporte para Agentes IA
 
 Pre-configurado para asistentes de codificación con IA populares:
 
@@ -72,8 +72,9 @@ Cada configuración instruye a la IA a:
 - Declarar niveles de confianza
 - Solicitar revisión humana cuando sea apropiado
 - Seguir convenciones de nomenclatura
+- **Seguir estrategia de branching Git** (nunca hacer commit directamente a `main`)
 
-### Supervisión Humana
+### 👁️ Supervisión Humana
 
 Salvaguardas incorporadas que aseguran que los humanos mantengan el control:
 
@@ -81,7 +82,7 @@ Salvaguardas incorporadas que aseguran que los humanos mantengan el control:
 - **Disparadores de revisión**: Baja confianza o alto riesgo → revisión obligatoria
 - **Revisiones éticas**: Preocupaciones de privacidad y sesgo marcadas para decisión humana
 
-### Validación y CI/CD
+### ✅ Validación y CI/CD
 
 Herramientas de validación automatizadas:
 
@@ -166,10 +167,9 @@ Ejemplo: `ADR-2025-01-27-001-usar-postgresql-para-persistencia.md`
 
 | Documento | Descripción |
 |-----------|-------------|
-| [ADOPTION-GUIDE.md](adopters/ADOPTION-GUIDE.md) | Guía completa de adopción |
-| [.devtrail/QUICK-REFERENCE.md](../../../.devtrail/QUICK-REFERENCE.md) | Tarjeta de referencia de una página |
-| [.devtrail/00-governance/PRINCIPLES.md](../../../.devtrail/00-governance/i18n/es/PRINCIPLES.md) | Principios guía |
-| [.devtrail/00-governance/AGENT-RULES.md](../../../.devtrail/00-governance/i18n/es/AGENT-RULES.md) | Reglas para agentes IA |
+| [**📘 Referencia Rápida**](../../../.devtrail/QUICK-REFERENCE.md) | Resumen de documentación en una página |
+| [DEVTRAIL.md](../../../DEVTRAIL.md) | Reglas de gobernanza unificadas (fuente de verdad) |
+| [ADOPTION-GUIDE.md](adopters/ADOPTION-GUIDE.md) | Guía de adopción para proyectos nuevos/existentes |
 
 ---
 

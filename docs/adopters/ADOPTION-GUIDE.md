@@ -4,6 +4,8 @@
 
 [![Strange Days Tech](https://img.shields.io/badge/by-Strange_Days_Tech-purple.svg)](https://strangedays.tech)
 
+**Languages**: English | [Español](../i18n/es/adopters/ADOPTION-GUIDE.md)
+
 ---
 
 ## Table of Contents
@@ -284,7 +286,7 @@ The CLI automatically:
    ```markdown
    ## Documentation
 
-   This project uses [DevTrail](link) for documentation governance.
+   This project uses [DevTrail](https://github.com/StrangeDaysTech/devtrail) for documentation governance.
 
    - All significant changes must be documented in `.devtrail/`
    - AI-assisted changes require AILOG entries

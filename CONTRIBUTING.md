@@ -2,6 +2,8 @@
 
 Thank you for your interest in contributing to DevTrail! This document provides guidelines and information for contributors.
 
+**Languages**: English | [Español](docs/i18n/es/CONTRIBUTING.md)
+
 ## Table of Contents
 
 - [Code of Conduct](#code-of-conduct)

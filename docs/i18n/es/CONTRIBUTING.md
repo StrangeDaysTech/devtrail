@@ -295,6 +295,24 @@ cd cli
 cargo build --release
 ```
 
+El binario de release está optimizado con LTO y stripped para tamaño mínimo.
+
+### Arquitectura
+
+```
+cli/src/
+├── main.rs          # Punto de entrada + definición CLI con clap
+├── commands/
+│   ├── init.rs      # devtrail init [path]
+│   ├── update.rs    # devtrail update
+│   └── remove.rs    # devtrail remove [--full]
+├── config.rs        # Gestión de configuración y checksums
+├── download.rs      # Descarga desde GitHub Releases
+├── inject.rs        # Inyección de archivos de directiva (markers)
+├── manifest.rs      # Parsing de dist-manifest.yml
+└── utils.rs         # Helpers (hashing, colores, paths)
+```
+
 ---
 
 ## ¿Preguntas?
