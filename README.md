@@ -137,7 +137,28 @@ git commit -m "chore: adopt DevTrail"
 
 ## Documentation
 
-### Quick Reference
+DevTrail documentation is organized by audience:
+
+| Track | For | Start here |
+|-------|-----|------------|
+| [**Adopters**](docs/adopters/) | Teams adopting DevTrail in their projects | [ADOPTION-GUIDE.md](docs/adopters/ADOPTION-GUIDE.md) |
+| [**Contributors**](docs/contributors/) | Developers contributing to DevTrail | [TRANSLATION-GUIDE.md](docs/contributors/TRANSLATION-GUIDE.md) |
+
+**Adopters**: Follow the [Adoption Guide](docs/adopters/ADOPTION-GUIDE.md) for step-by-step instructions, migration strategies for existing projects, and team rollout plans.
+
+**Contributors**: See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines, and the [Translation Guide](docs/contributors/TRANSLATION-GUIDE.md) for adding new languages.
+
+### Key References
+
+| Document | Description |
+|----------|-------------|
+| [**📘 Quick Reference**](.devtrail/QUICK-REFERENCE.md) | One-page overview of document types and naming |
+| [DEVTRAIL.md](DEVTRAIL.md) | Unified governance rules (source of truth) |
+| [ADOPTION-GUIDE.md](docs/adopters/ADOPTION-GUIDE.md) | Adoption guide for new/existing projects |
+
+### Internal Structure
+
+Once adopted, DevTrail creates a `.devtrail/` directory in your project for development governance:
 
 ```
 .devtrail/
@@ -162,14 +183,6 @@ git commit -m "chore: adopt DevTrail"
 ```
 
 Example: `ADR-2025-01-27-001-use-postgresql-for-persistence.md`
-
-### Key Documents
-
-| Document | Description |
-|----------|-------------|
-| [**📘 Quick Reference**](.devtrail/QUICK-REFERENCE.md) | One-page documentation overview |
-| [DEVTRAIL.md](DEVTRAIL.md) | Unified governance rules (source of truth) |
-| [ADOPTION-GUIDE.md](docs/adopters/ADOPTION-GUIDE.md) | Adoption guide for new/existing projects |
 
 ---
 

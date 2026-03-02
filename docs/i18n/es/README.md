@@ -137,14 +137,35 @@ git commit -m "chore: adoptar DevTrail"
 
 ## Documentación
 
-### Referencia Rápida
+La documentación de DevTrail está organizada por audiencia:
+
+| Track | Para | Empieza aquí |
+|-------|------|--------------|
+| [**Adoptantes**](adopters/) | Equipos que adoptan DevTrail en sus proyectos | [ADOPTION-GUIDE.md](adopters/ADOPTION-GUIDE.md) |
+| [**Contribuidores**](../../../docs/contributors/) | Desarrolladores que contribuyen a DevTrail | [TRANSLATION-GUIDE.md](../../../docs/contributors/TRANSLATION-GUIDE.md) |
+
+**Adoptantes**: Sigue la [Guía de Adopción](adopters/ADOPTION-GUIDE.md) para instrucciones paso a paso, estrategias de migración para proyectos existentes y planes de implementación en equipos.
+
+**Contribuidores**: Consulta [CONTRIBUTING.md](CONTRIBUTING.md) para guías de desarrollo, y la [Guía de Traducción](../../../docs/contributors/TRANSLATION-GUIDE.md) para agregar nuevos idiomas.
+
+### Referencias Clave
+
+| Documento | Descripción |
+|-----------|-------------|
+| [**📘 Referencia Rápida**](../../../.devtrail/QUICK-REFERENCE.md) | Resumen de tipos de documentos y nomenclatura |
+| [DEVTRAIL.md](../../../DEVTRAIL.md) | Reglas de gobernanza unificadas (fuente de verdad) |
+| [ADOPTION-GUIDE.md](adopters/ADOPTION-GUIDE.md) | Guía de adopción para proyectos nuevos/existentes |
+
+### Estructura Interna
+
+Una vez adoptado, DevTrail crea un directorio `.devtrail/` en tu proyecto para gobernanza de desarrollo:
 
 ```
 .devtrail/
 ├── 00-governance/           # Políticas y reglas
 ├── 01-requirements/         # Documentos REQ
 ├── 02-design/decisions/     # Documentos ADR
-├── 03-implementation/       # Guías de implementación
+├── 03-implementation/       # Guías de implementación (incl. estrategia Git)
 ├── 04-testing/              # Documentos TES
 ├── 05-operations/incidents/ # Documentos INC
 ├── 06-evolution/technical-debt/ # Documentos TDE
@@ -162,14 +183,6 @@ git commit -m "chore: adoptar DevTrail"
 ```
 
 Ejemplo: `ADR-2025-01-27-001-usar-postgresql-para-persistencia.md`
-
-### Documentos Clave
-
-| Documento | Descripción |
-|-----------|-------------|
-| [**📘 Referencia Rápida**](../../../.devtrail/QUICK-REFERENCE.md) | Resumen de documentación en una página |
-| [DEVTRAIL.md](../../../DEVTRAIL.md) | Reglas de gobernanza unificadas (fuente de verdad) |
-| [ADOPTION-GUIDE.md](adopters/ADOPTION-GUIDE.md) | Guía de adopción para proyectos nuevos/existentes |
 
 ---
 
