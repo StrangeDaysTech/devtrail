@@ -108,7 +108,7 @@ Las contribuciones de código deben:
 
 3. **Instalar el hook de pre-commit**
    ```bash
-   cp scripts/pre-commit-docs.sh .git/hooks/pre-commit
+   cp dist/scripts/pre-commit-docs.sh .git/hooks/pre-commit
    chmod +x .git/hooks/pre-commit
    ```
 
@@ -128,10 +128,10 @@ Las contribuciones de código deben:
 6. **Hacer tus cambios y validar**
    ```bash
    # Linux/Mac
-   bash scripts/pre-commit-docs.sh
+   bash dist/scripts/pre-commit-docs.sh
 
    # Windows
-   .\scripts\validate-docs.ps1
+   .\dist\scripts\validate-docs.ps1
    ```
 
 ---
@@ -245,25 +245,21 @@ Documentos DevTrail:
 Si estás proponiendo un nuevo tipo de documento:
 
 1. **Crear la plantilla**
-   - Agregar `TEMPLATE-NUEVOTIPO.md` a `.devtrail/templates/`
+   - Agregar `TEMPLATE-NUEVOTIPO.md` a `dist/.devtrail/templates/`
    - Seguir patrones de plantillas existentes
 
 2. **Actualizar docs de gobernanza**
-   - `.devtrail/00-governance/DOCUMENTATION-POLICY.md`
-   - `.devtrail/00-governance/AGENT-RULES.md`
-   - `.devtrail/QUICK-REFERENCE.md`
+   - `dist/.devtrail/00-governance/DOCUMENTATION-POLICY.md`
+   - `dist/.devtrail/00-governance/AGENT-RULES.md`
+   - `dist/.devtrail/QUICK-REFERENCE.md`
 
 3. **Actualizar configs de agente**
-   - `CLAUDE.md` (solo desarrollo)
-   - `GEMINI.md` (solo desarrollo)
-   - `.cursorrules` (solo desarrollo)
-   - `.github/copilot-instructions.md` (solo desarrollo)
-   - `dist-templates/directives/` (plantillas de distribución)
+   - `dist/dist-templates/directives/` (plantillas de distribución)
 
 4. **Actualizar validación**
-   - `scripts/pre-commit-docs.sh`
-   - `scripts/validate-docs.ps1`
-   - `.github/workflows/docs-validation.yml`
+   - `dist/scripts/pre-commit-docs.sh`
+   - `dist/scripts/validate-docs.ps1`
+   - `dist/.github/workflows/docs-validation.yml`
 
 5. **Documentar el cambio**
    - Crear un ADR explicando el nuevo tipo

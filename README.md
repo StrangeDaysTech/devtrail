@@ -6,7 +6,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Handbook](https://img.shields.io/badge/docs-Handbook-orange.svg)](.devtrail/QUICK-REFERENCE.md)
+[![Handbook](https://img.shields.io/badge/docs-Handbook-orange.svg)](dist/.devtrail/QUICK-REFERENCE.md)
 [![Strange Days Tech](https://img.shields.io/badge/by-Strange_Days_Tech-purple.svg)](https://strangedays.tech)
 
 [Getting Started](#getting-started) •
@@ -174,8 +174,8 @@ DevTrail documentation is organized by audience:
 
 | Document | Description |
 |----------|-------------|
-| [**📘 Quick Reference**](.devtrail/QUICK-REFERENCE.md) | One-page overview of document types and naming |
-| [DEVTRAIL.md](DEVTRAIL.md) | Unified governance rules (source of truth) |
+| [**📘 Quick Reference**](dist/.devtrail/QUICK-REFERENCE.md) | One-page overview of document types and naming |
+| [DEVTRAIL.md](dist/DEVTRAIL.md) | Unified governance rules (source of truth) |
 | [ADOPTION-GUIDE.md](docs/adopters/ADOPTION-GUIDE.md) | Adoption guide for new/existing projects |
 
 ### Internal Structure

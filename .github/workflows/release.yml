@@ -27,33 +27,8 @@ jobs:
 
       - name: Create distribution ZIP
         run: |
-          # Read files from dist-manifest.yml and create ZIP
           mkdir -p dist-staging
-
-          # Core framework
-          cp -r .devtrail dist-staging/
-          cp DEVTRAIL.md dist-staging/
-          cp dist-manifest.yml dist-staging/
-
-          # Agent skills
-          cp -r .claude/skills dist-staging/.claude/skills 2>/dev/null || true
-          cp -r .gemini/skills dist-staging/.gemini/skills 2>/dev/null || true
-          cp -r .agent/workflows dist-staging/.agent/workflows 2>/dev/null || true
-
-          # Scripts
-          mkdir -p dist-staging/scripts
-          cp scripts/devtrail-new.sh dist-staging/scripts/ 2>/dev/null || true
-          cp scripts/devtrail-status.sh dist-staging/scripts/ 2>/dev/null || true
-          cp scripts/pre-commit-docs.sh dist-staging/scripts/ 2>/dev/null || true
-          cp scripts/validate-docs.ps1 dist-staging/scripts/ 2>/dev/null || true
-
-          # CI/CD
-          mkdir -p dist-staging/.github/workflows
-          cp .github/workflows/docs-validation.yml dist-staging/.github/workflows/ 2>/dev/null || true
-
-          # Directive templates (used by CLI for injections)
-          cp -r dist-templates dist-staging/ 2>/dev/null || true
-
+          cp -a dist/. dist-staging/
           cd dist-staging
           zip -r "../devtrail-v${{ steps.version.outputs.version }}.zip" .
           cd ..

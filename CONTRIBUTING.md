@@ -108,7 +108,7 @@ Code contributions should:
 
 3. **Install the pre-commit hook**
    ```bash
-   cp scripts/pre-commit-docs.sh .git/hooks/pre-commit
+   cp dist/scripts/pre-commit-docs.sh .git/hooks/pre-commit
    chmod +x .git/hooks/pre-commit
    ```
 
@@ -128,10 +128,10 @@ Code contributions should:
 6. **Make your changes and validate**
    ```bash
    # Linux/Mac
-   bash scripts/pre-commit-docs.sh
+   bash dist/scripts/pre-commit-docs.sh
 
    # Windows
-   .\scripts\validate-docs.ps1
+   .\dist\scripts\validate-docs.ps1
    ```
 
 ---
@@ -245,25 +245,21 @@ DevTrail documents:
 If you're proposing a new document type:
 
 1. **Create the template**
-   - Add `TEMPLATE-NEWTYPE.md` to `.devtrail/templates/`
+   - Add `TEMPLATE-NEWTYPE.md` to `dist/.devtrail/templates/`
    - Follow existing template patterns
 
 2. **Update governance docs**
-   - `.devtrail/00-governance/DOCUMENTATION-POLICY.md`
-   - `.devtrail/00-governance/AGENT-RULES.md`
-   - `.devtrail/QUICK-REFERENCE.md`
+   - `dist/.devtrail/00-governance/DOCUMENTATION-POLICY.md`
+   - `dist/.devtrail/00-governance/AGENT-RULES.md`
+   - `dist/.devtrail/QUICK-REFERENCE.md`
 
 3. **Update agent configs**
-   - `CLAUDE.md` (dev-only)
-   - `GEMINI.md` (dev-only)
-   - `.cursorrules` (dev-only)
-   - `.github/copilot-instructions.md` (dev-only)
-   - `dist-templates/directives/` (distribution templates)
+   - `dist/dist-templates/directives/` (distribution templates)
 
 4. **Update validation**
-   - `scripts/pre-commit-docs.sh`
-   - `scripts/validate-docs.ps1`
-   - `.github/workflows/docs-validation.yml`
+   - `dist/scripts/pre-commit-docs.sh`
+   - `dist/scripts/validate-docs.ps1`
+   - `dist/.github/workflows/docs-validation.yml`
 
 5. **Document the change**
    - Create an ADR explaining the new type
