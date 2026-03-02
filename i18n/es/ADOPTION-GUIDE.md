@@ -2,7 +2,7 @@
 
 **Una guía completa para adoptar DevTrail en proyectos nuevos o existentes.**
 
-[![Enigmora](https://img.shields.io/badge/by-Enigmora-purple.svg)](https://enigmora.com)
+[![Strange Days Tech](https://img.shields.io/badge/by-Strange_Days_Tech-purple.svg)](https://strangedays.tech)
 
 **Idiomas**: [English](../../ADOPTION-GUIDE.md) | Español
 
@@ -155,68 +155,42 @@ DevTrail se alinea con y soporta cumplimiento para:
 
 ## Ruta de Adopción A: Proyectos Nuevos
 
-### Opción 1: Usar como Plantilla de GitHub (Recomendado)
+### Opción 1: CLI (Recomendado)
 
-1. **Crear desde plantilla**
+```bash
+# Instalar el CLI
+cargo install devtrail-cli
 
-   Haz clic en "Use this template" en el [repositorio de DevTrail](https://github.com/enigmora/devtrail-framework) para crear un nuevo repositorio.
+# Inicializar en tu proyecto
+cd tu-proyecto
+devtrail init .
 
-2. **Clonar tu nuevo repositorio**
-   ```bash
-   git clone https://github.com/tu-usuario/tu-nuevo-proyecto.git
-   cd tu-nuevo-proyecto
-   ```
+# Commit
+git add .devtrail/ DEVTRAIL.md scripts/
+git commit -m "chore: adoptar DevTrail"
+```
 
-3. **Eliminar archivos de ejemplo (opcional)**
-   ```bash
-   # Mantener la estructura, eliminar contenido de ejemplo
-   find .devtrail -name "*.md" -path "*-audit/*" -delete
-   find .devtrail -name "*.md" -path "*requirements/*" -delete
-   # etc.
-   ```
-
-4. **Personalizar configuraciones de agente**
-
-   Edita los archivos de configuración de agente para que coincidan con el contexto de tu proyecto:
-   - `CLAUDE.md` - para usuarios de Claude Code
-   - `GEMINI.md` - para usuarios de Gemini CLI
-   - `.cursorrules` - para usuarios de Cursor
-   - `.github/copilot-instructions.md` - para usuarios de Copilot CLI
-
-5. **Inicializar tu documentación**
-   ```bash
-   # Crear tu primer requisito
-   touch .devtrail/01-requirements/REQ-$(date +%Y-%m-%d)-001-requisitos-iniciales.md
-   ```
+El CLI automáticamente:
+- Descarga la última versión de DevTrail desde GitHub
+- Configura la estructura de directorios `.devtrail/`
+- Crea `DEVTRAIL.md` con las reglas de gobernanza
+- Configura las directivas de agentes IA (`CLAUDE.md`, `GEMINI.md`, `.cursorrules`, etc.)
+- Copia scripts de validación y workflows de CI/CD
 
 ### Opción 2: Configuración Manual
 
-1. **Descargar DevTrail**
+1. **Descargar el último release**
+
+   Ve a [GitHub Releases](https://github.com/StrangeDaysTech/devtrail/releases/latest) y descarga el ZIP de distribución.
+
+2. **Extraer en tu proyecto**
    ```bash
-   # Clonar el repositorio
-   git clone https://github.com/enigmora/devtrail-framework.git devtrail-temp
-
-   # Copiar a tu proyecto
-   cp -r devtrail-temp/.devtrail tu-proyecto/
-   cp devtrail-temp/CLAUDE.md tu-proyecto/
-   cp devtrail-temp/GEMINI.md tu-proyecto/
-   cp devtrail-temp/.cursorrules tu-proyecto/
-   cp -r devtrail-temp/.github tu-proyecto/
-   cp -r devtrail-temp/scripts tu-proyecto/
-
-   # Limpiar
-   rm -rf devtrail-temp
-   ```
-
-2. **Agregar a .gitignore (si es necesario)**
-   ```gitignore
-   # DevTrail - nada que ignorar por defecto
-   # Agrega patrones aquí si generas archivos temporales
+   unzip devtrail-v*.zip -d tu-proyecto/
    ```
 
 3. **Commit de la estructura**
    ```bash
-   git add .devtrail/ CLAUDE.md GEMINI.md .cursorrules .github/ scripts/
+   git add .devtrail/ DEVTRAIL.md scripts/
    git commit -m "chore: adoptar DevTrail para gobernanza de documentación"
    ```
 
@@ -247,19 +221,11 @@ DevTrail se alinea con y soporta cumplimiento para:
 
 1. **Agregar estructura DevTrail**
    ```bash
-   # Descargar y copiar archivos DevTrail
-   git clone https://github.com/enigmora/devtrail-framework.git devtrail-temp
+   # Usando CLI (recomendado)
+   devtrail init .
 
-   # Copiar estructura (no sobrescribirá archivos existentes)
-   cp -rn devtrail-temp/.devtrail ./
-   cp -n devtrail-temp/CLAUDE.md ./
-   cp -n devtrail-temp/GEMINI.md ./
-   cp -n devtrail-temp/.cursorrules ./
-   mkdir -p .github
-   cp -rn devtrail-temp/.github/* ./.github/
-   cp -rn devtrail-temp/scripts ./
-
-   rm -rf devtrail-temp
+   # O manualmente: descargar desde GitHub Releases
+   # https://github.com/StrangeDaysTech/devtrail/releases/latest
    ```
 
 2. **Resolver conflictos con `docs/` existente**
@@ -510,8 +476,8 @@ R: Las reglas de DevTrail son instrucciones, no cumplimiento forzado. Si un asis
 
 ## Obtener Ayuda
 
-- **Issues**: [GitHub Issues](https://github.com/enigmora/devtrail-framework/issues)
-- **Discusiones**: [GitHub Discussions](https://github.com/enigmora/devtrail-framework/discussions)
+- **Issues**: [GitHub Issues](https://github.com/StrangeDaysTech/devtrail/issues)
+- **Discusiones**: [GitHub Discussions](https://github.com/StrangeDaysTech/devtrail/discussions)
 - **Contribuir**: Ver [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ---
@@ -520,6 +486,6 @@ R: Las reglas de DevTrail son instrucciones, no cumplimiento forzado. Si un asis
 
 **DevTrail** — Porque cada cambio cuenta una historia.
 
-[Volver al README](README.md) • [Enigmora](https://enigmora.com)
+[Volver al README](README.md) • [Strange Days Tech](https://strangedays.tech)
 
 </div>

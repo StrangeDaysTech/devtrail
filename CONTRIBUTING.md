@@ -268,12 +268,57 @@ Templates should include:
 
 ---
 
+## CLI Development
+
+The DevTrail CLI is written in Rust and located in the `cli/` directory.
+
+### Building
+
+```bash
+cd cli
+cargo build
+```
+
+### Running Tests
+
+```bash
+cd cli
+cargo test
+```
+
+### Release Build
+
+```bash
+cd cli
+cargo build --release
+```
+
+The release binary is optimized with LTO and stripped for minimal size.
+
+### Architecture
+
+```
+cli/src/
+├── main.rs          # Entry point + clap CLI definition
+├── commands/
+│   ├── init.rs      # devtrail init [path]
+│   ├── update.rs    # devtrail update
+│   └── remove.rs    # devtrail remove [--full]
+├── config.rs        # Config and checksums management
+├── download.rs      # GitHub Releases download
+├── inject.rs        # Directive file injection (markers)
+├── manifest.rs      # dist-manifest.yml parsing
+└── utils.rs         # Helpers (hashing, colors, paths)
+```
+
+---
+
 ## Questions?
 
 If you have questions about contributing:
 
-1. Check existing [Issues](https://github.com/enigmora/devtrail-framework/issues)
-2. Check [Discussions](https://github.com/enigmora/devtrail-framework/discussions)
+1. Check existing [Issues](https://github.com/StrangeDaysTech/devtrail/issues)
+2. Check [Discussions](https://github.com/StrangeDaysTech/devtrail/discussions)
 3. Open a new Discussion for general questions
 4. Open an Issue for specific bugs or features
 
@@ -293,4 +338,4 @@ Thank you for helping make DevTrail better!
 
 *DevTrail — Because every change tells a story.*
 
-[Enigmora](https://enigmora.com)
+[Strange Days Tech](https://strangedays.tech)

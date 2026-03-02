@@ -3,7 +3,7 @@
 # =============================================================================
 #
 # This workflow validates documentation on each Pull Request and push to main.
-# https://enigmora.com
+# https://strangedays.tech
 #
 # Executes:
 # 1. File naming convention validation

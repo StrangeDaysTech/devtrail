@@ -2,7 +2,7 @@
 
 **A comprehensive guide for adopting DevTrail in new or existing projects.**
 
-[![Enigmora](https://img.shields.io/badge/by-Enigmora-purple.svg)](https://enigmora.com)
+[![Strange Days Tech](https://img.shields.io/badge/by-Strange_Days_Tech-purple.svg)](https://strangedays.tech)
 
 ---
 
@@ -153,68 +153,42 @@ DevTrail aligns with and supports compliance for:
 
 ## Adoption Path A: New Projects
 
-### Option 1: Use as GitHub Template (Recommended)
+### Option 1: CLI (Recommended)
 
-1. **Create from template**
+```bash
+# Install the CLI
+cargo install devtrail-cli
 
-   Click "Use this template" on the [DevTrail repository](https://github.com/enigmora/devtrail-framework) to create a new repository.
+# Initialize in your project
+cd your-project
+devtrail init .
 
-2. **Clone your new repository**
-   ```bash
-   git clone https://github.com/your-username/your-new-project.git
-   cd your-new-project
-   ```
+# Commit
+git add .devtrail/ DEVTRAIL.md scripts/
+git commit -m "chore: adopt DevTrail"
+```
 
-3. **Remove example files (optional)**
-   ```bash
-   # Keep the structure, remove sample content
-   find .devtrail -name "*.md" -path "*-audit/*" -delete
-   find .devtrail -name "*.md" -path "*requirements/*" -delete
-   # etc.
-   ```
-
-4. **Customize agent configurations**
-
-   Edit the agent configuration files to match your project context:
-   - `CLAUDE.md` - for Claude Code users
-   - `GEMINI.md` - for Gemini CLI users
-   - `.cursorrules` - for Cursor users
-   - `.github/copilot-instructions.md` - for Copilot CLI users
-
-5. **Initialize your documentation**
-   ```bash
-   # Create your first requirement
-   touch .devtrail/01-requirements/REQ-$(date +%Y-%m-%d)-001-initial-requirements.md
-   ```
+The CLI automatically:
+- Downloads the latest DevTrail release from GitHub
+- Sets up the `.devtrail/` directory structure
+- Creates `DEVTRAIL.md` with governance rules
+- Configures AI agent directives (`CLAUDE.md`, `GEMINI.md`, `.cursorrules`, etc.)
+- Copies validation scripts and CI/CD workflows
 
 ### Option 2: Manual Setup
 
-1. **Download DevTrail**
+1. **Download the latest release**
+
+   Go to [GitHub Releases](https://github.com/StrangeDaysTech/devtrail/releases/latest) and download the distribution ZIP.
+
+2. **Extract to your project**
    ```bash
-   # Clone the repository
-   git clone https://github.com/enigmora/devtrail-framework.git devtrail-temp
-
-   # Copy to your project
-   cp -r devtrail-temp/.devtrail your-project/
-   cp devtrail-temp/CLAUDE.md your-project/
-   cp devtrail-temp/GEMINI.md your-project/
-   cp devtrail-temp/.cursorrules your-project/
-   cp -r devtrail-temp/.github your-project/
-   cp -r devtrail-temp/scripts your-project/
-
-   # Clean up
-   rm -rf devtrail-temp
-   ```
-
-2. **Add to .gitignore (if needed)**
-   ```gitignore
-   # DevTrail - nothing to ignore by default
-   # Add patterns here if you generate temporary files
+   unzip devtrail-v*.zip -d your-project/
    ```
 
 3. **Commit the structure**
    ```bash
-   git add .devtrail/ CLAUDE.md GEMINI.md .cursorrules .github/ scripts/
+   git add .devtrail/ DEVTRAIL.md scripts/
    git commit -m "chore: adopt DevTrail for documentation governance"
    ```
 
@@ -245,19 +219,11 @@ DevTrail aligns with and supports compliance for:
 
 1. **Add DevTrail structure**
    ```bash
-   # Download and copy DevTrail files
-   git clone https://github.com/enigmora/devtrail-framework.git devtrail-temp
+   # Using CLI (recommended)
+   devtrail init .
 
-   # Copy structure (will not overwrite existing files)
-   cp -rn devtrail-temp/.devtrail ./
-   cp -n devtrail-temp/CLAUDE.md ./
-   cp -n devtrail-temp/GEMINI.md ./
-   cp -n devtrail-temp/.cursorrules ./
-   mkdir -p .github
-   cp -rn devtrail-temp/.github/* ./.github/
-   cp -rn devtrail-temp/scripts ./
-
-   rm -rf devtrail-temp
+   # Or manually: download from GitHub Releases
+   # https://github.com/StrangeDaysTech/devtrail/releases/latest
    ```
 
 2. **Resolve conflicts with existing `docs/`**
@@ -518,8 +484,8 @@ A: DevTrail rules are instructions, not enforcement. If an AI assistant creates 
 
 ## Getting Help
 
-- **Issues**: [GitHub Issues](https://github.com/enigmora/devtrail-framework/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/enigmora/devtrail-framework/discussions)
+- **Issues**: [GitHub Issues](https://github.com/StrangeDaysTech/devtrail/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/StrangeDaysTech/devtrail/discussions)
 - **Contributing**: See [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ---
@@ -530,6 +496,6 @@ A: DevTrail rules are instructions, not enforcement. If an AI assistant creates 
 
 **DevTrail** — Because every change tells a story.
 
-[Back to README](README.md) • [Enigmora](https://enigmora.com)
+[Back to README](README.md) • [Strange Days Tech](https://strangedays.tech)
 
 </div>

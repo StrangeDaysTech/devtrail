@@ -217,13 +217,13 @@ Basado en [REQ-2025-01-15-003].          # Keep reference format
 ### 9. URLs and Links
 
 ```markdown
-[Enigmora](https://enigmora.com)    # Keep URLs exactly
+[Strange Days Tech](https://strangedays.tech)    # Keep URLs exactly
 ```
 
 ### 10. Brand Names
 
 ```
-Enigmora
+Strange Days Tech
 DevTrail
 Claude Code
 Cursor
@@ -353,4 +353,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for general contribution guidelines.
 
 *DevTrail — Because every change tells a story.*
 
-[Enigmora](https://enigmora.com)
+[Strange Days Tech](https://strangedays.tech)

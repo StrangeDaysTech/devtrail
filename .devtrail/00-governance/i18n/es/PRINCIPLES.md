@@ -76,4 +76,4 @@ Ciertos tipos de cambios **siempre** requieren aprobación humana:
 
 ---
 
-*DevTrail v1.0.0 | [Enigmora](https://enigmora.com)*
+*DevTrail v1.0.0 | [Strange Days Tech](https://strangedays.tech)*

@@ -51,7 +51,7 @@ This Code of Conduct also applies when an individual is officially representing 
 
 If you experience or witness unacceptable behavior, or have any other concerns, please report it by contacting the project team at:
 
-**Email**: [contacto@enigmora.com](mailto:contacto@enigmora.com)
+**GitHub Issues**: [Report here](https://github.com/StrangeDaysTech/devtrail/issues)
 
 All reports will be reviewed and investigated promptly and fairly.
 
@@ -99,7 +99,7 @@ Community leaders will follow these Community Impact Guidelines in determining t
 
 ## Appeals
 
-If you believe you have been falsely or unfairly accused of violating this Code of Conduct, you may appeal by sending a detailed explanation to [contacto@enigmora.com](mailto:contacto@enigmora.com). Appeals will be reviewed by a different community leader than the one who made the original decision.
+If you believe you have been falsely or unfairly accused of violating this Code of Conduct, you may appeal by opening a detailed issue at [GitHub Issues](https://github.com/StrangeDaysTech/devtrail/issues). Appeals will be reviewed by a different community leader than the one who made the original decision.
 
 ## Attribution
 
@@ -127,5 +127,5 @@ For answers to common questions about this code of conduct, see the FAQ at [http
 <p align="center">
   <strong>DevTrail</strong><br>
   Building an inclusive community together<br>
-  <a href="https://enigmora.com">Enigmora SC</a>
+  <a href="https://strangedays.tech">Strange Days Tech, S.A.S.</a>
 </p>

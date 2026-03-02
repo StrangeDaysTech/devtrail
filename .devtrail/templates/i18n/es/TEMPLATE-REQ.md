@@ -85,4 +85,4 @@ validated_date: null
 | Estado | [Validado/Rechazado/Modificado] |
 | Comentarios | [Notas del validador] |
 
-<!-- Template: DevTrail | https://enigmora.com -->
+<!-- Template: DevTrail | https://strangedays.tech -->

@@ -1,0 +1,38 @@
+version: "2.0.0"
+description: "DevTrail distribution manifest"
+repository: "https://github.com/StrangeDaysTech/devtrail"
+
+# Files included when running `devtrail init`
+files:
+  # Core framework
+  - .devtrail/
+
+  # Unified rules file
+  - DEVTRAIL.md
+
+  # Agent skills
+  - .claude/skills/
+  - .gemini/skills/
+  - .agent/workflows/
+
+  # Scripts (bash + powershell)
+  - scripts/devtrail-new.sh
+  - scripts/devtrail-status.sh
+  - scripts/pre-commit-docs.sh
+  - scripts/validate-docs.ps1
+
+  # CI/CD
+  - .github/copilot-instructions.md
+  - .github/workflows/docs-validation.yml
+
+# Files that are injected into existing directive files
+# (not copied, but merged via markers)
+injections:
+  reference:
+    - CLAUDE.md
+    - GEMINI.md
+    - .github/copilot-instructions.md
+  inline:
+    - .cursorrules
+  directory:
+    - .cursor/rules/devtrail.md

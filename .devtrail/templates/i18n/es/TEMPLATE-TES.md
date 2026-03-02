@@ -98,4 +98,4 @@ related: []
 | Fecha | [YYYY-MM-DD] |
 | Comentarios | [Notas] |
 
-<!-- Template: DevTrail | https://enigmora.com -->
+<!-- Template: DevTrail | https://strangedays.tech -->

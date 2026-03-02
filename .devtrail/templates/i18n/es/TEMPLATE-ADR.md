@@ -87,4 +87,4 @@ supersedes: []
 |-------|-------|--------|
 | YYYY-MM-DD | [agente/humano] | Creación inicial |
 
-<!-- Template: DevTrail | https://enigmora.com -->
+<!-- Template: DevTrail | https://strangedays.tech -->

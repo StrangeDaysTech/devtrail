@@ -2,7 +2,7 @@
 
 # =============================================================================
 # DevTrail - Pre-commit Hook for Documentation Validation
-# https://enigmora.com
+# https://strangedays.tech
 # =============================================================================
 #
 # Installation:

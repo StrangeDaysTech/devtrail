@@ -120,4 +120,4 @@ Impact   │             │             │
 | Assigned to | [Team/Person] |
 | Comments | [Notes] |
 
-<!-- Template: DevTrail | https://enigmora.com -->
+<!-- Template: DevTrail | https://strangedays.tech -->

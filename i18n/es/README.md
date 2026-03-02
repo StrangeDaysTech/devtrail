@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](../../LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Documentation](https://img.shields.io/badge/docs-ADOPTION--GUIDE-orange.svg)](ADOPTION-GUIDE.md)
-[![Enigmora](https://img.shields.io/badge/by-Enigmora-purple.svg)](https://enigmora.com)
+[![Strange Days Tech](https://img.shields.io/badge/by-Strange_Days_Tech-purple.svg)](https://strangedays.tech)
 
 [Inicio Rápido](#inicio-rápido) •
 [Características](#características) •
@@ -93,46 +93,40 @@ Herramientas de validación automatizadas:
 
 ## Inicio Rápido
 
-### Inicio Rápido (Proyecto Nuevo)
-
-**Opción 1: Usar como Plantilla** (Recomendado)
-
-Haz clic en el botón **"Use this template"** arriba para crear un nuevo repositorio con DevTrail pre-configurado.
-
-**Opción 2: Clonar y Copiar**
+### Opción 1: CLI (Recomendado)
 
 ```bash
-# Clonar DevTrail
-git clone https://github.com/enigmora/devtrail-framework.git
+# Instalar el CLI
+cargo install devtrail-cli
 
-# Copiar a tu proyecto
-cp -r devtrail-framework/.devtrail tu-proyecto/
-cp devtrail-framework/CLAUDE.md tu-proyecto/
-cp devtrail-framework/GEMINI.md tu-proyecto/
-cp devtrail-framework/.cursorrules tu-proyecto/
-cp -r devtrail-framework/.github tu-proyecto/
-cp -r devtrail-framework/scripts tu-proyecto/
+# Inicializar en tu proyecto
+cd tu-proyecto
+devtrail init .
 ```
 
-### Inicio Rápido (Proyecto Existente)
+El CLI descarga la última versión de DevTrail, configura el framework y los archivos de directivas de agentes IA automáticamente.
 
 ```bash
-# Descargar DevTrail
-git clone https://github.com/enigmora/devtrail-framework.git devtrail-temp
+# Actualizar a la última versión
+devtrail update
 
-# Copiar sin sobrescribir (Linux/Mac)
-cp -rn devtrail-temp/.devtrail ./
-cp -n devtrail-temp/CLAUDE.md ./
-cp -n devtrail-temp/GEMINI.md ./
-cp -n devtrail-temp/.cursorrules ./
-cp -rn devtrail-temp/.github ./
-cp -rn devtrail-temp/scripts ./
+# Eliminar DevTrail
+devtrail remove
+```
 
-# Limpiar
-rm -rf devtrail-temp
+### Opción 2: Configuración Manual
+
+```bash
+# Descargar el último release ZIP de GitHub
+# https://github.com/StrangeDaysTech/devtrail/releases/latest
+
+# Extraer y copiar a tu proyecto
+cp -r .devtrail tu-proyecto/
+cp DEVTRAIL.md tu-proyecto/
+cp -r scripts tu-proyecto/
 
 # Commit
-git add .devtrail/ CLAUDE.md GEMINI.md .cursorrules .github/ scripts/
+git add .devtrail/ DEVTRAIL.md scripts/
 git commit -m "chore: adoptar DevTrail"
 ```
 
@@ -427,15 +421,13 @@ Este proyecto está licenciado bajo la Licencia MIT - ver el archivo [LICENSE](.
 
 ---
 
-## Acerca de Enigmora
+## Acerca de Strange Days Tech, S.A.S.
 
 <div align="center">
 
-<img src="../../assets/logo-enigmora.svg" alt="Enigmora Logo" width="60">
+**[Strange Days Tech](https://strangedays.tech)** construye herramientas para desarrollo de software responsable asistido por IA. DevTrail es uno de nuestros proyectos de código abierto.
 
-**[Enigmora](https://enigmora.com)** construye herramientas para desarrollo de software responsable asistido por IA.
-
-[Sitio Web](https://enigmora.com) • [GitHub](https://github.com/enigmora)
+[Sitio Web](https://strangedays.tech) • [GitHub](https://github.com/StrangeDaysTech)
 
 </div>
 
@@ -445,6 +437,6 @@ Este proyecto está licenciado bajo la Licencia MIT - ver el archivo [LICENSE](.
 
 **DevTrail** — Porque cada cambio cuenta una historia.
 
-[Volver arriba](#enigmora-devtrail-framework)
+[Volver arriba](#devtrail)
 
 </div>
