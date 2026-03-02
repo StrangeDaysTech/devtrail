@@ -1,5 +1,6 @@
 use anyhow::{bail, Context, Result};
 use colored::Colorize;
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use crate::config::Checksums;
@@ -45,14 +46,17 @@ pub fn run(path: &str) -> Result<()> {
 
     // Extract files according to manifest
     utils::info("Extracting files...");
-    extract_distribution(&zip_path, &target)?;
+    let (manifest, templates) = extract_distribution(&zip_path, &target)?;
 
     // Create empty directory structure with .gitkeep
     create_empty_dirs(&target)?;
 
     // Inject into directive files
     utils::info("Configuring AI agent directives...");
-    inject_directives(&target)?;
+    inject_directives(&target, &manifest, &templates)?;
+
+    // Save manifest locally for future remove operations
+    save_local_manifest(&target, &manifest)?;
 
     // Save checksums
     save_initial_checksums(&target, &release.tag_name)?;
@@ -76,8 +80,11 @@ pub fn run(path: &str) -> Result<()> {
     Ok(())
 }
 
-/// Extract distributable files from the release ZIP
-fn extract_distribution(zip_path: &Path, target: &Path) -> Result<()> {
+/// Extract distributable files from the release ZIP and read templates into memory
+fn extract_distribution(
+    zip_path: &Path,
+    target: &Path,
+) -> Result<(DistManifest, HashMap<String, String>)> {
     let file = std::fs::File::open(zip_path).context("Failed to open ZIP file")?;
     let mut archive = zip::ZipArchive::new(file).context("Failed to read ZIP archive")?;
 
@@ -115,7 +122,22 @@ fn extract_distribution(zip_path: &Path, target: &Path) -> Result<()> {
         extract_matching_files(&mut archive, &prefix, pattern, target)?;
     }
 
-    Ok(())
+    // Read template files from ZIP into memory
+    let mut templates: HashMap<String, String> = HashMap::new();
+    for injection in &manifest.injections {
+        let zip_entry_name = format!("{}{}", prefix, injection.template);
+        for i in 0..archive.len() {
+            let mut entry = archive.by_index(i)?;
+            if entry.name() == zip_entry_name {
+                let mut content = String::new();
+                std::io::Read::read_to_string(&mut entry, &mut content)?;
+                templates.insert(injection.template.clone(), content);
+                break;
+            }
+        }
+    }
+
+    Ok((manifest, templates))
 }
 
 /// Extract files from ZIP matching a manifest pattern
@@ -187,41 +209,59 @@ fn create_empty_dirs(target: &Path) -> Result<()> {
     Ok(())
 }
 
-/// Inject DevTrail references into existing directive files
-fn inject_directives(target: &Path) -> Result<()> {
-    // Reference-based injection
-    let reference_targets = [
-        target.join("CLAUDE.md"),
-        target.join("GEMINI.md"),
-        target.join(".github/copilot-instructions.md"),
-    ];
+/// Inject DevTrail directives based on manifest and templates
+fn inject_directives(
+    target: &Path,
+    manifest: &DistManifest,
+    templates: &HashMap<String, String>,
+) -> Result<()> {
+    for injection in &manifest.injections {
+        let template_content = match templates.get(&injection.template) {
+            Some(content) => content,
+            None => {
+                utils::warn(&format!(
+                    "Template not found in ZIP: {}",
+                    injection.template
+                ));
+                continue;
+            }
+        };
 
-    for t in &reference_targets {
-        inject::inject_reference(t)?;
-        let name = t
-            .strip_prefix(target)
-            .unwrap_or(t)
-            .display()
-            .to_string();
-        if t.exists() {
-            utils::success(&format!("Configured {}", name));
-        }
+        let embed_content = if let Some(embed_file) = &injection.embed {
+            let embed_path = target.join(embed_file);
+            if embed_path.exists() {
+                Some(std::fs::read_to_string(&embed_path).with_context(|| {
+                    format!("Failed to read embed file: {}", embed_path.display())
+                })?)
+            } else {
+                utils::warn(&format!(
+                    "Embed file not found: {} (skipping {})",
+                    embed_file, injection.target
+                ));
+                continue;
+            }
+        } else {
+            None
+        };
+
+        let target_path = target.join(&injection.target);
+        inject::inject_directive(
+            &target_path,
+            template_content,
+            embed_content.as_deref(),
+        )?;
+        utils::success(&format!("Configured {}", injection.target));
     }
 
-    // Full content injection for .cursorrules
-    let devtrail_md = target.join("DEVTRAIL.md");
-    if devtrail_md.exists() {
-        let content = std::fs::read_to_string(&devtrail_md)?;
-        let cursorrules = target.join(".cursorrules");
-        inject::inject_full_content(&cursorrules, &content)?;
-        utils::success("Configured .cursorrules (inline)");
+    Ok(())
+}
 
-        // .cursor/rules/ directory
-        let cursor_rules_dir = target.join(".cursor/rules");
-        inject::inject_cursor_rules_dir(&cursor_rules_dir, &content)?;
-        utils::success("Configured .cursor/rules/devtrail.md");
-    }
-
+/// Save the manifest locally for future remove operations
+fn save_local_manifest(target: &Path, manifest: &DistManifest) -> Result<()> {
+    let manifest_path = target.join(".devtrail/dist-manifest.yml");
+    let content = manifest.to_yaml()?;
+    std::fs::write(&manifest_path, content)
+        .context("Failed to save local dist-manifest.yml")?;
     Ok(())
 }
 

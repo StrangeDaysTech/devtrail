@@ -6,6 +6,7 @@ use std::path::{Path, PathBuf};
 use crate::config::Checksums;
 use crate::download;
 use crate::inject;
+use crate::manifest::DistManifest;
 use crate::self_update;
 use crate::utils;
 
@@ -53,13 +54,22 @@ pub fn run() -> Result<()> {
     std::fs::create_dir_all(&extract_dir)?;
     extract_all(&zip_path, &extract_dir)?;
 
+    // Find source root within extracted content
+    let source_root = find_source_root(&extract_dir)?;
+
+    // Load manifest from extracted release
+    let manifest = DistManifest::load(&source_root.join("dist-manifest.yml"))?;
+
     // Update framework files
     utils::info("Updating framework files...");
-    let stats = update_files(&target, &extract_dir, &current_checksums)?;
+    let stats = update_files(&target, &source_root, &current_checksums)?;
 
     // Update directive injections
     utils::info("Updating AI agent directives...");
-    inject_directives(&target)?;
+    inject_directives(&target, &source_root, &manifest)?;
+
+    // Save manifest locally for future remove operations
+    save_local_manifest(&target, &manifest)?;
 
     // Save new checksums
     save_checksums(&target, &release.tag_name)?;
@@ -86,7 +96,7 @@ struct UpdateStats {
 /// Update files, respecting user modifications
 fn update_files(
     target: &Path,
-    extract_dir: &Path,
+    source_root: &Path,
     checksums: &Checksums,
 ) -> Result<UpdateStats> {
     let mut stats = UpdateStats {
@@ -95,15 +105,12 @@ fn update_files(
         added: 0,
     };
 
-    // Find the root of the extracted content (may be nested)
-    let source_root = find_source_root(extract_dir)?;
-
     // Walk extracted files
-    let entries = walkdir(source_root.clone())?;
+    let entries = walkdir(source_root.to_path_buf())?;
 
     for source_path in entries {
         let relative = source_path
-            .strip_prefix(&source_root)
+            .strip_prefix(source_root)
             .unwrap_or(&source_path)
             .display()
             .to_string();
@@ -115,6 +122,11 @@ fn update_files(
 
         // Skip checksums file
         if relative == ".devtrail/.checksums.json" {
+            continue;
+        }
+
+        // Skip dist-manifest.yml (we save it separately)
+        if relative == ".devtrail/dist-manifest.yml" {
             continue;
         }
 
@@ -182,34 +194,58 @@ fn update_files(
     Ok(stats)
 }
 
-fn inject_directives(target: &Path) -> Result<()> {
-    let reference_targets = [
-        target.join("CLAUDE.md"),
-        target.join("GEMINI.md"),
-        target.join(".github/copilot-instructions.md"),
-    ];
+/// Inject directives based on manifest and templates from the release
+fn inject_directives(target: &Path, source_root: &Path, manifest: &DistManifest) -> Result<()> {
+    for injection in &manifest.injections {
+        let target_path = target.join(&injection.target);
 
-    for t in &reference_targets {
-        if t.exists() {
-            inject::inject_reference(t)?;
+        // In update mode, only update targets that already exist
+        if !target_path.exists() {
+            continue;
         }
+
+        let template_path = source_root.join(&injection.template);
+        let template_content = match std::fs::read_to_string(&template_path) {
+            Ok(content) => content,
+            Err(_) => {
+                utils::warn(&format!(
+                    "Template not found: {}",
+                    injection.template
+                ));
+                continue;
+            }
+        };
+
+        let embed_content = if let Some(embed_file) = &injection.embed {
+            // Use the embed file from the release, not the local one
+            let embed_path = source_root.join(embed_file);
+            if embed_path.exists() {
+                Some(std::fs::read_to_string(&embed_path).with_context(|| {
+                    format!("Failed to read embed file: {}", embed_path.display())
+                })?)
+            } else {
+                utils::warn(&format!(
+                    "Embed file not found in release: {} (skipping {})",
+                    embed_file, injection.target
+                ));
+                continue;
+            }
+        } else {
+            None
+        };
+
+        inject::inject_directive(&target_path, &template_content, embed_content.as_deref())?;
     }
 
-    let devtrail_md = target.join("DEVTRAIL.md");
-    if devtrail_md.exists() {
-        let content = std::fs::read_to_string(&devtrail_md)?;
+    Ok(())
+}
 
-        let cursorrules = target.join(".cursorrules");
-        if cursorrules.exists() {
-            inject::inject_full_content(&cursorrules, &content)?;
-        }
-
-        let cursor_rules_dir = target.join(".cursor/rules");
-        if cursor_rules_dir.exists() {
-            inject::inject_cursor_rules_dir(&cursor_rules_dir, &content)?;
-        }
-    }
-
+/// Save the manifest locally for future remove operations
+fn save_local_manifest(target: &Path, manifest: &DistManifest) -> Result<()> {
+    let manifest_path = target.join(".devtrail/dist-manifest.yml");
+    let content = manifest.to_yaml()?;
+    std::fs::write(&manifest_path, content)
+        .context("Failed to save local dist-manifest.yml")?;
     Ok(())
 }
 
