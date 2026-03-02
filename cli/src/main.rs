@@ -33,6 +33,8 @@ enum Commands {
         #[arg(long)]
         full: bool,
     },
+    /// Show version, author, and license information
+    About,
 }
 
 fn main() {
@@ -42,6 +44,7 @@ fn main() {
         Commands::Init { path } => commands::init::run(&path),
         Commands::Update => commands::update::run(),
         Commands::Remove { full } => commands::remove::run(full),
+        Commands::About => commands::about::run(),
     };
 
     if let Err(e) = result {
