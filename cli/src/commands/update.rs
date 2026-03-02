@@ -6,6 +6,7 @@ use std::path::{Path, PathBuf};
 use crate::config::Checksums;
 use crate::download;
 use crate::inject;
+use crate::self_update;
 use crate::utils;
 
 pub fn run() -> Result<()> {
@@ -69,6 +70,9 @@ pub fn run() -> Result<()> {
     println!("  Files updated: {}", stats.updated);
     println!("  Files skipped (user-modified): {}", stats.skipped);
     println!("  Files added: {}", stats.added);
+
+    // Notify about CLI updates
+    self_update::notify_if_newer(&release.tag_name);
 
     Ok(())
 }

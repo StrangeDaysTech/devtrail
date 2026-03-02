@@ -119,7 +119,8 @@ jobs:
         run: |
           BINARY=cli/target/${{ matrix.target }}/release/devtrail.exe
           ARCHIVE=devtrail-cli-v${{ steps.version.outputs.version }}-${{ matrix.target }}.zip
-          7z a "$ARCHIVE" "./$BINARY"
+          cp "$BINARY" devtrail.exe
+          7z a "$ARCHIVE" devtrail.exe
           echo "ARCHIVE=$ARCHIVE" >> "$GITHUB_ENV"
 
       - name: Upload binary artifact

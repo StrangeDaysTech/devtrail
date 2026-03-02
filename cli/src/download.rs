@@ -6,21 +6,48 @@ use std::path::Path;
 const GITHUB_REPO: &str = "StrangeDaysTech/devtrail";
 const GITHUB_API_BASE: &str = "https://api.github.com";
 
-/// Information about a GitHub release
+/// Information about a GitHub release (distribution ZIP)
 #[derive(Debug)]
 pub struct ReleaseInfo {
     pub tag_name: String,
     pub zip_url: String,
 }
 
-/// Get the latest release info from GitHub
-pub fn get_latest_release() -> Result<ReleaseInfo> {
+/// A single asset in a GitHub release
+#[derive(Debug)]
+pub struct ReleaseAsset {
+    pub name: String,
+    pub download_url: String,
+}
+
+/// Full release information including all assets
+#[derive(Debug)]
+pub struct FullReleaseInfo {
+    pub tag_name: String,
+    pub assets: Vec<ReleaseAsset>,
+}
+
+/// Build an HTTP client with optional GitHub token authentication
+fn build_client() -> Result<reqwest::blocking::Client> {
+    let mut builder = reqwest::blocking::Client::builder().user_agent("devtrail-cli");
+
+    if let Ok(token) = std::env::var("GITHUB_TOKEN") {
+        use reqwest::header;
+        let mut headers = header::HeaderMap::new();
+        let value = header::HeaderValue::from_str(&format!("Bearer {}", token))
+            .context("Invalid GITHUB_TOKEN value")?;
+        headers.insert(header::AUTHORIZATION, value);
+        builder = builder.default_headers(headers);
+    }
+
+    builder.build().context("Failed to create HTTP client")
+}
+
+/// Get full release info including all assets
+pub fn get_latest_release_full() -> Result<FullReleaseInfo> {
     let url = format!("{}/repos/{}/releases/latest", GITHUB_API_BASE, GITHUB_REPO);
 
-    let client = reqwest::blocking::Client::builder()
-        .user_agent("devtrail-cli")
-        .build()
-        .context("Failed to create HTTP client")?;
+    let client = build_client()?;
 
     let response = client
         .get(&url)
@@ -48,46 +75,57 @@ pub fn get_latest_release() -> Result<ReleaseInfo> {
         .context("Missing tag_name in release")?
         .to_string();
 
-    // Look for the devtrail distribution ZIP in release assets
-    let zip_url: Option<String> = if let Some(assets) = body["assets"].as_array() {
-        let mut found = None;
-        for asset in assets {
-            if let Some(name) = asset["name"].as_str() {
-                if name.starts_with("devtrail-") && name.ends_with(".zip") {
-                    if let Some(url) = asset["browser_download_url"].as_str() {
-                        found = Some(url.to_string());
-                        break;
-                    }
-                }
+    let mut assets = Vec::new();
+    if let Some(asset_array) = body["assets"].as_array() {
+        for asset in asset_array {
+            if let (Some(name), Some(url)) = (
+                asset["name"].as_str(),
+                asset["browser_download_url"].as_str(),
+            ) {
+                assets.push(ReleaseAsset {
+                    name: name.to_string(),
+                    download_url: url.to_string(),
+                });
             }
         }
-        found
-    } else {
-        None
-    };
+    }
+
+    Ok(FullReleaseInfo { tag_name, assets })
+}
+
+/// Get the latest release info from GitHub
+pub fn get_latest_release() -> Result<ReleaseInfo> {
+    let full = get_latest_release_full()?;
+
+    // Look for the devtrail distribution ZIP (not CLI binary ZIPs)
+    let zip_url = full
+        .assets
+        .iter()
+        .find(|a| a.name.starts_with("devtrail-v") && a.name.ends_with(".zip"))
+        .map(|a| a.download_url.clone());
 
     // Fallback to zipball if no distribution asset found
     let zip_url = zip_url.unwrap_or_else(|| {
         format!(
             "https://github.com/{}/archive/refs/tags/{}.zip",
-            GITHUB_REPO, tag_name
+            GITHUB_REPO, full.tag_name
         )
     });
 
-    Ok(ReleaseInfo { tag_name, zip_url })
+    Ok(ReleaseInfo {
+        tag_name: full.tag_name,
+        zip_url,
+    })
 }
 
-/// Download a ZIP file from a URL to a temporary file
-pub fn download_zip(url: &str, dest: &Path) -> Result<()> {
-    let client = reqwest::blocking::Client::builder()
-        .user_agent("devtrail-cli")
-        .build()
-        .context("Failed to create HTTP client")?;
+/// Download a file from a URL to a destination path with progress bar
+pub fn download_file(url: &str, dest: &Path, label: &str) -> Result<()> {
+    let client = build_client()?;
 
     let mut response = client
         .get(url)
         .send()
-        .context("Failed to download release ZIP")?;
+        .with_context(|| format!("Failed to download {}", label))?;
 
     if !response.status().is_success() {
         bail!("Download failed with status: {}", response.status());
@@ -120,4 +158,9 @@ pub fn download_zip(url: &str, dest: &Path) -> Result<()> {
 
     pb.finish_with_message("Download complete");
     Ok(())
+}
+
+/// Download a ZIP file from a URL to a temporary file
+pub fn download_zip(url: &str, dest: &Path) -> Result<()> {
+    download_file(url, dest, "release ZIP")
 }
