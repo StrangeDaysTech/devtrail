@@ -12,3 +12,5 @@ When working on this project, identify yourself as: `gemini-cli-v1.0` (or your v
 ---
 
 *DevTrail v2.0.0 | [Strange Days Tech](https://strangedays.tech) — Because every change tells a story.*
+
+<!-- DEV-ONLY: Distribution template at dist-templates/directives/ -->

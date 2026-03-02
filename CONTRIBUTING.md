@@ -254,10 +254,11 @@ If you're proposing a new document type:
    - `.devtrail/QUICK-REFERENCE.md`
 
 3. **Update agent configs**
-   - `CLAUDE.md`
-   - `GEMINI.md`
-   - `.cursorrules`
-   - `.github/copilot-instructions.md`
+   - `CLAUDE.md` (dev-only)
+   - `GEMINI.md` (dev-only)
+   - `.cursorrules` (dev-only)
+   - `.github/copilot-instructions.md` (dev-only)
+   - `dist-templates/directives/` (distribution templates)
 
 4. **Update validation**
    - `scripts/pre-commit-docs.sh`

@@ -49,7 +49,7 @@ jobs:
 
           # CI/CD
           mkdir -p dist-staging/.github/workflows
-          cp .github/copilot-instructions.md dist-staging/.github/ 2>/dev/null || true
+          cp dist-templates/directives/copilot-instructions.md dist-staging/.github/copilot-instructions.md 2>/dev/null || true
           cp .github/workflows/docs-validation.yml dist-staging/.github/workflows/ 2>/dev/null || true
 
           cd dist-staging

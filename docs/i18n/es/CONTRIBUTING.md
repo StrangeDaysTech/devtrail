@@ -254,10 +254,11 @@ Si estás proponiendo un nuevo tipo de documento:
    - `.devtrail/QUICK-REFERENCE.md`
 
 3. **Actualizar configs de agente**
-   - `CLAUDE.md`
-   - `GEMINI.md`
-   - `.cursorrules`
-   - `.github/copilot-instructions.md`
+   - `CLAUDE.md` (solo desarrollo)
+   - `GEMINI.md` (solo desarrollo)
+   - `.cursorrules` (solo desarrollo)
+   - `.github/copilot-instructions.md` (solo desarrollo)
+   - `dist-templates/directives/` (plantillas de distribución)
 
 4. **Actualizar validación**
    - `scripts/pre-commit-docs.sh`

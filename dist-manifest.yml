@@ -22,7 +22,6 @@ files:
   - scripts/validate-docs.ps1
 
   # CI/CD
-  - .github/copilot-instructions.md
   - .github/workflows/docs-validation.yml
 
 # Files that are injected into existing directive files
