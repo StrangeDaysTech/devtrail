@@ -91,4 +91,4 @@ git push -u origin fix/accidental-commits
 ---
 
 *DevTrail v1.0.0 | Last updated: 2025-01-30*
-*[Enigmora](https://enigmora.com) — Because every change tells a story.*
+*[Strange Days Tech](https://strangedays.tech) — Because every change tells a story.*

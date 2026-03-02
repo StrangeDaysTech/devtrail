@@ -6,8 +6,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Handbook](https://img.shields.io/badge/docs-Handbook-orange.svg)](https://enigmora.github.io/devtrail/)
-[![Enigmora](https://img.shields.io/badge/by-Enigmora-purple.svg)](https://enigmora.com)
+[![Handbook](https://img.shields.io/badge/docs-Handbook-orange.svg)](.devtrail/QUICK-REFERENCE.md)
+[![Strange Days Tech](https://img.shields.io/badge/by-Strange_Days_Tech-purple.svg)](https://strangedays.tech)
 
 [Getting Started](#getting-started) •
 [Features](#features) •
@@ -94,46 +94,40 @@ Automated validation tools:
 
 ## Getting Started
 
-### Quick Start (New Project)
-
-**Option 1: Use as Template** (Recommended)
-
-Click the **"Use this template"** button above to create a new repository with DevTrail pre-configured.
-
-**Option 2: Clone and Copy**
+### Option 1: CLI (Recommended)
 
 ```bash
-# Clone DevTrail
-git clone https://github.com/enigmora/devtrail-framework.git
+# Install the CLI
+cargo install devtrail-cli
 
-# Copy to your project
-cp -r devtrail-framework/.devtrail your-project/
-cp devtrail-framework/CLAUDE.md your-project/
-cp devtrail-framework/GEMINI.md your-project/
-cp devtrail-framework/.cursorrules your-project/
-cp -r devtrail-framework/.github your-project/
-cp -r devtrail-framework/scripts your-project/
+# Initialize in your project
+cd your-project
+devtrail init .
 ```
 
-### Quick Start (Existing Project)
+The CLI downloads the latest DevTrail release, sets up the framework, and configures your AI agent directive files automatically.
 
 ```bash
-# Download DevTrail
-git clone https://github.com/enigmora/devtrail-framework.git devtrail-temp
+# Update to latest version
+devtrail update
 
-# Copy without overwriting (Linux/Mac)
-cp -rn devtrail-temp/.devtrail ./
-cp -n devtrail-temp/CLAUDE.md ./
-cp -n devtrail-temp/GEMINI.md ./
-cp -n devtrail-temp/.cursorrules ./
-cp -rn devtrail-temp/.github ./
-cp -rn devtrail-temp/scripts ./
+# Remove DevTrail
+devtrail remove
+```
 
-# Clean up
-rm -rf devtrail-temp
+### Option 2: Manual Setup
+
+```bash
+# Download the latest release ZIP from GitHub
+# https://github.com/StrangeDaysTech/devtrail/releases/latest
+
+# Extract and copy to your project
+cp -r .devtrail your-project/
+cp DEVTRAIL.md your-project/
+cp -r scripts your-project/
 
 # Commit
-git add .devtrail/ CLAUDE.md GEMINI.md .cursorrules .github/ scripts/
+git add .devtrail/ DEVTRAIL.md scripts/
 git commit -m "chore: adopt DevTrail"
 ```
 
@@ -173,10 +167,9 @@ Example: `ADR-2025-01-27-001-use-postgresql-for-persistence.md`
 
 | Document | Description |
 |----------|-------------|
-| [**📘 Handbook**](https://enigmora.github.io/devtrail/) | Complete online documentation |
+| [**📘 Quick Reference**](.devtrail/QUICK-REFERENCE.md) | One-page documentation overview |
+| [DEVTRAIL.md](DEVTRAIL.md) | Unified governance rules (source of truth) |
 | [ADOPTION-GUIDE.md](ADOPTION-GUIDE.md) | Adoption guide for new/existing projects |
-| [docs/cookbook.md](docs/cookbook.md) | Practical examples and scenarios |
-| [.devtrail/QUICK-REFERENCE.md](.devtrail/QUICK-REFERENCE.md) | One-page reference card |
 
 ---
 
@@ -429,15 +422,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## About Enigmora
+## About Strange Days Tech, S.A.S.
 
 <div align="center">
 
-<img src="assets/logo-enigmora.svg" alt="Enigmora Logo" width="60">
+**[Strange Days Tech](https://strangedays.tech)** builds tools for responsible AI-assisted software development. DevTrail is one of our open-source projects.
 
-**[Enigmora](https://enigmora.com)** builds tools for responsible AI-assisted software development.
-
-[Website](https://enigmora.com) • [GitHub](https://github.com/enigmora)
+[Website](https://strangedays.tech) • [GitHub](https://github.com/StrangeDaysTech)
 
 </div>
 
@@ -447,6 +438,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **DevTrail** — Because every change tells a story.
 
-[⬆ Back to top](#enigmora-devtrail-framework)
+[⬆ Back to top](#devtrail)
 
 </div>

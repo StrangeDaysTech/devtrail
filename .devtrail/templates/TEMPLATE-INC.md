@@ -123,4 +123,4 @@ resolved_date: null
 | Review date | [YYYY-MM-DD] |
 | Status | [Draft/Reviewed/Closed] |
 
-<!-- Template: DevTrail | https://enigmora.com -->
+<!-- Template: DevTrail | https://strangedays.tech -->

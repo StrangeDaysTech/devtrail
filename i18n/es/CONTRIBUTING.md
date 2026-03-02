@@ -270,12 +270,39 @@ Las plantillas deben incluir:
 
 ---
 
+## Desarrollo del CLI
+
+El CLI de DevTrail está escrito en Rust y se encuentra en el directorio `cli/`.
+
+### Compilar
+
+```bash
+cd cli
+cargo build
+```
+
+### Ejecutar Tests
+
+```bash
+cd cli
+cargo test
+```
+
+### Build de Release
+
+```bash
+cd cli
+cargo build --release
+```
+
+---
+
 ## ¿Preguntas?
 
 Si tienes preguntas sobre contribuir:
 
-1. Revisa [Issues](https://github.com/enigmora/devtrail-framework/issues) existentes
-2. Revisa [Discussions](https://github.com/enigmora/devtrail-framework/discussions)
+1. Revisa [Issues](https://github.com/StrangeDaysTech/devtrail/issues) existentes
+2. Revisa [Discussions](https://github.com/StrangeDaysTech/devtrail/discussions)
 3. Abre una nueva Discussion para preguntas generales
 4. Abre un Issue para bugs o características específicas
 
@@ -295,4 +322,4 @@ Los contribuidores son reconocidos en:
 
 *DevTrail — Porque cada cambio cuenta una historia.*
 
-[Enigmora](https://enigmora.com)
+[Strange Days Tech](https://strangedays.tech)

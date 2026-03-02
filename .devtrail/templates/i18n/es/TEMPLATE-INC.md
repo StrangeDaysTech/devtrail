@@ -123,4 +123,4 @@ resolved_date: null
 | Fecha de revisión | [YYYY-MM-DD] |
 | Estado | [Borrador/Revisado/Cerrado] |
 
-<!-- Template: DevTrail | https://enigmora.com -->
+<!-- Template: DevTrail | https://strangedays.tech -->

@@ -1,0 +1,163 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # Job 1: Package distributable templates
+  package-templates:
+    name: Package Templates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read version from Cargo.toml
+        id: version
+        run: |
+          VERSION=$(grep '^version' cli/Cargo.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Create distribution ZIP
+        run: |
+          # Read files from dist-manifest.yml and create ZIP
+          mkdir -p dist-staging
+
+          # Core framework
+          cp -r .devtrail dist-staging/
+          cp DEVTRAIL.md dist-staging/
+          cp dist-manifest.yml dist-staging/
+
+          # Agent skills
+          cp -r .claude/skills dist-staging/.claude/skills 2>/dev/null || true
+          cp -r .gemini/skills dist-staging/.gemini/skills 2>/dev/null || true
+          cp -r .agent/workflows dist-staging/.agent/workflows 2>/dev/null || true
+
+          # Scripts
+          mkdir -p dist-staging/scripts
+          cp scripts/devtrail-new.sh dist-staging/scripts/ 2>/dev/null || true
+          cp scripts/devtrail-status.sh dist-staging/scripts/ 2>/dev/null || true
+          cp scripts/pre-commit-docs.sh dist-staging/scripts/ 2>/dev/null || true
+          cp scripts/validate-docs.ps1 dist-staging/scripts/ 2>/dev/null || true
+
+          # CI/CD
+          mkdir -p dist-staging/.github/workflows
+          cp .github/copilot-instructions.md dist-staging/.github/ 2>/dev/null || true
+          cp .github/workflows/docs-validation.yml dist-staging/.github/workflows/ 2>/dev/null || true
+
+          cd dist-staging
+          zip -r "../devtrail-v${{ steps.version.outputs.version }}.zip" .
+          cd ..
+
+      - name: Upload template artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: templates
+          path: devtrail-v${{ steps.version.outputs.version }}.zip
+
+  # Job 2: Build CLI binaries (cross-platform)
+  build-cli:
+    name: Build CLI (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            archive: tar.gz
+          - target: x86_64-apple-darwin
+            os: macos-latest
+            archive: tar.gz
+          - target: aarch64-apple-darwin
+            os: macos-latest
+            archive: tar.gz
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            archive: zip
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install OpenSSL (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get update && sudo apt-get install -y libssl-dev pkg-config
+
+      - name: Read version
+        id: version
+        shell: bash
+        run: |
+          VERSION=$(grep '^version' cli/Cargo.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Build release binary
+        run: cargo build --release --manifest-path cli/Cargo.toml --target ${{ matrix.target }}
+
+      - name: Package (Unix)
+        if: matrix.archive == 'tar.gz'
+        shell: bash
+        run: |
+          BINARY=cli/target/${{ matrix.target }}/release/devtrail
+          ARCHIVE=devtrail-cli-v${{ steps.version.outputs.version }}-${{ matrix.target }}.tar.gz
+          tar czf "$ARCHIVE" -C "$(dirname "$BINARY")" "$(basename "$BINARY")"
+          echo "ARCHIVE=$ARCHIVE" >> "$GITHUB_ENV"
+
+      - name: Package (Windows)
+        if: matrix.archive == 'zip'
+        shell: bash
+        run: |
+          BINARY=cli/target/${{ matrix.target }}/release/devtrail.exe
+          ARCHIVE=devtrail-cli-v${{ steps.version.outputs.version }}-${{ matrix.target }}.zip
+          7z a "$ARCHIVE" "./$BINARY"
+          echo "ARCHIVE=$ARCHIVE" >> "$GITHUB_ENV"
+
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cli-${{ matrix.target }}
+          path: ${{ env.ARCHIVE }}
+
+  # Job 3: Create GitHub Release
+  create-release:
+    name: Create Release
+    needs: [package-templates, build-cli]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read version
+        id: version
+        run: |
+          VERSION=$(grep '^version' cli/Cargo.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+
+      - name: Collect release files
+        run: |
+          mkdir -p release
+          find release-artifacts -type f \( -name "*.zip" -o -name "*.tar.gz" \) -exec cp {} release/ \;
+          ls -la release/
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            --title "DevTrail ${{ github.ref_name }}" \
+            --generate-notes \
+            release/*

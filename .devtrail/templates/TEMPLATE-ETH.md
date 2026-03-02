@@ -103,4 +103,4 @@ approved_date: null
 | Decision | [APPROVED/REJECTED/CONDITIONAL] |
 | Conditions | [If applicable] |
 
-<!-- Template: DevTrail | https://enigmora.com -->
+<!-- Template: DevTrail | https://strangedays.tech -->

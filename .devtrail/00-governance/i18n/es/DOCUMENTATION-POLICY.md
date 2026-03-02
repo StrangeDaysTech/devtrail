@@ -152,4 +152,4 @@ Ver también [ADR-2025-01-20-001] para contexto arquitectónico.
 
 ---
 
-*DevTrail v1.0.0 | [Enigmora](https://enigmora.com)*
+*DevTrail v1.0.0 | [Strange Days Tech](https://strangedays.tech)*

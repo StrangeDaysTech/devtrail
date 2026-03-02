@@ -1,7 +1,7 @@
-# Enigmora DevTrial - .gitignore
+# DevTrail - .gitignore
 
 # =============================================================================
-# Desarrollo interno de Enigmora
+# Desarrollo interno de Strange Days Tech
 # =============================================================================
 
 copy-to-all-lnxdrive.sh
@@ -70,15 +70,20 @@ yarn.lock
 *.bak
 
 # =============================================================================
-# Enigmora Chronicle Framework Specific
+# DevTrail Framework Specific
 # =============================================================================
 
 # Temporary validation files
 .markdownlint.json
 
-# Generated index (if using auto-generation)
-# Uncomment if you want to ignore the auto-generated index:
-# .chronicle/INDEX.md
+# =============================================================================
+# CLI Build Artifacts
+# =============================================================================
+
+cli/target/
+dist/
+*.tar.gz
+release/
 
 # =============================================================================
 # Security - Never commit these

@@ -120,4 +120,4 @@ Impacto  │               │               │
 | Asignado a | [Equipo/Persona] |
 | Comentarios | [Notas] |
 
-<!-- Template: DevTrail | https://enigmora.com -->
+<!-- Template: DevTrail | https://strangedays.tech -->
