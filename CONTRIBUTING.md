@@ -7,6 +7,7 @@ Thank you for your interest in contributing to DevTrail! This document provides 
 ## Table of Contents
 
 - [Code of Conduct](#code-of-conduct)
+- [Contributor License Agreement (CLA)](#contributor-license-agreement-cla)
 - [How Can I Contribute?](#how-can-i-contribute)
 - [Development Setup](#development-setup)
 - [Pull Request Process](#pull-request-process)
@@ -17,15 +18,24 @@ Thank you for your interest in contributing to DevTrail! This document provides 
 
 ## Code of Conduct
 
-This project adheres to a Code of Conduct that all contributors are expected to follow. Please be respectful, inclusive, and constructive in all interactions.
+This project is governed by our [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
 
-### Our Standards
+In short: be respectful, inclusive, and constructive in all interactions. Harassment, discrimination, and trolling are not tolerated. Please read the [full Code of Conduct](CODE_OF_CONDUCT.md) before contributing.
 
-- Be welcoming and inclusive
-- Be respectful of differing viewpoints
-- Accept constructive criticism gracefully
-- Focus on what is best for the community
-- Show empathy towards other community members
+---
+
+## Contributor License Agreement (CLA)
+
+This project requires all contributors to sign a **Contributor License Agreement (CLA)** before their pull requests can be merged. We use [CLA Assistant](https://cla-assistant.io/) to manage this process.
+
+### How it works
+
+1. When you open your first pull request, CLA Assistant will automatically post a comment asking you to sign the CLA.
+2. Click the link in the comment to review and sign the agreement.
+3. The CLA only needs to be signed once — it covers all future contributions to this project.
+4. Once signed, CLA Assistant will update the PR check status and your contribution can proceed to review.
+
+If you have questions about the CLA, please open a [Discussion](https://github.com/StrangeDaysTech/devtrail/discussions).
 
 ---
 
@@ -77,39 +87,45 @@ Code contributions should:
 
 ### Prerequisites
 
-- Git
-- A text editor (VS Code recommended)
-- Bash (for Linux/Mac validation scripts)
-- PowerShell (for Windows validation scripts)
-- Node.js (optional, for markdownlint)
+- **Git**
+- **A text editor** (VS Code recommended)
+- **Bash** (for Linux/Mac validation scripts)
+- **PowerShell** (for Windows validation scripts)
+- **Rust toolchain** (for CLI development — install via [rustup.rs](https://rustup.rs/))
+- **Node.js 20+** (optional, for markdownlint)
 
 ### Setup Steps
 
 1. **Fork the repository**
 
-   Click "Fork" on the GitHub repository page.
+   Click "Fork" on the [GitHub repository page](https://github.com/StrangeDaysTech/devtrail).
 
 2. **Clone your fork**
    ```bash
    git clone https://github.com/your-username/devtrail.git
-   cd devtrail-framework
+   cd devtrail
    ```
 
-3. **Create a branch**
+3. **Install the pre-commit hook**
+   ```bash
+   cp scripts/pre-commit-docs.sh .git/hooks/pre-commit
+   chmod +x .git/hooks/pre-commit
+   ```
+
+4. **Install development tools (optional)**
+   ```bash
+   # Markdown linting
+   npm install -g markdownlint-cli
+   ```
+
+5. **Create a branch**
    ```bash
    git checkout -b feature/your-feature-name
    # or
    git checkout -b fix/your-bug-fix
    ```
 
-4. **Install development tools (optional)**
-   ```bash
-   npm install -g markdownlint-cli
-   ```
-
-5. **Make your changes**
-
-6. **Validate your changes**
+6. **Make your changes and validate**
    ```bash
    # Linux/Mac
    bash scripts/pre-commit-docs.sh

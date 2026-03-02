@@ -7,6 +7,7 @@
 ## Tabla de Contenidos
 
 - [Código de Conducta](#código-de-conducta)
+- [Acuerdo de Licencia de Contribuidor (CLA)](#acuerdo-de-licencia-de-contribuidor-cla)
 - [¿Cómo Puedo Contribuir?](#cómo-puedo-contribuir)
 - [Configuración de Desarrollo](#configuración-de-desarrollo)
 - [Proceso de Pull Request](#proceso-de-pull-request)
@@ -17,15 +18,24 @@
 
 ## Código de Conducta
 
-Este proyecto se adhiere a un Código de Conducta que todos los contribuidores deben seguir. Por favor sé respetuoso, inclusivo y constructivo en todas las interacciones.
+Este proyecto se rige por nuestro [Código de Conducta del Pacto del Contribuidor](../../../CODE_OF_CONDUCT.md) ([Español](CODE_OF_CONDUCT.md)). Al participar, se espera que cumplas con este código.
 
-### Nuestros Estándares
+En resumen: sé respetuoso, inclusivo y constructivo en todas las interacciones. El acoso, la discriminación y el trolling no son tolerados. Por favor lee el [Código de Conducta completo](CODE_OF_CONDUCT.md) antes de contribuir.
 
-- Sé acogedor e inclusivo
-- Sé respetuoso con diferentes puntos de vista
-- Acepta críticas constructivas con gracia
-- Enfócate en lo mejor para la comunidad
-- Muestra empatía hacia otros miembros de la comunidad
+---
+
+## Acuerdo de Licencia de Contribuidor (CLA)
+
+Este proyecto requiere que todos los contribuidores firmen un **Acuerdo de Licencia de Contribuidor (CLA)** antes de que sus pull requests puedan ser fusionados. Usamos [CLA Assistant](https://cla-assistant.io/) para gestionar este proceso.
+
+### Cómo funciona
+
+1. Cuando abras tu primer pull request, CLA Assistant publicará automáticamente un comentario pidiéndote que firmes el CLA.
+2. Haz clic en el enlace del comentario para revisar y firmar el acuerdo.
+3. El CLA solo necesita firmarse una vez — cubre todas las contribuciones futuras a este proyecto.
+4. Una vez firmado, CLA Assistant actualizará el estado del check del PR y tu contribución podrá proceder a revisión.
+
+Si tienes preguntas sobre el CLA, por favor abre una [Discusión](https://github.com/StrangeDaysTech/devtrail/discussions).
 
 ---
 
@@ -77,39 +87,45 @@ Las contribuciones de código deben:
 
 ### Prerrequisitos
 
-- Git
-- Un editor de texto (VS Code recomendado)
-- Bash (para scripts de validación en Linux/Mac)
-- PowerShell (para scripts de validación en Windows)
-- Node.js (opcional, para markdownlint)
+- **Git**
+- **Un editor de texto** (VS Code recomendado)
+- **Bash** (para scripts de validación en Linux/Mac)
+- **PowerShell** (para scripts de validación en Windows)
+- **Rust toolchain** (para desarrollo del CLI — instalar vía [rustup.rs](https://rustup.rs/))
+- **Node.js 20+** (opcional, para markdownlint)
 
 ### Pasos de Configuración
 
 1. **Fork del repositorio**
 
-   Haz clic en "Fork" en la página del repositorio de GitHub.
+   Haz clic en "Fork" en la [página del repositorio de GitHub](https://github.com/StrangeDaysTech/devtrail).
 
 2. **Clonar tu fork**
    ```bash
    git clone https://github.com/tu-usuario/devtrail.git
-   cd devtrail-framework
+   cd devtrail
    ```
 
-3. **Crear una rama**
+3. **Instalar el hook de pre-commit**
+   ```bash
+   cp scripts/pre-commit-docs.sh .git/hooks/pre-commit
+   chmod +x .git/hooks/pre-commit
+   ```
+
+4. **Instalar herramientas de desarrollo (opcional)**
+   ```bash
+   # Linting de Markdown
+   npm install -g markdownlint-cli
+   ```
+
+5. **Crear una rama**
    ```bash
    git checkout -b feature/nombre-de-tu-caracteristica
    # o
    git checkout -b fix/tu-correccion-de-bug
    ```
 
-4. **Instalar herramientas de desarrollo (opcional)**
-   ```bash
-   npm install -g markdownlint-cli
-   ```
-
-5. **Hacer tus cambios**
-
-6. **Validar tus cambios**
+6. **Hacer tus cambios y validar**
    ```bash
    # Linux/Mac
    bash scripts/pre-commit-docs.sh
