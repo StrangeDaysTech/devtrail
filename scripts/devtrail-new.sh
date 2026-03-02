@@ -1,7 +1,13 @@
 #!/bin/bash
 # devtrail-new.sh - Create DevTrail documentation manually
-# Usage: ./scripts/devtrail-new.sh [type]
+# Usage: ./scripts/devtrail-new.sh [type] [title] [slug]
 # Types: ailog, aidec, adr, eth, req, tes, inc, tde
+#
+# Examples:
+#   ./scripts/devtrail-new.sh                              # fully interactive
+#   ./scripts/devtrail-new.sh ailog                        # asks for title and slug
+#   ./scripts/devtrail-new.sh ailog "Implement auth"       # slug derived from title
+#   ./scripts/devtrail-new.sh ailog "Implement auth" "implement-auth"  # no prompts
 
 set -e
 
@@ -182,48 +188,62 @@ create_document() {
 
 # Main
 main() {
+    local args_provided=$#
     local type=$1
-    
+    local title=$2
+    local description=$3
+
     show_header
     show_git_status
-    
+
     # If type not provided, ask
     if [ -z "$type" ]; then
         type=$(select_type)
     fi
-    
+
     # Validate type
     if [ -z "${DOC_PATHS[$type]}" ]; then
         echo -e "${RED}Error: Invalid type '$type'${NC}"
         echo "Valid types: ailog, aidec, adr, eth, req, tes, inc, tde"
         exit 1
     fi
-    
+
     echo ""
     echo -e "Creating: ${GREEN}${DOC_NAMES[$type]}${NC}"
     echo ""
-    
-    # Get title
-    read -p "Title (brief description): " title
+
+    # Get title - ask only if not provided as argument
     if [ -z "$title" ]; then
-        echo -e "${RED}Error: Title is required${NC}"
-        exit 1
+        read -p "Title (brief description): " title
+        if [ -z "$title" ]; then
+            echo -e "${RED}Error: Title is required${NC}"
+            exit 1
+        fi
     fi
-    
-    # Get description for filename
-    read -p "Filename slug (short, lowercase): " description
+
+    # Get description for filename - ask only if not provided as argument
     if [ -z "$description" ]; then
-        description="$title"
+        if [ "$args_provided" -ge 2 ]; then
+            # Title was passed as arg but no slug; derive from title
+            description="$title"
+        else
+            read -p "Filename slug (short, lowercase): " description
+            if [ -z "$description" ]; then
+                description="$title"
+            fi
+        fi
     fi
-    
-    # Confirm
-    echo ""
-    read -p "Create document? [Y/n]: " confirm
-    if [[ "$confirm" =~ ^[Nn] ]]; then
-        echo "Cancelled."
-        exit 0
+
+    # Confirm - skip when user provided args (they already know what they want)
+    if [ "$args_provided" -lt 2 ]; then
+        echo ""
+        read -p "Create document? [Y/n]: " confirm
+        if [[ "$confirm" =~ ^[Nn] ]]; then
+            echo "Cancelled."
+            exit 0
+        fi
     fi
-    
+
     create_document "$type" "$title" "$description"
 }
 

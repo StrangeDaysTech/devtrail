@@ -74,8 +74,8 @@ fi
 echo ""
 
 # Count summary
-doc_count=$(echo "$recent_docs" | grep -c "^" 2>/dev/null || echo "0")
-file_count=$(echo "$source_files" | grep -c "^" 2>/dev/null || echo "0")
+if [ -z "$recent_docs" ]; then doc_count=0; else doc_count=$(echo "$recent_docs" | wc -l); fi
+if [ -z "$source_files" ]; then file_count=0; else file_count=$(echo "$source_files" | wc -l); fi
 
 echo -e "${BLUE}Summary:${NC}"
 echo "  Documents created today: $doc_count"
