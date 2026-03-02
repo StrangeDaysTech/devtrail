@@ -4,9 +4,9 @@
 
 **Gobernanza de Documentación para Desarrollo de Software Asistido por IA**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](../../LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](../../../LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Documentation](https://img.shields.io/badge/docs-ADOPTION--GUIDE-orange.svg)](ADOPTION-GUIDE.md)
+[![Documentation](https://img.shields.io/badge/docs-ADOPTION--GUIDE-orange.svg)](adopters/ADOPTION-GUIDE.md)
 [![Strange Days Tech](https://img.shields.io/badge/by-Strange_Days_Tech-purple.svg)](https://strangedays.tech)
 
 [Inicio Rápido](#inicio-rápido) •
@@ -14,7 +14,7 @@
 [Documentación](#documentación) •
 [Contribuir](#contribuir)
 
-**Idiomas**: [English](../../README.md) | Español
+**Idiomas**: [English](../../../README.md) | Español
 
 </div>
 
@@ -130,7 +130,7 @@ git add .devtrail/ DEVTRAIL.md scripts/
 git commit -m "chore: adoptar DevTrail"
 ```
 
-**Ver [ADOPTION-GUIDE.md](ADOPTION-GUIDE.md) para instrucciones detalladas, estrategias de migración y planes de implementación en equipos.**
+**Ver [ADOPTION-GUIDE.md](adopters/ADOPTION-GUIDE.md) para instrucciones detalladas, estrategias de migración y planes de implementación en equipos.**
 
 ---
 
@@ -166,10 +166,10 @@ Ejemplo: `ADR-2025-01-27-001-usar-postgresql-para-persistencia.md`
 
 | Documento | Descripción |
 |-----------|-------------|
-| [ADOPTION-GUIDE.md](ADOPTION-GUIDE.md) | Guía completa de adopción |
-| [.devtrail/QUICK-REFERENCE.md](../../.devtrail/QUICK-REFERENCE.md) | Tarjeta de referencia de una página |
-| [.devtrail/00-governance/PRINCIPLES.md](../../.devtrail/00-governance/i18n/es/PRINCIPLES.md) | Principios guía |
-| [.devtrail/00-governance/AGENT-RULES.md](../../.devtrail/00-governance/i18n/es/AGENT-RULES.md) | Reglas para agentes IA |
+| [ADOPTION-GUIDE.md](adopters/ADOPTION-GUIDE.md) | Guía completa de adopción |
+| [.devtrail/QUICK-REFERENCE.md](../../../.devtrail/QUICK-REFERENCE.md) | Tarjeta de referencia de una página |
+| [.devtrail/00-governance/PRINCIPLES.md](../../../.devtrail/00-governance/i18n/es/PRINCIPLES.md) | Principios guía |
+| [.devtrail/00-governance/AGENT-RULES.md](../../../.devtrail/00-governance/i18n/es/AGENT-RULES.md) | Reglas para agentes IA |
 
 ---
 
@@ -417,7 +417,7 @@ DevTrail se alinea con:
 
 ## Licencia
 
-Este proyecto está licenciado bajo la Licencia MIT - ver el archivo [LICENSE](../../LICENSE) para detalles.
+Este proyecto está licenciado bajo la Licencia MIT - ver el archivo [LICENSE](../../../LICENSE) para detalles.
 
 ---
 

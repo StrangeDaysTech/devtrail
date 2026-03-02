@@ -59,7 +59,8 @@ The AI agent will then use Spanish templates when creating documentation.
 
 | Category | Files | Location |
 |----------|-------|----------|
-| **Main Documentation** | README.md, ADOPTION-GUIDE.md, CONTRIBUTING.md, CODE_OF_CONDUCT.md | `i18n/{lang}/` |
+| **Main Documentation** | README.md, CONTRIBUTING.md, CODE_OF_CONDUCT.md | `docs/i18n/{lang}/` |
+| **Adopter Documentation** | ADOPTION-GUIDE.md | `docs/i18n/{lang}/adopters/` |
 | **Templates** | TEMPLATE-*.md (8 files) | `.devtrail/templates/i18n/{lang}/` |
 | **Governance** | PRINCIPLES.md, DOCUMENTATION-POLICY.md, AGENT-RULES.md, QUICK-REFERENCE.md | `.devtrail/00-governance/i18n/{lang}/` |
 
@@ -239,13 +240,19 @@ Gemini CLI
 
 ```
 devtrail/
-├── i18n/
-│   ├── es/                          # Spanish translations
-│   │   ├── README.md
-│   │   ├── ADOPTION-GUIDE.md
-│   │   ├── CONTRIBUTING.md
-│   │   └── CODE_OF_CONDUCT.md
-│   └── [other-lang]/                # Future languages
+├── docs/
+│   ├── adopters/
+│   │   └── ADOPTION-GUIDE.md        # English adopter docs
+│   ├── contributors/
+│   │   └── TRANSLATION-GUIDE.md     # This file
+│   └── i18n/
+│       ├── es/                      # Spanish translations
+│       │   ├── README.md
+│       │   ├── CONTRIBUTING.md
+│       │   ├── CODE_OF_CONDUCT.md
+│       │   └── adopters/
+│       │       └── ADOPTION-GUIDE.md
+│       └── [other-lang]/            # Future languages
 │
 └── .devtrail/
     ├── templates/
@@ -267,7 +274,8 @@ Translated files keep the same filename as the original:
 
 | Original | Translation |
 |----------|-------------|
-| `README.md` | `i18n/es/README.md` |
+| `README.md` | `docs/i18n/es/README.md` |
+| `docs/adopters/ADOPTION-GUIDE.md` | `docs/i18n/es/adopters/ADOPTION-GUIDE.md` |
 | `TEMPLATE-AILOG.md` | `.devtrail/templates/i18n/es/TEMPLATE-AILOG.md` |
 
 ---
@@ -277,7 +285,7 @@ Translated files keep the same filename as the original:
 ### Step 1: Copy the Original
 
 ```bash
-cp README.md i18n/es/README.md
+cp README.md docs/i18n/es/README.md
 ```
 
 ### Step 2: Translate Content
@@ -347,7 +355,7 @@ To contribute a new translation:
 3. Submit a pull request with all translated files
 4. Include the language code in PR title: `i18n(XX): Add [Language] translation`
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for general contribution guidelines.
+See [CONTRIBUTING.md](../../CONTRIBUTING.md) for general contribution guidelines.
 
 ---
 

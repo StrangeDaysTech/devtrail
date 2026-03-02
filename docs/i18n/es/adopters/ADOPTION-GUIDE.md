@@ -4,7 +4,7 @@
 
 [![Strange Days Tech](https://img.shields.io/badge/by-Strange_Days_Tech-purple.svg)](https://strangedays.tech)
 
-**Idiomas**: [English](../../ADOPTION-GUIDE.md) | Español
+**Idiomas**: [English](../../../adopters/ADOPTION-GUIDE.md) | Español
 
 ---
 
@@ -478,7 +478,7 @@ R: Las reglas de DevTrail son instrucciones, no cumplimiento forzado. Si un asis
 
 - **Issues**: [GitHub Issues](https://github.com/StrangeDaysTech/devtrail/issues)
 - **Discusiones**: [GitHub Discussions](https://github.com/StrangeDaysTech/devtrail/discussions)
-- **Contribuir**: Ver [CONTRIBUTING.md](CONTRIBUTING.md)
+- **Contribuir**: Ver [CONTRIBUTING.md](../CONTRIBUTING.md)
 
 ---
 
@@ -486,6 +486,6 @@ R: Las reglas de DevTrail son instrucciones, no cumplimiento forzado. Si un asis
 
 **DevTrail** — Porque cada cambio cuenta una historia.
 
-[Volver al README](README.md) • [Strange Days Tech](https://strangedays.tech)
+[Volver al README](../README.md) • [Strange Days Tech](https://strangedays.tech)
 
 </div>

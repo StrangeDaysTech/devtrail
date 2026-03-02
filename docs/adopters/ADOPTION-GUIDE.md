@@ -486,7 +486,7 @@ A: DevTrail rules are instructions, not enforcement. If an AI assistant creates 
 
 - **Issues**: [GitHub Issues](https://github.com/StrangeDaysTech/devtrail/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/StrangeDaysTech/devtrail/discussions)
-- **Contributing**: See [CONTRIBUTING.md](CONTRIBUTING.md)
+- **Contributing**: See [CONTRIBUTING.md](../../CONTRIBUTING.md)
 
 ---
 
@@ -496,6 +496,6 @@ A: DevTrail rules are instructions, not enforcement. If an AI assistant creates 
 
 **DevTrail** — Because every change tells a story.
 
-[Back to README](README.md) • [Strange Days Tech](https://strangedays.tech)
+[Back to README](../../README.md) • [Strange Days Tech](https://strangedays.tech)
 
 </div>

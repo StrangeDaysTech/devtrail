@@ -14,7 +14,7 @@
 [Documentation](#documentation) •
 [Contributing](#contributing)
 
-**Languages**: English | [Español](i18n/es/README.md)
+**Languages**: English | [Español](docs/i18n/es/README.md)
 
 </div>
 
@@ -131,7 +131,7 @@ git add .devtrail/ DEVTRAIL.md scripts/
 git commit -m "chore: adopt DevTrail"
 ```
 
-📖 **See [ADOPTION-GUIDE.md](ADOPTION-GUIDE.md) for detailed instructions, migration strategies, and team rollout plans.**
+📖 **See [ADOPTION-GUIDE.md](docs/adopters/ADOPTION-GUIDE.md) for detailed instructions, migration strategies, and team rollout plans.**
 
 ---
 
@@ -169,7 +169,7 @@ Example: `ADR-2025-01-27-001-use-postgresql-for-persistence.md`
 |----------|-------------|
 | [**📘 Quick Reference**](.devtrail/QUICK-REFERENCE.md) | One-page documentation overview |
 | [DEVTRAIL.md](DEVTRAIL.md) | Unified governance rules (source of truth) |
-| [ADOPTION-GUIDE.md](ADOPTION-GUIDE.md) | Adoption guide for new/existing projects |
+| [ADOPTION-GUIDE.md](docs/adopters/ADOPTION-GUIDE.md) | Adoption guide for new/existing projects |
 
 ---
 
