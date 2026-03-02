@@ -22,17 +22,20 @@ files:
   - scripts/validate-docs.ps1
 
   # CI/CD
-  - .github/copilot-instructions.md
   - .github/workflows/docs-validation.yml
 
 # Files that are injected into existing directive files
 # (not copied, but merged via markers)
 injections:
-  reference:
-    - CLAUDE.md
-    - GEMINI.md
-    - .github/copilot-instructions.md
-  inline:
-    - .cursorrules
-  directory:
-    - .cursor/rules/devtrail.md
+  - target: CLAUDE.md
+    template: dist-templates/directives/CLAUDE.md
+  - target: GEMINI.md
+    template: dist-templates/directives/GEMINI.md
+  - target: .github/copilot-instructions.md
+    template: dist-templates/directives/copilot-instructions.md
+  - target: .cursorrules
+    template: dist-templates/directives/cursorrules
+    embed: DEVTRAIL.md
+  - target: .cursor/rules/devtrail.md
+    template: dist-templates/directives/cursor-rules-devtrail.md
+    embed: DEVTRAIL.md

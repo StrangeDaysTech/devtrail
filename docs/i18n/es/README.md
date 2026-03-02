@@ -6,7 +6,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](../../../LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Handbook](https://img.shields.io/badge/docs-Handbook-orange.svg)](../../../.devtrail/QUICK-REFERENCE.md)
+[![Handbook](https://img.shields.io/badge/docs-Handbook-orange.svg)](../../../dist/.devtrail/QUICK-REFERENCE.md)
 [![Strange Days Tech](https://img.shields.io/badge/by-Strange_Days_Tech-purple.svg)](https://strangedays.tech)
 
 [Inicio Rápido](#inicio-rápido) •
@@ -174,8 +174,8 @@ La documentación de DevTrail está organizada por audiencia:
 
 | Documento | Descripción |
 |-----------|-------------|
-| [**📘 Referencia Rápida**](../../../.devtrail/QUICK-REFERENCE.md) | Resumen de tipos de documentos y nomenclatura |
-| [DEVTRAIL.md](../../../DEVTRAIL.md) | Reglas de gobernanza unificadas (fuente de verdad) |
+| [**📘 Referencia Rápida**](../../../dist/.devtrail/QUICK-REFERENCE.md) | Resumen de tipos de documentos y nomenclatura |
+| [DEVTRAIL.md](../../../dist/DEVTRAIL.md) | Reglas de gobernanza unificadas (fuente de verdad) |
 | [ADOPTION-GUIDE.md](adopters/ADOPTION-GUIDE.md) | Guía de adopción para proyectos nuevos/existentes |
 
 ### Estructura Interna

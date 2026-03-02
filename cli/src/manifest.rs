@@ -1,25 +1,23 @@
 use anyhow::{Context, Result};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::path::Path;
 
 /// Parsed dist-manifest.yml
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct DistManifest {
     pub version: String,
     pub description: String,
     pub files: Vec<String>,
     #[serde(default)]
-    pub injections: Option<Injections>,
+    pub injections: Vec<Injection>,
 }
 
-#[derive(Debug, Deserialize)]
-pub struct Injections {
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct Injection {
+    pub target: String,
+    pub template: String,
     #[serde(default)]
-    pub reference: Vec<String>,
-    #[serde(default)]
-    pub inline: Vec<String>,
-    #[serde(default)]
-    pub directory: Vec<String>,
+    pub embed: Option<String>,
 }
 
 impl DistManifest {
@@ -33,5 +31,10 @@ impl DistManifest {
         let content =
             std::fs::read_to_string(path).context("Failed to read dist-manifest.yml")?;
         Self::from_str(&content)
+    }
+
+    /// Serialize manifest to YAML string
+    pub fn to_yaml(&self) -> Result<String> {
+        serde_yaml::to_string(self).context("Failed to serialize dist-manifest.yml")
     }
 }

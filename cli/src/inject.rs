@@ -4,83 +4,66 @@ use std::path::Path;
 const MARKER_BEGIN: &str = "<!-- devtrail:begin -->";
 const MARKER_END: &str = "<!-- devtrail:end -->";
 
-/// Inject a lightweight reference into a directive file (CLAUDE.md, GEMINI.md, copilot-instructions.md)
-pub fn inject_reference(target: &Path) -> Result<()> {
-    let reference_content = format!(
-        "{}\n> **Read and follow the rules in [DEVTRAIL.md](DEVTRAIL.md).**\n> That file contains all DevTrail documentation governance rules for this project.\n{}",
-        MARKER_BEGIN, MARKER_END
-    );
+/// Extract the marker block (begin marker through end marker, inclusive) from a template string.
+/// Returns None if markers are not found.
+fn extract_marker_block(template: &str) -> Option<String> {
+    let start = template.find(MARKER_BEGIN)?;
+    let end = template.find(MARKER_END)?;
+    let end = end + MARKER_END.len();
+    Some(template[start..end].to_string())
+}
+
+/// Build the marker block content for an injection.
+///
+/// If `embed_content` is provided, wraps it between markers.
+/// Otherwise, extracts the existing marker block from the template.
+fn build_marker_block(template: &str, embed_content: Option<&str>) -> Result<String> {
+    match embed_content {
+        Some(content) => Ok(format!("{}\n{}\n{}", MARKER_BEGIN, content.trim(), MARKER_END)),
+        None => extract_marker_block(template)
+            .context("Template is missing devtrail markers"),
+    }
+}
+
+/// Build the full file content by replacing markers in the template with the marker block.
+fn build_full_content(template: &str, marker_block: &str) -> String {
+    if let Some(original_block) = extract_marker_block(template) {
+        template.replace(&original_block, marker_block)
+    } else {
+        // Template has no markers — append block at the end
+        format!("{}\n\n{}\n", template.trim_end(), marker_block)
+    }
+}
+
+/// Unified injection: apply a template (with optional embed content) to a target file.
+///
+/// - If the target doesn't exist → create it with the full template content.
+/// - If the target exists and has markers → replace the marker block.
+/// - If the target exists without markers → append the marker block.
+pub fn inject_directive(target: &Path, template_content: &str, embed_content: Option<&str>) -> Result<()> {
+    let marker_block = build_marker_block(template_content, embed_content)?;
+    let full_content = build_full_content(template_content, &marker_block);
 
     if target.exists() {
         let content = std::fs::read_to_string(target).context("Failed to read directive file")?;
 
         if content.contains(MARKER_BEGIN) {
             // Replace existing injection
-            let new_content = replace_between_markers(&content, &reference_content);
+            let new_content = replace_between_markers(&content, &marker_block);
             std::fs::write(target, new_content).context("Failed to write directive file")?;
         } else {
             // Append injection
-            let new_content = format!("{}\n\n{}\n", content.trim_end(), reference_content);
+            let new_content = format!("{}\n\n{}\n", content.trim_end(), marker_block);
             std::fs::write(target, new_content).context("Failed to write directive file")?;
         }
     } else {
-        // Create minimal file with just the injection
-        let filename = target
-            .file_name()
-            .and_then(|n| n.to_str())
-            .unwrap_or("Unknown");
-        let header = match filename {
-            "CLAUDE.md" => "# DevTrail - Claude Code Configuration",
-            "GEMINI.md" => "# DevTrail - Gemini CLI Configuration",
-            "copilot-instructions.md" => "# DevTrail - GitHub Copilot Configuration",
-            _ => "# DevTrail Configuration",
-        };
-        let content = format!("{}\n\n{}\n", header, reference_content);
+        // Create new file with full template content
         if let Some(parent) = target.parent() {
             std::fs::create_dir_all(parent).context("Failed to create directory")?;
         }
-        std::fs::write(target, content).context("Failed to create directive file")?;
+        std::fs::write(target, full_content).context("Failed to create directive file")?;
     }
 
-    Ok(())
-}
-
-/// Inject full DEVTRAIL.md content into .cursorrules (which doesn't support includes)
-pub fn inject_full_content(target: &Path, devtrail_content: &str) -> Result<()> {
-    let inline_content = format!("{}\n{}\n{}", MARKER_BEGIN, devtrail_content.trim(), MARKER_END);
-
-    if target.exists() {
-        let content = std::fs::read_to_string(target).context("Failed to read .cursorrules")?;
-
-        if content.contains(MARKER_BEGIN) {
-            let new_content = replace_between_markers(&content, &inline_content);
-            std::fs::write(target, new_content).context("Failed to write .cursorrules")?;
-        } else {
-            let new_content = format!("{}\n\n{}\n", content.trim_end(), inline_content);
-            std::fs::write(target, new_content).context("Failed to write .cursorrules")?;
-        }
-    } else {
-        let content = format!(
-            "# DevTrail - Cursor Configuration\n\n{}\n",
-            inline_content
-        );
-        std::fs::write(target, content).context("Failed to create .cursorrules")?;
-    }
-
-    Ok(())
-}
-
-/// Create a devtrail.md file inside .cursor/rules/ directory
-pub fn inject_cursor_rules_dir(target_dir: &Path, devtrail_content: &str) -> Result<()> {
-    std::fs::create_dir_all(target_dir).context("Failed to create .cursor/rules/ directory")?;
-    let target = target_dir.join("devtrail.md");
-    let content = format!(
-        "# DevTrail - Cursor Rules\n\n{}\n{}\n{}\n",
-        MARKER_BEGIN,
-        devtrail_content.trim(),
-        MARKER_END
-    );
-    std::fs::write(&target, content).context("Failed to write .cursor/rules/devtrail.md")?;
     Ok(())
 }
 
@@ -139,6 +122,105 @@ fn remove_between_markers(content: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use tempfile::TempDir;
+
+    #[test]
+    fn test_extract_marker_block() {
+        let template = "# Header\n\n<!-- devtrail:begin -->\nsome content\n<!-- devtrail:end -->\n\nfooter";
+        let block = extract_marker_block(template).unwrap();
+        assert_eq!(block, "<!-- devtrail:begin -->\nsome content\n<!-- devtrail:end -->");
+    }
+
+    #[test]
+    fn test_extract_marker_block_missing() {
+        let template = "# Header\n\nno markers here";
+        assert!(extract_marker_block(template).is_none());
+    }
+
+    #[test]
+    fn test_build_marker_block_with_embed() {
+        let template = "# Header\n\n<!-- devtrail:begin -->\n<!-- devtrail:end -->\n";
+        let block = build_marker_block(template, Some("embedded content")).unwrap();
+        assert_eq!(block, "<!-- devtrail:begin -->\nembedded content\n<!-- devtrail:end -->");
+    }
+
+    #[test]
+    fn test_build_marker_block_without_embed() {
+        let template = "# Header\n\n<!-- devtrail:begin -->\nstatic ref\n<!-- devtrail:end -->\n";
+        let block = build_marker_block(template, None).unwrap();
+        assert_eq!(block, "<!-- devtrail:begin -->\nstatic ref\n<!-- devtrail:end -->");
+    }
+
+    #[test]
+    fn test_inject_directive_creates_file() {
+        let dir = TempDir::new().unwrap();
+        let target = dir.path().join("CLAUDE.md");
+        let template = "# DevTrail - Claude Code Configuration\n\n<!-- devtrail:begin -->\n> **Read rules**\n<!-- devtrail:end -->\n";
+
+        inject_directive(&target, template, None).unwrap();
+
+        let content = std::fs::read_to_string(&target).unwrap();
+        assert!(content.contains("# DevTrail - Claude Code Configuration"));
+        assert!(content.contains("<!-- devtrail:begin -->"));
+        assert!(content.contains("> **Read rules**"));
+        assert!(content.contains("<!-- devtrail:end -->"));
+    }
+
+    #[test]
+    fn test_inject_directive_with_embed_creates_file() {
+        let dir = TempDir::new().unwrap();
+        let target = dir.path().join(".cursorrules");
+        let template = "# DevTrail - Cursor Configuration\n\n<!-- devtrail:begin -->\n<!-- devtrail:end -->\n";
+
+        inject_directive(&target, template, Some("# My Rules\nRule 1\nRule 2")).unwrap();
+
+        let content = std::fs::read_to_string(&target).unwrap();
+        assert!(content.contains("# DevTrail - Cursor Configuration"));
+        assert!(content.contains("# My Rules"));
+        assert!(content.contains("Rule 1"));
+    }
+
+    #[test]
+    fn test_inject_directive_appends_to_existing() {
+        let dir = TempDir::new().unwrap();
+        let target = dir.path().join("CLAUDE.md");
+        std::fs::write(&target, "# My Project\n\nCustom config here\n").unwrap();
+
+        let template = "# DevTrail\n\n<!-- devtrail:begin -->\n> **Read rules**\n<!-- devtrail:end -->\n";
+        inject_directive(&target, template, None).unwrap();
+
+        let content = std::fs::read_to_string(&target).unwrap();
+        assert!(content.contains("# My Project"));
+        assert!(content.contains("Custom config here"));
+        assert!(content.contains("<!-- devtrail:begin -->"));
+        assert!(content.contains("> **Read rules**"));
+    }
+
+    #[test]
+    fn test_inject_directive_replaces_existing_markers() {
+        let dir = TempDir::new().unwrap();
+        let target = dir.path().join("CLAUDE.md");
+        std::fs::write(&target, "# My Project\n\n<!-- devtrail:begin -->\nold content\n<!-- devtrail:end -->\n\nfooter\n").unwrap();
+
+        let template = "# DevTrail\n\n<!-- devtrail:begin -->\nnew content\n<!-- devtrail:end -->\n";
+        inject_directive(&target, template, None).unwrap();
+
+        let content = std::fs::read_to_string(&target).unwrap();
+        assert!(content.contains("new content"));
+        assert!(!content.contains("old content"));
+        assert!(content.contains("# My Project"));
+        assert!(content.contains("footer"));
+    }
+
+    #[test]
+    fn test_inject_directive_creates_parent_dirs() {
+        let dir = TempDir::new().unwrap();
+        let target = dir.path().join(".github/copilot-instructions.md");
+        let template = "# Config\n\n<!-- devtrail:begin -->\nref\n<!-- devtrail:end -->\n";
+
+        inject_directive(&target, template, None).unwrap();
+        assert!(target.exists());
+    }
 
     #[test]
     fn test_replace_between_markers() {

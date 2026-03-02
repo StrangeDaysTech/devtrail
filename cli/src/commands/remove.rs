@@ -4,7 +4,18 @@ use dialoguer::{Confirm, theme::ColorfulTheme};
 use std::path::Path;
 
 use crate::inject;
+use crate::manifest::DistManifest;
 use crate::utils;
+
+/// Legacy hardcoded targets for backwards compatibility with installations
+/// that don't have a local dist-manifest.yml
+const LEGACY_DIRECTIVE_TARGETS: &[&str] = &[
+    "CLAUDE.md",
+    "GEMINI.md",
+    ".github/copilot-instructions.md",
+    ".cursorrules",
+    ".cursor/rules/devtrail.md",
+];
 
 pub fn run(full: bool) -> Result<()> {
     let target = std::env::current_dir().context("Failed to get current directory")?;
@@ -69,8 +80,7 @@ pub fn run(full: bool) -> Result<()> {
     remove_empty_dir(&target.join(".gemini"))?;
     remove_empty_dir(&target.join(".agent"))?;
 
-    // Remove cursor rules file (if we created it)
-    remove_file_if_exists(&target.join(".cursor/rules/devtrail.md"))?;
+    // Clean up .cursor directories (injections already handled by clean_directives)
     remove_empty_dir(&target.join(".cursor/rules"))?;
     remove_empty_dir(&target.join(".cursor"))?;
 
@@ -105,17 +115,42 @@ pub fn run(full: bool) -> Result<()> {
 }
 
 fn clean_directives(target: &Path) -> Result<()> {
-    let files = [
-        target.join("CLAUDE.md"),
-        target.join("GEMINI.md"),
-        target.join(".github/copilot-instructions.md"),
-        target.join(".cursorrules"),
-    ];
+    // Try to load the local manifest for injection targets
+    let manifest_path = target.join(".devtrail/dist-manifest.yml");
+    let directive_targets: Vec<String> = if manifest_path.exists() {
+        match DistManifest::load(&manifest_path) {
+            Ok(manifest) => manifest
+                .injections
+                .iter()
+                .map(|inj| inj.target.clone())
+                .collect(),
+            Err(_) => {
+                // Failed to parse — fall back to legacy list
+                LEGACY_DIRECTIVE_TARGETS
+                    .iter()
+                    .map(|s| s.to_string())
+                    .collect()
+            }
+        }
+    } else {
+        // No local manifest — legacy installation
+        LEGACY_DIRECTIVE_TARGETS
+            .iter()
+            .map(|s| s.to_string())
+            .collect()
+    };
 
-    for f in &files {
-        if inject::remove_injection(f)? {
-            let name = f.strip_prefix(target).unwrap_or(f).display().to_string();
-            utils::success(&format!("Cleaned {}", name));
+    for directive_target in &directive_targets {
+        let path = target.join(directive_target);
+        if inject::remove_injection(&path)? {
+            utils::success(&format!("Cleaned {}", directive_target));
+        }
+
+        // Clean up empty parent directories
+        if let Some(parent) = path.parent() {
+            if parent != target {
+                remove_empty_dir(parent)?;
+            }
         }
     }
 
@@ -162,6 +197,7 @@ fn remove_framework_files(target: &Path) -> Result<()> {
     remove_file_if_exists(&devtrail.join("config.yml"))?;
     remove_file_if_exists(&devtrail.join("QUICK-REFERENCE.md"))?;
     remove_file_if_exists(&devtrail.join(".checksums.json"))?;
+    remove_file_if_exists(&devtrail.join("dist-manifest.yml"))?;
 
     Ok(())
 }

@@ -1,13 +1,9 @@
 # DevTrail - GitHub Copilot Configuration
 
 <!-- devtrail:begin -->
-> **Read and follow the rules in [DEVTRAIL.md](../DEVTRAIL.md).**
+> **Read and follow the rules in [../DEVTRAIL.md](../DEVTRAIL.md).**
 > That file contains all DevTrail documentation governance rules for this project.
 <!-- devtrail:end -->
-
-## Agent Identity
-
-When working on this project, identify yourself as: `copilot-cli-v1.0` (or your version).
 
 ---
 

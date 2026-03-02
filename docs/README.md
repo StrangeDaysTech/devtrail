@@ -39,4 +39,4 @@ docs/
 
 ---
 
-> **Note**: Development governance documentation (policies, templates, agent rules) lives in [`.devtrail/`](../.devtrail/) — not in this directory. See [QUICK-REFERENCE.md](../.devtrail/QUICK-REFERENCE.md) for an overview.
+> **Note**: Development governance documentation (policies, templates, agent rules) lives in [`dist/.devtrail/`](../dist/.devtrail/) — not in this directory. See [QUICK-REFERENCE.md](../dist/.devtrail/QUICK-REFERENCE.md) for an overview.
