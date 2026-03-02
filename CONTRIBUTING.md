@@ -303,13 +303,18 @@ The release binary is optimized with LTO and stripped for minimal size.
 cli/src/
 ├── main.rs          # Entry point + clap CLI definition
 ├── commands/
+│   ├── mod.rs       # Subcommand routing
 │   ├── init.rs      # devtrail init [path]
 │   ├── update.rs    # devtrail update
-│   └── remove.rs    # devtrail remove [--full]
+│   ├── remove.rs    # devtrail remove [--full]
+│   ├── update_cli.rs # devtrail update-cli
+│   └── about.rs     # devtrail about
 ├── config.rs        # Config and checksums management
 ├── download.rs      # GitHub Releases download
 ├── inject.rs        # Directive file injection (markers)
 ├── manifest.rs      # dist-manifest.yml parsing
+├── platform.rs      # OS/arch detection for binary downloads
+├── self_update.rs   # CLI binary self-update logic
 └── utils.rs         # Helpers (hashing, colors, paths)
 ```
 

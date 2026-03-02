@@ -157,15 +157,30 @@ DevTrail aligns with and supports compliance for:
 
 ### Option 1: CLI (Recommended)
 
-```bash
-# Install the CLI
-cargo install devtrail-cli
+**Quick install (prebuilt binary):**
 
-# Initialize in your project
+```bash
+# Linux / macOS
+curl -fsSL https://raw.githubusercontent.com/StrangeDaysTech/devtrail/main/install.sh | sh
+```
+
+```powershell
+# Windows (PowerShell)
+irm https://raw.githubusercontent.com/StrangeDaysTech/devtrail/main/install.ps1 | iex
+```
+
+Or install from source with Cargo:
+
+```bash
+cargo install devtrail-cli
+```
+
+Then initialize and commit:
+
+```bash
 cd your-project
 devtrail init .
 
-# Commit
 git add .devtrail/ DEVTRAIL.md scripts/
 git commit -m "chore: adopt DevTrail"
 ```

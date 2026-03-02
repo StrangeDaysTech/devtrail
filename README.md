@@ -96,11 +96,27 @@ Automated validation tools:
 
 ### Option 1: CLI (Recommended)
 
-```bash
-# Install the CLI
-cargo install devtrail-cli
+**Quick install (prebuilt binary):**
 
-# Initialize in your project
+```bash
+# Linux / macOS
+curl -fsSL https://raw.githubusercontent.com/StrangeDaysTech/devtrail/main/install.sh | sh
+```
+
+```powershell
+# Windows (PowerShell)
+irm https://raw.githubusercontent.com/StrangeDaysTech/devtrail/main/install.ps1 | iex
+```
+
+Or install from source with Cargo:
+
+```bash
+cargo install devtrail-cli
+```
+
+Then initialize in your project:
+
+```bash
 cd your-project
 devtrail init .
 ```
@@ -108,8 +124,14 @@ devtrail init .
 The CLI downloads the latest DevTrail release, sets up the framework, and configures your AI agent directive files automatically.
 
 ```bash
-# Update to latest version
+# Update DevTrail documents to latest version
 devtrail update
+
+# Update the CLI binary itself
+devtrail update-cli
+
+# Show authorship and license info
+devtrail about
 
 # Remove DevTrail
 devtrail remove
