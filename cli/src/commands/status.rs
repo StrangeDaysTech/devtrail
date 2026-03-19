@@ -53,11 +53,14 @@ pub fn run(path: &str) -> Result<()> {
     let version = load_version(&target);
     let language = load_language(&target);
 
+    let cli_version = env!("CARGO_PKG_VERSION");
+
     println!();
     println!("{}", "DevTrail Status".bold());
-    println!("  {}  {}", "Path:".dimmed(), target.display());
-    println!("  {}  {}", "Version:".dimmed(), version);
-    println!("  {} {}", "Language:".dimmed(), language);
+    println!("  {}      {}", "Path:".dimmed(), target.display());
+    println!("  {} {}", "Framework:".dimmed(), version);
+    println!("  {}       {}", "CLI:".dimmed(), cli_version);
+    println!("  {}  {}", "Language:".dimmed(), language);
 
     // Phase 2: Structure check
     println!();

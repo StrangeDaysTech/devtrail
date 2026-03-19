@@ -1,9 +1,9 @@
-name: Release
+name: Release CLI
 
 on:
   push:
     tags:
-      - 'v*'
+      - 'cli-*'
 
 permissions:
   contents: write
@@ -12,34 +12,6 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  # Job 1: Package distributable templates
-  package-templates:
-    name: Package Templates
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Read version from Cargo.toml
-        id: version
-        run: |
-          VERSION=$(grep '^version' cli/Cargo.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-
-      - name: Create distribution ZIP
-        run: |
-          mkdir -p dist-staging
-          cp -a dist/. dist-staging/
-          cd dist-staging
-          zip -r "../devtrail-v${{ steps.version.outputs.version }}.zip" .
-          cd ..
-
-      - name: Upload template artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: templates
-          path: devtrail-v${{ steps.version.outputs.version }}.zip
-
-  # Job 2: Build CLI binaries (cross-platform)
   build-cli:
     name: Build CLI (${{ matrix.target }})
     runs-on: ${{ matrix.os }}
@@ -71,12 +43,22 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: sudo apt-get update && sudo apt-get install -y libssl-dev pkg-config
 
-      - name: Read version
+      - name: Extract version from tag
         id: version
         shell: bash
         run: |
-          VERSION=$(grep '^version' cli/Cargo.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')
+          VERSION="${GITHUB_REF_NAME#cli-}"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Verify Cargo.toml version matches tag
+        shell: bash
+        run: |
+          CARGO_VERSION=$(grep '^version' cli/Cargo.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')
+          TAG_VERSION="${GITHUB_REF_NAME#cli-}"
+          if [ "$CARGO_VERSION" != "$TAG_VERSION" ]; then
+            echo "ERROR: Cargo.toml version ($CARGO_VERSION) does not match tag version ($TAG_VERSION)"
+            exit 1
+          fi
 
       - name: Build release binary
         run: cargo build --release --manifest-path cli/Cargo.toml --target ${{ matrix.target }}
@@ -106,18 +88,17 @@ jobs:
           name: cli-${{ matrix.target }}
           path: ${{ env.ARCHIVE }}
 
-  # Job 3: Create GitHub Release
   create-release:
     name: Create Release
-    needs: [package-templates, build-cli]
+    needs: [build-cli]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Read version
+      - name: Extract version from tag
         id: version
         run: |
-          VERSION=$(grep '^version' cli/Cargo.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')
+          VERSION="${GITHUB_REF_NAME#cli-}"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Download all artifacts
@@ -136,6 +117,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create "${{ github.ref_name }}" \
-            --title "DevTrail ${{ github.ref_name }}" \
+            --title "DevTrail CLI ${{ steps.version.outputs.version }}" \
             --generate-notes \
             release/*

@@ -1,6 +1,8 @@
 use anyhow::Result;
 use colored::Colorize;
 
+use crate::manifest::DistManifest;
+
 pub fn run() -> Result<()> {
     let version = env!("CARGO_PKG_VERSION");
     let description = env!("CARGO_PKG_DESCRIPTION");
@@ -15,6 +17,19 @@ pub fn run() -> Result<()> {
         "DevTrail CLI".bold(),
         format!("v{version}").dimmed()
     );
+
+    // Show framework version if installed
+    if let Ok(cwd) = std::env::current_dir() {
+        let manifest_path = cwd.join(".devtrail/dist-manifest.yml");
+        if let Ok(manifest) = DistManifest::load(&manifest_path) {
+            println!(
+                "  {} {}",
+                "Framework:".dimmed(),
+                format!("v{}", manifest.version).dimmed()
+            );
+        }
+    }
+
     println!("  {}", description.dimmed());
     println!();
     println!("  {}  {}", "Author:".cyan(), authors);

@@ -6,69 +6,6 @@ use crate::download;
 use crate::platform;
 use crate::utils;
 
-/// Information about an available CLI update
-pub struct UpdateAvailable {
-    pub current: String,
-    pub latest: String,
-}
-
-/// Check if a CLI update is available by comparing versions
-pub fn check_for_cli_update(release_tag: &str) -> Option<UpdateAvailable> {
-    let current_str = env!("CARGO_PKG_VERSION");
-    let tag_version = release_tag.strip_prefix('v').unwrap_or(release_tag);
-
-    let current = semver::Version::parse(current_str).ok()?;
-    let latest = semver::Version::parse(tag_version).ok()?;
-
-    if latest > current {
-        Some(UpdateAvailable {
-            current: current_str.to_string(),
-            latest: tag_version.to_string(),
-        })
-    } else {
-        None
-    }
-}
-
-/// Print a notification box if a CLI update is available
-pub fn notify_if_newer(release_tag: &str) {
-    if let Some(update) = check_for_cli_update(release_tag) {
-        let line1 = format!(
-            " CLI update available: v{} -> v{} ",
-            update.current, update.latest
-        );
-        let line2 = " Run `devtrail update-cli` to update the binary ";
-        let width = line1.len().max(line2.len());
-        let border = "\u{2500}".repeat(width);
-
-        println!();
-        println!(
-            "  {}{}{}",
-            "\u{256d}".yellow(),
-            border.yellow(),
-            "\u{256e}".yellow()
-        );
-        println!(
-            "  {}{:<width$}{}",
-            "\u{2502}".yellow(),
-            line1,
-            "\u{2502}".yellow()
-        );
-        println!(
-            "  {}{:<width$}{}",
-            "\u{2502}".yellow(),
-            line2,
-            "\u{2502}".yellow()
-        );
-        println!(
-            "  {}{}{}",
-            "\u{2570}".yellow(),
-            border.yellow(),
-            "\u{256f}".yellow()
-        );
-    }
-}
-
 /// Perform the CLI self-update
 pub fn perform_update() -> Result<()> {
     let current_version = env!("CARGO_PKG_VERSION");
@@ -77,10 +14,7 @@ pub fn perform_update() -> Result<()> {
     // Fetch latest release
     utils::info("Checking for updates...");
     let release = download::get_latest_release_full()?;
-    let tag_version = release
-        .tag_name
-        .strip_prefix('v')
-        .unwrap_or(&release.tag_name);
+    let tag_version = download::strip_tag_prefix(&release.tag_name);
 
     println!(
         "  {} v{}",

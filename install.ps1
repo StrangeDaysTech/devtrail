@@ -4,7 +4,7 @@
 #   irm https://raw.githubusercontent.com/StrangeDaysTech/devtrail/main/install.ps1 | iex
 #
 #   # Or with parameters:
-#   & ([scriptblock]::Create((irm https://raw.githubusercontent.com/StrangeDaysTech/devtrail/main/install.ps1))) -Tag v2.0.0
+#   & ([scriptblock]::Create((irm https://raw.githubusercontent.com/StrangeDaysTech/devtrail/main/install.ps1))) -Tag cli-1.0.0
 #
 # Compatible with PowerShell 5.1+ and PowerShell Core (pwsh).
 
@@ -61,13 +61,13 @@ function Get-GitHubHeaders {
 # ── Get latest tag ───────────────────────────────────────────────────────
 
 function Get-LatestTag {
-    $apiUrl = "https://api.github.com/repos/$Repo/releases/latest"
+    $apiUrl = "https://api.github.com/repos/$Repo/releases"
     $headers = Get-GitHubHeaders
 
-    Write-Status "fetching latest release info..."
+    Write-Status "fetching latest CLI release info..."
 
     try {
-        $release = Invoke-RestMethod -Uri $apiUrl -Headers $headers -UseBasicParsing
+        $releases = Invoke-RestMethod -Uri $apiUrl -Headers $headers -UseBasicParsing
     }
     catch {
         Write-Err "Failed to fetch release info from GitHub API."
@@ -78,9 +78,9 @@ function Get-LatestTag {
         exit 1
     }
 
-    $tagName = $release.tag_name
+    $tagName = ($releases | Where-Object { $_.tag_name -like "cli-*" } | Select-Object -First 1).tag_name
     if (-not $tagName) {
-        Write-Err "Could not parse latest release tag from GitHub API response."
+        Write-Err "Could not find a CLI release (cli-* tag) from GitHub API response."
         exit 1
     }
 
@@ -102,7 +102,7 @@ try {
     }
 
     # Build asset name and URL
-    $versionNum = $Tag -replace "^v", ""
+    $versionNum = $Tag -replace "^cli-", ""
     $asset = "devtrail-cli-v${versionNum}-${Target}.zip"
     $url = "https://github.com/$Repo/releases/download/$Tag/$asset"
 

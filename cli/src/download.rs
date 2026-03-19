@@ -43,16 +43,24 @@ fn build_client() -> Result<reqwest::blocking::Client> {
     builder.build().context("Failed to create HTTP client")
 }
 
-/// Get full release info including all assets
-pub fn get_latest_release_full() -> Result<FullReleaseInfo> {
-    let url = format!("{}/repos/{}/releases/latest", GITHUB_API_BASE, GITHUB_REPO);
+/// Strip known tag prefixes (fw-, cli-, v) and return the version string
+pub fn strip_tag_prefix(tag: &str) -> &str {
+    tag.strip_prefix("fw-")
+        .or_else(|| tag.strip_prefix("cli-"))
+        .or_else(|| tag.strip_prefix("v"))
+        .unwrap_or(tag)
+}
+
+/// Fetch the latest release whose tag starts with the given prefix
+pub fn get_latest_release_by_prefix(prefix: &str) -> Result<FullReleaseInfo> {
+    let url = format!("{}/repos/{}/releases", GITHUB_API_BASE, GITHUB_REPO);
 
     let client = build_client()?;
 
     let response = client
         .get(&url)
         .send()
-        .context("Failed to fetch latest release from GitHub")?;
+        .context("Failed to fetch releases from GitHub")?;
 
     if response.status() == reqwest::StatusCode::FORBIDDEN {
         bail!(
@@ -68,40 +76,57 @@ pub fn get_latest_release_full() -> Result<FullReleaseInfo> {
         bail!("GitHub API error: {}", response.status());
     }
 
-    let body: serde_json::Value = response.json().context("Failed to parse release JSON")?;
+    let body: serde_json::Value = response.json().context("Failed to parse releases JSON")?;
 
-    let tag_name = body["tag_name"]
-        .as_str()
-        .context("Missing tag_name in release")?
-        .to_string();
+    let releases = body.as_array().context("Expected JSON array of releases")?;
 
-    let mut assets = Vec::new();
-    if let Some(asset_array) = body["assets"].as_array() {
-        for asset in asset_array {
-            if let (Some(name), Some(url)) = (
-                asset["name"].as_str(),
-                asset["browser_download_url"].as_str(),
-            ) {
-                assets.push(ReleaseAsset {
-                    name: name.to_string(),
-                    download_url: url.to_string(),
-                });
+    for release in releases {
+        let tag_name = match release["tag_name"].as_str() {
+            Some(t) => t,
+            None => continue,
+        };
+
+        if !tag_name.starts_with(prefix) {
+            continue;
+        }
+
+        let tag_name = tag_name.to_string();
+        let mut assets = Vec::new();
+
+        if let Some(asset_array) = release["assets"].as_array() {
+            for asset in asset_array {
+                if let (Some(name), Some(url)) = (
+                    asset["name"].as_str(),
+                    asset["browser_download_url"].as_str(),
+                ) {
+                    assets.push(ReleaseAsset {
+                        name: name.to_string(),
+                        download_url: url.to_string(),
+                    });
+                }
             }
         }
+
+        return Ok(FullReleaseInfo { tag_name, assets });
     }
 
-    Ok(FullReleaseInfo { tag_name, assets })
+    bail!("No release found with tag prefix '{}'", prefix)
 }
 
-/// Get the latest release info from GitHub
-pub fn get_latest_release() -> Result<ReleaseInfo> {
-    let full = get_latest_release_full()?;
+/// Get full release info for CLI releases (cli-* tags)
+pub fn get_latest_release_full() -> Result<FullReleaseInfo> {
+    get_latest_release_by_prefix("cli-")
+}
 
-    // Look for the devtrail distribution ZIP (not CLI binary ZIPs)
+/// Get the latest framework release info (fw-* tags)
+pub fn get_latest_release() -> Result<ReleaseInfo> {
+    let full = get_latest_release_by_prefix("fw-")?;
+
+    // Look for the devtrail distribution ZIP (devtrail-fw-*.zip)
     let zip_url = full
         .assets
         .iter()
-        .find(|a| a.name.starts_with("devtrail-v") && a.name.ends_with(".zip"))
+        .find(|a| a.name.starts_with("devtrail-fw-") && a.name.ends_with(".zip"))
         .map(|a| a.download_url.clone());
 
     // Fallback to zipball if no distribution asset found
