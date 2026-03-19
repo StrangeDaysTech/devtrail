@@ -9,7 +9,7 @@ use crate::utils;
 /// Perform the CLI self-update
 pub fn perform_update() -> Result<()> {
     let current_version = env!("CARGO_PKG_VERSION");
-    utils::info(&format!("Current CLI version: v{}", current_version));
+    utils::info(&format!("Current version: cli-{}", current_version));
 
     // Fetch latest release
     utils::info("Checking for updates...");
@@ -17,9 +17,9 @@ pub fn perform_update() -> Result<()> {
     let tag_version = download::strip_tag_prefix(&release.tag_name);
 
     println!(
-        "  {} v{}",
-        "Latest release:".dimmed(),
-        tag_version.green()
+        "  {} {}",
+        "Latest version:".dimmed(),
+        release.tag_name.green()
     );
 
     // Compare versions
@@ -30,7 +30,7 @@ pub fn perform_update() -> Result<()> {
 
     if latest <= current {
         utils::success(&format!(
-            "CLI is already at the latest version (v{})",
+            "CLI is already at the latest version (cli-{})",
             current_version
         ));
         return Ok(());
@@ -48,7 +48,7 @@ pub fn perform_update() -> Result<()> {
         .find(|a| a.name == expected_name)
         .ok_or_else(|| {
             anyhow::anyhow!(
-                "No CLI binary found for {} in release v{}",
+                "No CLI binary found for {} in release cli-{}",
                 target,
                 tag_version
             )
@@ -82,7 +82,7 @@ pub fn perform_update() -> Result<()> {
 
     replace_binary(&extracted_binary, &current_exe)?;
 
-    utils::success(&format!("CLI updated to v{}!", tag_version));
+    utils::success(&format!("CLI updated to cli-{}!", tag_version));
 
     #[cfg(windows)]
     println!(
