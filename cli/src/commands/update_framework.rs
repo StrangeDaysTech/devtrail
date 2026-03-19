@@ -25,11 +25,7 @@ pub fn run() -> Result<()> {
     // Load current checksums
     let current_checksums = Checksums::load(&target)?;
     if !current_checksums.version.is_empty() {
-        println!(
-            "  {} {}",
-            "Current version:".dimmed(),
-            current_checksums.version
-        );
+        utils::info(&format!("Current version: {}", current_checksums.version));
     }
 
     // Fetch latest release
@@ -50,7 +46,6 @@ pub fn run() -> Result<()> {
             semver::Version::parse(display_version),
         ) {
             if latest <= current {
-                println!();
                 utils::success(&format!(
                     "Framework is already at the latest version ({})",
                     current_checksums.version
