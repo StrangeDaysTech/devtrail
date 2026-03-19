@@ -42,6 +42,24 @@ pub fn run() -> Result<()> {
         display_version.green()
     );
 
+    // Compare versions — skip if already up to date
+    let current_ver_str = download::strip_tag_prefix(&current_checksums.version);
+    if !current_ver_str.is_empty() {
+        if let (Ok(current), Ok(latest)) = (
+            semver::Version::parse(current_ver_str),
+            semver::Version::parse(display_version),
+        ) {
+            if latest <= current {
+                println!();
+                utils::success(&format!(
+                    "Framework is already at the latest version ({})",
+                    current_checksums.version
+                ));
+                return Ok(());
+            }
+        }
+    }
+
     // Download ZIP
     let temp_dir = tempfile::tempdir().context("Failed to create temp directory")?;
     let zip_path = temp_dir.path().join("devtrail.zip");
