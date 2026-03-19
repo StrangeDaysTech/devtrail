@@ -163,8 +163,6 @@ Mark `review_required: true` when:
 | Found tech debt | TDE |
 | Handled PII data | AILOG + ETH |
 
-📖 **See [docs/cookbook.md](../docs/cookbook.md) for detailed examples.**
-
 ---
 
-*DevTrail v2.0.0 | [GitHub](https://github.com/StrangeDaysTech/devtrail) | [Strange Days Tech](https://strangedays.tech)*
+*DevTrail | [GitHub](https://github.com/StrangeDaysTech/devtrail) | [Strange Days Tech](https://strangedays.tech)*

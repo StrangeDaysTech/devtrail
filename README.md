@@ -123,30 +123,41 @@ devtrail init .
 
 The CLI downloads the latest DevTrail release, sets up the framework, and configures your AI agent directive files automatically.
 
-```bash
-# Update DevTrail documents to latest version
-devtrail update
+### Versioning
 
-# Update the CLI binary itself
-devtrail update-cli
+DevTrail uses independent version tags for each component:
 
-# Show authorship and license info
-devtrail about
+| Component | Tag prefix | Example | Includes |
+|-----------|-----------|---------|----------|
+| Framework | `fw-` | `fw-2.1.0` | Templates, governance, directives, scripts |
+| CLI | `cli-` | `cli-1.0.0` | The `devtrail` binary |
 
-# Remove DevTrail
-devtrail remove
-```
+Check installed versions with `devtrail status` or `devtrail about`.
+
+### CLI Commands
+
+| Command | Description |
+|---------|-------------|
+| `devtrail init [path]` | Initialize DevTrail in a project |
+| `devtrail update` | Update both framework and CLI |
+| `devtrail update-framework` | Update only the framework |
+| `devtrail update-cli` | Update the CLI binary |
+| `devtrail remove [--full]` | Remove DevTrail from project |
+| `devtrail status [path]` | Show installation health and doc stats |
+| `devtrail about` | Show version and license info |
+
+See [CLI Reference](docs/adopters/CLI-REFERENCE.md) for detailed usage.
 
 ### Option 2: Manual Setup
 
 ```bash
-# Download the latest release ZIP from GitHub
-# https://github.com/StrangeDaysTech/devtrail/releases/latest
+# Download the latest framework release ZIP from GitHub
+# Go to https://github.com/StrangeDaysTech/devtrail/releases
+# and download the latest fw-* release (e.g., fw-2.1.0)
 
 # Extract and copy to your project
-cp -r .devtrail your-project/
-cp DEVTRAIL.md your-project/
-cp -r scripts your-project/
+unzip devtrail-fw-*.zip -d your-project/
+cd your-project
 
 # Commit
 git add .devtrail/ DEVTRAIL.md scripts/
@@ -166,7 +177,7 @@ DevTrail documentation is organized by audience:
 | [**Adopters**](docs/adopters/) | Teams adopting DevTrail in their projects | [ADOPTION-GUIDE.md](docs/adopters/ADOPTION-GUIDE.md) |
 | [**Contributors**](docs/contributors/) | Developers contributing to DevTrail | [TRANSLATION-GUIDE.md](docs/contributors/TRANSLATION-GUIDE.md) |
 
-**Adopters**: Follow the [Adoption Guide](docs/adopters/ADOPTION-GUIDE.md) for step-by-step instructions, migration strategies for existing projects, and team rollout plans.
+**Adopters**: Follow the [Adoption Guide](docs/adopters/ADOPTION-GUIDE.md) for step-by-step instructions, the [CLI Reference](docs/adopters/CLI-REFERENCE.md) for command details, and the [Workflows Guide](docs/adopters/WORKFLOWS.md) for daily usage patterns.
 
 **Contributors**: See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines, and the [Translation Guide](docs/contributors/TRANSLATION-GUIDE.md) for adding new languages.
 
@@ -174,9 +185,11 @@ DevTrail documentation is organized by audience:
 
 | Document | Description |
 |----------|-------------|
-| [**📘 Quick Reference**](dist/.devtrail/QUICK-REFERENCE.md) | One-page overview of document types and naming |
+| [**Quick Reference**](dist/.devtrail/QUICK-REFERENCE.md) | One-page overview of document types and naming |
 | [DEVTRAIL.md](dist/DEVTRAIL.md) | Unified governance rules (source of truth) |
 | [ADOPTION-GUIDE.md](docs/adopters/ADOPTION-GUIDE.md) | Adoption guide for new/existing projects |
+| [CLI-REFERENCE.md](docs/adopters/CLI-REFERENCE.md) | Complete CLI command reference |
+| [WORKFLOWS.md](docs/adopters/WORKFLOWS.md) | Recommended daily workflows and team patterns |
 
 ### Internal Structure
 

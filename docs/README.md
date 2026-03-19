@@ -7,7 +7,9 @@ This directory contains DevTrail's user-facing documentation, organized by audie
 ```
 docs/
 ├── adopters/           # For teams adopting DevTrail
-│   └── ADOPTION-GUIDE.md
+│   ├── ADOPTION-GUIDE.md
+│   ├── CLI-REFERENCE.md
+│   └── WORKFLOWS.md
 ├── contributors/       # For developers contributing to DevTrail
 │   └── TRANSLATION-GUIDE.md
 └── i18n/               # Translations
@@ -19,17 +21,31 @@ docs/
             └── ADOPTION-GUIDE.md
 ```
 
+## Versioning
+
+DevTrail uses independent version tags: `fw-*` for framework releases and `cli-*` for CLI releases. See the [CLI Reference](adopters/CLI-REFERENCE.md#versioning) for details.
+
 ## For Adopters
 
 | Document | Description |
 |----------|-------------|
 | [ADOPTION-GUIDE.md](adopters/ADOPTION-GUIDE.md) | Step-by-step guide for adopting DevTrail in new or existing projects |
+| [CLI-REFERENCE.md](adopters/CLI-REFERENCE.md) | Complete CLI command reference with flags, arguments, and examples |
+| [WORKFLOWS.md](adopters/WORKFLOWS.md) | Recommended daily workflows, update cadences, and team patterns |
 
 ## For Contributors
 
 | Document | Description |
 |----------|-------------|
+| [CONTRIBUTING.md](../CONTRIBUTING.md) | Development setup, PR process, style guidelines |
 | [TRANSLATION-GUIDE.md](contributors/TRANSLATION-GUIDE.md) | Rules and guidelines for translating DevTrail documentation |
+
+## Key References
+
+| Document | Description |
+|----------|-------------|
+| [QUICK-REFERENCE.md](../dist/.devtrail/QUICK-REFERENCE.md) | One-page cheat sheet: document types, naming, metadata |
+| [DEVTRAIL.md](../dist/DEVTRAIL.md) | Unified governance rules (source of truth) |
 
 ## Translations
 

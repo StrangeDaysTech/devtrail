@@ -7,4 +7,4 @@
 
 ---
 
-*DevTrail v2.0.0 | [Strange Days Tech](https://strangedays.tech) — Because every change tells a story.*
+*DevTrail | [Strange Days Tech](https://strangedays.tech) — Because every change tells a story.*
