@@ -4,3 +4,4 @@ pub mod remove;
 pub mod status;
 pub mod update;
 pub mod update_cli;
+pub mod update_framework;

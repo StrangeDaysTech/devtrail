@@ -314,22 +314,26 @@ El binario de release está optimizado con LTO y stripped para tamaño mínimo.
 
 ```
 cli/src/
-├── main.rs          # Punto de entrada + definición CLI con clap
+├── main.rs              # Punto de entrada + definición CLI con clap
 ├── commands/
-│   ├── mod.rs       # Enrutamiento de subcomandos
-│   ├── init.rs      # devtrail init [path]
-│   ├── update.rs    # devtrail update
-│   ├── remove.rs    # devtrail remove [--full]
-│   ├── update_cli.rs # devtrail update-cli
-│   └── about.rs     # devtrail about
-├── config.rs        # Gestión de configuración y checksums
-├── download.rs      # Descarga desde GitHub Releases
-├── inject.rs        # Inyección de archivos de directiva (markers)
-├── manifest.rs      # Parsing de dist-manifest.yml
-├── platform.rs      # Detección de SO/arquitectura para descarga de binarios
-├── self_update.rs   # Lógica de auto-actualización del binario CLI
-└── utils.rs         # Helpers (hashing, colores, paths)
+│   ├── mod.rs           # Enrutamiento de subcomandos
+│   ├── init.rs          # devtrail init [path]
+│   ├── update.rs        # devtrail update (combinado)
+│   ├── update_framework.rs # devtrail update-framework
+│   ├── update_cli.rs    # devtrail update-cli
+│   ├── remove.rs        # devtrail remove [--full]
+│   ├── status.rs        # devtrail status [path]
+│   └── about.rs         # devtrail about
+├── config.rs            # Gestión de configuración y checksums
+├── download.rs          # API de GitHub Releases (filtrado por prefijo)
+├── inject.rs            # Inyección de archivos de directiva (markers)
+├── manifest.rs          # Parsing de dist-manifest.yml
+├── platform.rs          # Detección de SO/arquitectura para descarga de binarios
+├── self_update.rs       # Lógica de auto-actualización del binario CLI
+└── utils.rs             # Helpers (hashing, colores, paths)
 ```
+
+> **Nota**: Framework y CLI usan versionado independiente (tags `fw-*` y `cli-*`). Ver [Referencia CLI](docs/adopters/CLI-REFERENCE.md#versioning) para detalles.
 
 ---
 

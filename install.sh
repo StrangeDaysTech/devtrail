@@ -3,7 +3,7 @@
 #
 # Usage:
 #   curl -fsSL https://raw.githubusercontent.com/StrangeDaysTech/devtrail/main/install.sh | sh
-#   curl -fsSL ... | sh -s -- --tag v2.0.0 --to ~/.local/bin
+#   curl -fsSL ... | sh -s -- --tag cli-1.0.0 --to ~/.local/bin
 #
 # Compatible with bash, zsh, dash, and POSIX sh.
 
@@ -63,7 +63,7 @@ USAGE:
     install.sh [OPTIONS]
 
 OPTIONS:
-    --tag <TAG>    Install a specific version (e.g. v2.0.0). Default: latest
+    --tag <TAG>    Install a specific version (e.g. cli-1.0.0). Default: latest
     --to  <DIR>    Installation directory. Default: ~/.local/bin (or /usr/local/bin with sudo)
     --help         Show this help message
 
@@ -72,7 +72,7 @@ ENVIRONMENT:
 
 EXAMPLES:
     curl -fsSL https://raw.githubusercontent.com/StrangeDaysTech/devtrail/main/install.sh | sh
-    curl -fsSL ... | sh -s -- --tag v2.0.0
+    curl -fsSL ... | sh -s -- --tag cli-1.0.0
     curl -fsSL ... | sh -s -- --to /usr/local/bin
 EOF
 }
@@ -150,10 +150,10 @@ resolve_install_dir() {
 # ── Get latest tag ───────────────────────────────────────────────────────
 
 get_latest_tag() {
-    _api_url="https://api.github.com/repos/${REPO}/releases/latest"
-    _tmp_json="${TMPDIR_CLEANUP}/release.json"
+    _api_url="https://api.github.com/repos/${REPO}/releases"
+    _tmp_json="${TMPDIR_CLEANUP}/releases.json"
 
-    say "fetching latest release info..."
+    say "fetching latest CLI release info..."
     if ! download "$_api_url" "$_tmp_json" 2>/dev/null; then
         echo ""
         echo "  Failed to fetch release info from GitHub API." >&2
@@ -163,11 +163,11 @@ get_latest_tag() {
         err "could not determine latest version"
     fi
 
-    # Extract tag_name from JSON without jq (POSIX-compatible)
-    TAG=$(sed -n 's/.*"tag_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$_tmp_json" | head -1)
+    # Extract the first tag_name starting with "cli-" (POSIX-compatible)
+    TAG=$(sed -n 's/.*"tag_name"[[:space:]]*:[[:space:]]*"\(cli-[^"]*\)".*/\1/p' "$_tmp_json" | head -1)
 
     if [ -z "$TAG" ]; then
-        err "could not parse latest release tag from GitHub API response"
+        err "could not find a CLI release (cli-* tag) from GitHub API response"
     fi
 
     say "latest version: ${TAG}"
@@ -196,8 +196,8 @@ main() {
         say "using specified version: ${TAG}"
     fi
 
-    # Strip leading 'v' for the version in asset name (asset uses v-prefix)
-    VERSION_NUM="${TAG#v}"
+    # Strip leading 'cli-' prefix for the version in asset name
+    VERSION_NUM="${TAG#cli-}"
 
     # Build asset name and URL
     ASSET="devtrail-cli-v${VERSION_NUM}-${TARGET}.tar.gz"

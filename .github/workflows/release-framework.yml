@@ -1,0 +1,39 @@
+name: Release Framework
+
+on:
+  push:
+    tags:
+      - 'fw-*'
+
+permissions:
+  contents: write
+
+jobs:
+  package-framework:
+    name: Package Framework
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          VERSION="${GITHUB_REF_NAME#fw-}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Create distribution ZIP
+        run: |
+          mkdir -p dist-staging
+          cp -a dist/. dist-staging/
+          cd dist-staging
+          zip -r "../devtrail-fw-${{ steps.version.outputs.version }}.zip" .
+          cd ..
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            --title "DevTrail Framework ${{ steps.version.outputs.version }}" \
+            --generate-notes \
+            "devtrail-fw-${{ steps.version.outputs.version }}.zip"

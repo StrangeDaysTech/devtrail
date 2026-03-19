@@ -196,11 +196,11 @@ El CLI automáticamente:
 
 1. **Descargar el último release**
 
-   Ve a [GitHub Releases](https://github.com/StrangeDaysTech/devtrail/releases/latest) y descarga el ZIP de distribución.
+   Ve a [GitHub Releases](https://github.com/StrangeDaysTech/devtrail/releases) y descarga el último release `fw-*` (ej. `fw-2.1.0`).
 
 2. **Extraer en tu proyecto**
    ```bash
-   unzip devtrail-v*.zip -d tu-proyecto/
+   unzip devtrail-fw-*.zip -d tu-proyecto/
    ```
 
 3. **Commit de la estructura**
@@ -239,8 +239,8 @@ El CLI automáticamente:
    # Usando CLI (recomendado)
    devtrail init .
 
-   # O manualmente: descargar desde GitHub Releases
-   # https://github.com/StrangeDaysTech/devtrail/releases/latest
+   # O manualmente: descargar el último release fw-* desde GitHub Releases
+   # https://github.com/StrangeDaysTech/devtrail/releases
    ```
 
 2. **Resolver conflictos con `docs/` existente**
@@ -501,6 +501,8 @@ R: Las reglas de DevTrail son instrucciones, no cumplimiento forzado. Si un asis
 
 ## Obtener Ayuda
 
+- **Referencia CLI**: [CLI-REFERENCE.md](CLI-REFERENCE.md) — referencia detallada de comandos
+- **Flujos de Trabajo**: [WORKFLOWS.md](WORKFLOWS.md) — patrones de uso diario recomendados
 - **Issues**: [GitHub Issues](https://github.com/StrangeDaysTech/devtrail/issues)
 - **Discusiones**: [GitHub Discussions](https://github.com/StrangeDaysTech/devtrail/discussions)
 - **Contribuir**: Ver [CONTRIBUTING.md](../CONTRIBUTING.md)

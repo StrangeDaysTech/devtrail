@@ -27,8 +27,10 @@ enum Commands {
         #[arg(default_value = ".")]
         path: String,
     },
-    /// Update DevTrail to the latest version
+    /// Update both framework and CLI to the latest version
     Update,
+    /// Update the DevTrail framework to the latest version
+    UpdateFramework,
     /// Update the CLI binary to the latest version
     UpdateCli,
     /// Remove DevTrail from the project
@@ -56,6 +58,7 @@ fn main() {
     let result = match cli.command {
         Commands::Init { path } => commands::init::run(&path),
         Commands::Update => commands::update::run(),
+        Commands::UpdateFramework => commands::update_framework::run(),
         Commands::UpdateCli => commands::update_cli::run(),
         Commands::Remove { full } => commands::remove::run(full),
         Commands::Status { path } => commands::status::run(&path),

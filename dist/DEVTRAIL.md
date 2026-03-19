@@ -274,5 +274,5 @@ risk_level: low | medium | high | critical
 
 ---
 
-*DevTrail v2.0.0 | [GitHub](https://github.com/StrangeDaysTech/devtrail)*
+*DevTrail | [GitHub](https://github.com/StrangeDaysTech/devtrail)*
 *[Strange Days Tech](https://strangedays.tech) — Because every change tells a story.*
