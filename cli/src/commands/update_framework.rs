@@ -20,8 +20,6 @@ pub fn run() -> Result<()> {
         );
     }
 
-    println!("{} DevTrail framework...", "Updating".cyan().bold());
-
     // Load current checksums
     let current_checksums = Checksums::load(&target)?;
     if !current_checksums.version.is_empty() {
