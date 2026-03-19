@@ -58,8 +58,8 @@ pub fn run(path: &str) -> Result<()> {
     println!();
     println!("{}", "DevTrail Status".bold());
     println!("  {}      {}", "Path:".dimmed(), target.display());
-    println!("  {} {}", "Framework:".dimmed(), version);
-    println!("  {}       {}", "CLI:".dimmed(), cli_version);
+    println!("  {} fw-{}", "Framework:".dimmed(), version);
+    println!("  {}       cli-{}", "CLI:".dimmed(), cli_version);
     println!("  {}  {}", "Language:".dimmed(), language);
 
     // Phase 2: Structure check

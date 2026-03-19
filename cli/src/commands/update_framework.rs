@@ -39,7 +39,7 @@ pub fn run() -> Result<()> {
     println!(
         "  {} {}",
         "Latest version:".dimmed(),
-        display_version.green()
+        release.tag_name.green()
     );
 
     // Compare versions — skip if already up to date

@@ -15,7 +15,7 @@ pub fn run() -> Result<()> {
     println!(
         "  {} {}",
         "DevTrail CLI".bold(),
-        format!("v{version}").dimmed()
+        format!("cli-{version}").dimmed()
     );
 
     // Show framework version if installed
@@ -25,7 +25,7 @@ pub fn run() -> Result<()> {
             println!(
                 "  {} {}",
                 "Framework:".dimmed(),
-                format!("v{}", manifest.version).dimmed()
+                format!("fw-{}", manifest.version).dimmed()
             );
         }
     }
