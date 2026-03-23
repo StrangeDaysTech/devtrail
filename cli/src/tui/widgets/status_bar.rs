@@ -25,11 +25,10 @@ impl Widget for StatusBar<'_> {
         }
 
         let key_style = Style::default()
-            .fg(Color::Black)
-            .bg(Color::DarkGray)
+            .fg(theme::ACCENT)
             .add_modifier(Modifier::BOLD);
         let desc_style = Style::default().fg(theme::TEXT_DIM);
-        let info_style = Style::default().fg(Color::Cyan);
+        let info_style = Style::default().fg(theme::ACCENT);
 
         // Show notification if present
         if let Some(ref msg) = self.app.notification {

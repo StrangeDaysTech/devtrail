@@ -33,11 +33,11 @@ impl<'a> DocViewer<'a> {
         let block = Block::default()
             .title(title)
             .title_alignment(ratatui::layout::Alignment::Center)
-            .title_style(
-                Style::default()
-                    .fg(Color::Cyan)
-                    .add_modifier(Modifier::BOLD),
-            )
+            .title_style(if is_active {
+                Style::default().fg(theme::ACCENT).add_modifier(Modifier::BOLD)
+            } else {
+                Style::default().fg(theme::SUBTLE)
+            })
             .borders(Borders::ALL)
             .border_type(theme::BORDER_TYPE)
             .border_style(border_style)
@@ -61,7 +61,7 @@ impl<'a> DocViewer<'a> {
         let doc = self.app.current_doc.as_ref().unwrap();
 
         // Render markdown body only (metadata is in separate panel)
-        let mut all_lines = vec![Line::from(""); 1];
+        let mut all_lines = vec![Line::from(""); 2];
         all_lines.extend(markdown_to_lines(&doc.body, inner.width as usize));
 
         // Estimate total lines accounting for wrapping
@@ -99,7 +99,7 @@ impl<'a> DocViewer<'a> {
 
 fn render_welcome(total_docs: usize, fallback_path: Option<String>) -> Vec<Line<'static>> {
     let title = Style::default()
-        .fg(Color::Cyan)
+        .fg(theme::ACCENT)
         .add_modifier(Modifier::BOLD);
     let dim = Style::default().fg(theme::SUBTLE);
     let key = Style::default()
@@ -146,7 +146,9 @@ fn render_welcome(total_docs: usize, fallback_path: Option<String>) -> Vec<Line<
     ]));
     lines.push(Line::from(vec![
         Span::styled("   Tab  ", key),
-        Span::styled("Cycle panels: Navigation → Metadata → Document", text),
+        Span::styled("Next panel / ", text),
+        Span::styled("Shift+Tab  ", key),
+        Span::styled("Previous panel", text),
     ]));
     lines.push(Line::from(vec![
         Span::styled("     /  ", key),

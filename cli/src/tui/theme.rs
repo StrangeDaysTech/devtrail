@@ -16,8 +16,15 @@ pub const SUBGROUP: Color = Color::Rgb(249, 226, 145);
 // User dir labels (magenta/lavender family)
 pub const USER_DIR: Color = Color::Rgb(203, 166, 247);
 
+// Accent: panel titles, expand/collapse icons, shortcut keys
+pub const ACCENT: Color = Color::Rgb(116, 199, 236);
 // Active panel border
 pub const BORDER_ACTIVE: Color = Color::Rgb(179, 190, 254);
+
+// Semantic colors (muted variants)
+pub const GREEN: Color = Color::Rgb(166, 218, 149);
+pub const YELLOW: Color = Color::Rgb(229, 200, 144);
+pub const RED: Color = Color::Rgb(237, 135, 150);
 
 // Border type: rounded corners
 pub const BORDER_TYPE: BorderType = BorderType::Rounded;

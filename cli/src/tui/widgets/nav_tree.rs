@@ -32,7 +32,11 @@ impl Widget for NavTree<'_> {
                 SortOrder::Name => "[s:sort ↓name]",
                 SortOrder::Date => "[s:sort ↓date]",
             }))
-            .title_style(Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
+            .title_style(if is_active {
+                Style::default().fg(theme::ACCENT).add_modifier(Modifier::BOLD)
+            } else {
+                Style::default().fg(theme::SUBTLE)
+            })
             .borders(Borders::ALL)
             .border_type(theme::BORDER_TYPE)
             .border_style(border_style)
@@ -41,7 +45,7 @@ impl Widget for NavTree<'_> {
         let inner = block.inner(area);
         block.render(area, buf);
 
-        let mut lines: Vec<Line<'static>> = Vec::new();
+        let mut lines: Vec<Line<'static>> = vec![Line::from("")];
         let mut selected_line: Option<usize> = None;
         let search = self.app.search_query.as_deref();
         let has_search = search.is_some();
@@ -82,7 +86,7 @@ impl Widget for NavTree<'_> {
                 selected_line = Some(lines.len());
             }
             lines.push(Line::from(vec![
-                Span::styled(format!(" {arrow} "), Style::default().fg(Color::Cyan)),
+                Span::styled(format!(" {arrow} "), Style::default().fg(theme::ACCENT)),
                 Span::styled(group.label.clone(), style),
                 Span::styled(count_str, Style::default().fg(theme::TEXT_DIM)),
             ]));
@@ -96,7 +100,7 @@ impl Widget for NavTree<'_> {
                     if is_sel {
                         selected_line = Some(lines.len());
                     }
-                    lines.push(file_entry_line(entry, "     ", inner.width as usize, is_sel));
+                    lines.push(file_entry_line(entry, "   ", inner.width as usize, is_sel));
                 }
 
                 for (si, sg) in group.subgroups.iter().enumerate() {
@@ -143,7 +147,7 @@ impl Widget for NavTree<'_> {
                             if is_sel {
                                 selected_line = Some(lines.len());
                             }
-                            lines.push(file_entry_line(entry, "       ", inner.width as usize, is_sel));
+                            lines.push(file_entry_line(entry, "     ", inner.width as usize, is_sel));
                         }
 
                         // User-created subdirectories
@@ -196,7 +200,7 @@ impl Widget for NavTree<'_> {
                                     if is_sel {
                                         selected_line = Some(lines.len());
                                     }
-                                    lines.push(file_entry_line(entry, "         ", inner.width as usize, is_sel));
+                                    lines.push(file_entry_line(entry, "       ", inner.width as usize, is_sel));
                                 }
                             }
                         }
@@ -225,15 +229,13 @@ impl Widget for NavTree<'_> {
 
 fn file_entry_line(entry: &DocEntry, indent: &str, max_width: usize, selected: bool) -> Line<'static> {
     let style = file_style(selected);
-    let badge_style = Style::default().fg(theme::TEXT_DIM);
+    let badge_style = Style::default()
+        .fg(theme::TEXT_DIM)
+        .bg(Color::Rgb(45, 45, 60));
     let date_style = Style::default().fg(theme::TEXT_DIM);
 
-    let badge = if entry.doc_type.is_empty() {
-        String::from("   ")
-    } else {
-        format!("{} ", entry.doc_type)
-    };
-    let badge_len = badge.len();
+    let has_badge = !entry.doc_type.is_empty();
+    let badge_len = if has_badge { entry.doc_type.len() + 1 } else { 0 }; // badge + space
 
     // Compact date: show MM-DD from YYYY-MM-DD
     let date = if entry.created.len() >= 10 {
@@ -251,19 +253,21 @@ fn file_entry_line(entry: &DocEntry, indent: &str, max_width: usize, selected: b
 
     let title = truncate_str(&entry.title, title_budget);
 
-    Line::from(vec![
-        Span::raw(indent.to_string()),
-        Span::styled(badge, badge_style),
-        Span::styled(title, style),
-        Span::styled(date, date_style),
-    ])
+    let mut spans = vec![Span::raw(indent.to_string())];
+    if has_badge {
+        spans.push(Span::styled(entry.doc_type.clone(), badge_style));
+        spans.push(Span::raw(" "));
+    }
+    spans.push(Span::styled(title, style));
+    spans.push(Span::styled(date, date_style));
+    Line::from(spans)
 }
 
 fn file_style(selected: bool) -> Style {
     if selected {
         Style::default()
-            .bg(Color::Blue)
-            .fg(theme::TEXT)
+            .bg(Color::Rgb(45, 50, 80))
+            .fg(Color::Rgb(220, 224, 242))
             .add_modifier(Modifier::BOLD)
     } else {
         Style::default().fg(theme::TEXT)
@@ -284,12 +288,14 @@ fn count_group_docs(group: &crate::tui::index::DocGroup) -> usize {
 }
 
 fn truncate_str(name: &str, max_width: usize) -> String {
-    if name.len() <= max_width {
+    let char_count: usize = name.chars().count();
+    if char_count <= max_width {
         name.to_string()
     } else if max_width > 3 {
-        format!("{}...", &name[..max_width - 3])
+        let truncated: String = name.chars().take(max_width - 3).collect();
+        format!("{truncated}...")
     } else {
-        name[..max_width].to_string()
+        name.chars().take(max_width).collect()
     }
 }
 
