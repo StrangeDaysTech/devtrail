@@ -6,6 +6,7 @@ use ratatui::widgets::{Block, Borders, Paragraph, Scrollbar, ScrollbarOrientatio
 
 use crate::tui::app::{ActivePanel, App};
 use crate::tui::markdown::markdown_to_lines;
+use crate::tui::theme;
 
 pub struct DocViewer<'a> {
     app: &'a mut App,
@@ -38,7 +39,9 @@ impl<'a> DocViewer<'a> {
                     .add_modifier(Modifier::BOLD),
             )
             .borders(Borders::ALL)
-            .border_style(border_style);
+            .border_type(theme::BORDER_TYPE)
+            .border_style(border_style)
+            .style(Style::default().bg(theme::SURFACE));
 
         let inner = block.inner(area);
         block.render(area, buf);

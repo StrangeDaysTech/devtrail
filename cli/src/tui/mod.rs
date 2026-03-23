@@ -3,6 +3,7 @@ pub mod document;
 pub mod event;
 pub mod index;
 pub mod markdown;
+pub mod theme;
 pub mod ui;
 pub mod widgets;
 
