@@ -16,5 +16,8 @@ pub const SUBGROUP: Color = Color::Rgb(249, 226, 145);
 // User dir labels (magenta/lavender family)
 pub const USER_DIR: Color = Color::Rgb(203, 166, 247);
 
+// Active panel border
+pub const BORDER_ACTIVE: Color = Color::Rgb(179, 190, 254);
+
 // Border type: rounded corners
 pub const BORDER_TYPE: BorderType = BorderType::Rounded;
