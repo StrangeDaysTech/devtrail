@@ -31,6 +31,7 @@ impl<'a> DocViewer<'a> {
 
         let block = Block::default()
             .title(title)
+            .title_alignment(ratatui::layout::Alignment::Center)
             .title_style(
                 Style::default()
                     .fg(Color::Cyan)
@@ -53,7 +54,7 @@ impl<'a> DocViewer<'a> {
 
         // Render markdown body only (metadata is in separate panel)
         let mut all_lines = vec![Line::from(""); 1];
-        all_lines.extend(markdown_to_lines(&doc.body));
+        all_lines.extend(markdown_to_lines(&doc.body, inner.width as usize));
 
         // Estimate total lines accounting for wrapping
         let width = inner.width.max(1) as usize;

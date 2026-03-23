@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 
 use super::document::Document;
@@ -32,8 +32,12 @@ pub enum NavSelection {
     Subgroup(usize, usize),
     /// A file in a group's direct files
     GroupFile(usize, usize),
-    /// A file within a subgroup
+    /// A file within a subgroup's direct files
     SubgroupFile(usize, usize, usize),
+    /// A user-created directory within a subgroup
+    UserDir(usize, usize, usize),
+    /// A file within a user-created directory
+    UserDirFile(usize, usize, usize, usize),
 }
 
 /// Sort order for file listings
@@ -57,6 +61,8 @@ pub struct App {
     pub selection: NavSelection,
     /// Which groups are expanded in the tree
     pub expanded_groups: Vec<bool>,
+    /// Which subgroups/user_dirs are expanded: (gi, si) for subgroups, (gi, si, di) encoded as string
+    pub expanded_nodes: HashSet<String>,
     /// Scroll offset for the document viewer
     pub doc_scroll: u16,
     /// Total lines in current document (for scroll bounds)
@@ -95,6 +101,7 @@ impl App {
             view_mode: ViewMode::Normal,
             selection: NavSelection::Group(0),
             expanded_groups: vec![false; num_groups],
+            expanded_nodes: HashSet::new(),
             doc_scroll: 0,
             doc_total_lines: 0,
             current_doc: None,
@@ -144,10 +151,13 @@ impl App {
                 let gi = *gi;
                 self.expanded_groups[gi] = !self.expanded_groups[gi];
             }
-            NavSelection::Subgroup(gi, _si) => {
-                // Subgroups are always expanded when visible, so treat as entering
-                let gi = *gi;
-                self.expanded_groups[gi] = true;
+            NavSelection::Subgroup(gi, si) => {
+                let key = format!("sg:{gi}:{si}");
+                if self.expanded_nodes.contains(&key) {
+                    self.expanded_nodes.remove(&key);
+                } else {
+                    self.expanded_nodes.insert(key);
+                }
             }
             NavSelection::GroupFile(gi, fi) => {
                 let gi = *gi;
@@ -166,6 +176,30 @@ impl App {
                     .get(gi)
                     .and_then(|g| g.subgroups.get(si))
                     .and_then(|sg| sg.files.get(fi))
+                {
+                    self.load_document(&entry.path.clone());
+                }
+            }
+            NavSelection::UserDir(gi, si, di) => {
+                let key = format!("ud:{gi}:{si}:{di}");
+                if self.expanded_nodes.contains(&key) {
+                    self.expanded_nodes.remove(&key);
+                } else {
+                    self.expanded_nodes.insert(key);
+                }
+            }
+            NavSelection::UserDirFile(gi, si, di, fi) => {
+                let gi = *gi;
+                let si = *si;
+                let di = *di;
+                let fi = *fi;
+                if let Some(entry) = self
+                    .index
+                    .groups
+                    .get(gi)
+                    .and_then(|g| g.subgroups.get(si))
+                    .and_then(|sg| sg.user_dirs.get(di))
+                    .and_then(|ud| ud.files.get(fi))
                 {
                     self.load_document(&entry.path.clone());
                 }
@@ -214,10 +248,16 @@ impl App {
                 let gi = *gi;
                 self.selection = NavSelection::Group(gi);
             }
-            NavSelection::SubgroupFile(gi, si, _) => {
+            NavSelection::SubgroupFile(gi, si, _) | NavSelection::UserDir(gi, si, _) => {
                 let gi = *gi;
                 let si = *si;
                 self.selection = NavSelection::Subgroup(gi, si);
+            }
+            NavSelection::UserDirFile(gi, si, di, _) => {
+                let gi = *gi;
+                let si = *si;
+                let di = *di;
+                self.selection = NavSelection::UserDir(gi, si, di);
             }
             NavSelection::Group(gi) => {
                 let gi = *gi;
@@ -344,12 +384,34 @@ impl App {
         }
     }
 
-    /// Cycle sort order
+    pub fn is_subgroup_expanded(&self, gi: usize, si: usize) -> bool {
+        self.expanded_nodes.contains(&format!("sg:{gi}:{si}"))
+    }
+
+    pub fn is_userdir_expanded(&self, gi: usize, si: usize, di: usize) -> bool {
+        self.expanded_nodes.contains(&format!("ud:{gi}:{si}:{di}"))
+    }
+
+    /// Cycle sort order and re-sort all files in the index
     pub fn cycle_sort(&mut self) {
         self.sort_order = match self.sort_order {
             SortOrder::Name => SortOrder::Date,
             SortOrder::Date => SortOrder::Name,
         };
+        self.apply_sort();
+    }
+
+    fn apply_sort(&mut self) {
+        let sort = self.sort_order;
+        for group in &mut self.index.groups {
+            sort_entries(&mut group.files, sort);
+            for sg in &mut group.subgroups {
+                sort_entries(&mut sg.files, sort);
+                for ud in &mut sg.user_dirs {
+                    sort_entries(&mut ud.files, sort);
+                }
+            }
+        }
     }
 
     /// Navigate to a document by its ID (hyperlinked navigation)
@@ -375,7 +437,9 @@ impl App {
             match &self.selection {
                 NavSelection::GroupFile(gi, _)
                 | NavSelection::Subgroup(gi, _)
-                | NavSelection::SubgroupFile(gi, _, _) => {
+                | NavSelection::SubgroupFile(gi, _, _)
+                | NavSelection::UserDir(gi, _, _)
+                | NavSelection::UserDirFile(gi, _, _, _) => {
                     self.expanded_groups[*gi] = true;
                 }
                 _ => {}
@@ -459,6 +523,22 @@ impl App {
                 let path = self.index.groups[gi].subgroups[si].files[new_fi].path.clone();
                 self.load_document(&path);
             }
+            NavSelection::UserDirFile(gi, si, di, fi) => {
+                let gi = *gi;
+                let si = *si;
+                let di = *di;
+                let fi = *fi;
+                let len = self.index.groups[gi].subgroups[si].user_dirs[di].files.len();
+                if len == 0 {
+                    return;
+                }
+                let new_fi = (fi as i32 + direction).rem_euclid(len as i32) as usize;
+                self.selection = NavSelection::UserDirFile(gi, si, di, new_fi);
+                let path = self.index.groups[gi].subgroups[si].user_dirs[di].files[new_fi]
+                    .path
+                    .clone();
+                self.load_document(&path);
+            }
             _ => {}
         }
     }
@@ -474,6 +554,13 @@ impl App {
                 for (fi, entry) in sg.files.iter().enumerate() {
                     if entry.path == target {
                         return Some(NavSelection::SubgroupFile(gi, si, fi));
+                    }
+                }
+                for (di, ud) in sg.user_dirs.iter().enumerate() {
+                    for (fi, entry) in ud.files.iter().enumerate() {
+                        if entry.path == target {
+                            return Some(NavSelection::UserDirFile(gi, si, di, fi));
+                        }
                     }
                 }
             }
@@ -509,19 +596,41 @@ impl App {
                     }
                     items.push(NavSelection::GroupFile(gi, fi));
                 }
-                // Subgroups and their files
+                // Subgroups, their files, and user dirs
                 for (si, sg) in group.subgroups.iter().enumerate() {
-                    let sg_has_matches =
-                        sg.files.iter().any(|e| entry_matches_search(e, search));
+                    let sg_has_matches = subgroup_has_matches(sg, search);
                     if has_search && !sg_has_matches {
                         continue;
                     }
                     items.push(NavSelection::Subgroup(gi, si));
-                    for (fi, entry) in sg.files.iter().enumerate() {
-                        if !entry_matches_search(entry, search) {
-                            continue;
+
+                    let sg_expanded = has_search || self.is_subgroup_expanded(gi, si);
+                    if sg_expanded {
+                        for (fi, entry) in sg.files.iter().enumerate() {
+                            if !entry_matches_search(entry, search) {
+                                continue;
+                            }
+                            items.push(NavSelection::SubgroupFile(gi, si, fi));
                         }
-                        items.push(NavSelection::SubgroupFile(gi, si, fi));
+                        for (di, ud) in sg.user_dirs.iter().enumerate() {
+                            let ud_has_matches =
+                                ud.files.iter().any(|e| entry_matches_search(e, search));
+                            if has_search && !ud_has_matches {
+                                continue;
+                            }
+                            items.push(NavSelection::UserDir(gi, si, di));
+
+                            let ud_expanded =
+                                has_search || self.is_userdir_expanded(gi, si, di);
+                            if ud_expanded {
+                                for (fi, entry) in ud.files.iter().enumerate() {
+                                    if !entry_matches_search(entry, search) {
+                                        continue;
+                                    }
+                                    items.push(NavSelection::UserDirFile(gi, si, di, fi));
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -538,7 +647,27 @@ fn group_has_matches(
         || group
             .subgroups
             .iter()
-            .any(|sg| sg.files.iter().any(|e| entry_matches_search(e, search)))
+            .any(|sg| subgroup_has_matches(sg, search))
+}
+
+fn subgroup_has_matches(
+    sg: &crate::tui::index::DocSubgroup,
+    search: Option<&str>,
+) -> bool {
+    sg.files.iter().any(|e| entry_matches_search(e, search))
+        || sg
+            .user_dirs
+            .iter()
+            .any(|ud| ud.files.iter().any(|e| entry_matches_search(e, search)))
+}
+
+fn sort_entries(entries: &mut Vec<crate::tui::index::DocEntry>, order: SortOrder) {
+    match order {
+        SortOrder::Name => {
+            entries.sort_by(|a, b| a.title.to_lowercase().cmp(&b.title.to_lowercase()))
+        }
+        SortOrder::Date => entries.sort_by(|a, b| b.created.cmp(&a.created)),
+    }
 }
 
 fn entry_matches_search(
