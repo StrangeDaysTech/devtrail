@@ -63,15 +63,7 @@ pub fn run(path: &str) -> Result<()> {
 
     // ── Header ──
     println!();
-    let header = "DevTrail Status";
-    let w = 48;
-    let pad = w - 2 - header.len();
-    let top = format!("  ╔{}╗", "═".repeat(w));
-    let mid = format!("  ║ {}{} ║", header, " ".repeat(pad));
-    let bot = format!("  ╚{}╝", "═".repeat(w));
-    println!("{}", top.cyan());
-    println!("{}", mid.bold().cyan());
-    println!("{}", bot.cyan());
+    println!("  {}", "DevTrail Status".bold().cyan());
     println!();
 
     // ── Project Info ──
@@ -138,17 +130,21 @@ pub fn run(path: &str) -> Result<()> {
         .max("Directory / File".len());
     let status_w = 6; // "✓ OK " or "✗ -- "
 
-    print_border("  ┌", name_w, "┬", status_w, "┐");
+    println!();
     println!(
-        "  │ {:<name_w$} │ {:<status_w$} │",
+        "  {:<name_w$} {} {:<status_w$}",
         "Directory / File".dimmed(),
+        "│".dimmed(),
         "Status".dimmed()
     );
-    print_border("  ├", name_w, "┼", status_w, "┤");
+    println!(
+        "  {}",
+        format!("{}─┼─{}", "─".repeat(name_w), "─".repeat(status_w)).dimmed()
+    );
 
     for (name, exists) in &struct_items {
         let status_text = if *exists { "✓ OK" } else { "✗ --" };
-        let plain_row = format!("  │ {:<name_w$} │ {:<status_w$} │", name, status_text);
+        let plain_row = format!("  {:<name_w$} │ {:<status_w$}", name, status_text);
         if *exists {
             println!("{}", plain_row.replace(status_text, &status_text.green().to_string()));
         } else {
@@ -160,8 +156,6 @@ pub fn run(path: &str) -> Result<()> {
             );
         }
     }
-
-    print_border("  └", name_w, "┴", status_w, "┘");
 
     // ── Documentation ──
     let counts = count_documents(&devtrail_dir);
@@ -178,40 +172,42 @@ pub fn run(path: &str) -> Result<()> {
         .max("Type".len());
     let count_w = 5;
 
-    print_border("  ┌", type_w, "┬", count_w, "┐");
+    println!();
     println!(
-        "  │ {:<type_w$} │ {:<count_w$} │",
+        "  {:<type_w$} {} {:<count_w$}",
         "Type".dimmed(),
+        "│".dimmed(),
         "Count".dimmed()
     );
-    print_border("  ├", type_w, "┼", count_w, "┤");
+    println!(
+        "  {}",
+        format!("{}─┼─{}", "─".repeat(type_w), "─".repeat(count_w)).dimmed()
+    );
 
     for (prefix, label, count) in &counts {
         let display = format!("{prefix:<6}{label}");
         let count_str = format!("{count:>count_w$}");
         if *count > 0 {
             println!(
-                "  │ {:<type_w$} │ {} │",
+                "  {:<type_w$} │ {}",
                 display,
                 count_str.green().bold()
             );
         } else {
             println!(
-                "  │ {} │ {} │",
+                "  {} │ {}",
                 format!("{:<type_w$}", display).dimmed(),
                 count_str.dimmed()
             );
         }
     }
 
-    print_border("  ├", type_w, "┼", count_w, "┤");
     let total_str = format!("{total:>count_w$}");
     println!(
-        "  │ {:<type_w$} │ {} │",
-        "Total".bold(),
+        "  {:<type_w$} │ {}",
+        "TOTAL".bold(),
         total_str.cyan().bold()
     );
-    print_border("  └", type_w, "┴", count_w, "┘");
     println!();
 
     // ── Hints ──
