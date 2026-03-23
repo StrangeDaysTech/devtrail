@@ -144,6 +144,8 @@ Check installed versions with `devtrail status` or `devtrail about`.
 | `devtrail update-cli` | Update the CLI binary |
 | `devtrail remove [--full]` | Remove DevTrail from project |
 | `devtrail status [path]` | Show installation health and doc stats |
+| `devtrail repair [path]` | Restore missing directories and framework files |
+| `devtrail explore [path]` | Browse documentation interactively in a TUI |
 | `devtrail about` | Show version and license info |
 
 See [CLI Reference](docs/adopters/CLI-REFERENCE.md) for detailed usage.
