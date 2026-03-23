@@ -1,9 +1,19 @@
 name: Release CLI
 
 on:
+  # Trigger on tag push (e.g., git push --tags)
   push:
     tags:
       - 'cli-*'
+  # Trigger when a release with cli-* tag is published via GitHub UI or API
+  release:
+    types: [published]
+  # Allow manual trigger (useful when release already exists without binaries)
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g., cli-1.1.0)'
+        required: true
 
 permissions:
   contents: write
@@ -12,8 +22,45 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  # Determine the tag and version to build
+  resolve-version:
+    name: Resolve version
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.resolve.outputs.tag }}
+      version: ${{ steps.resolve.outputs.version }}
+      should_run: ${{ steps.resolve.outputs.should_run }}
+    steps:
+      - name: Resolve tag and version
+        id: resolve
+        shell: bash
+        run: |
+          # Determine the tag from the trigger source
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ github.event.inputs.tag }}"
+          elif [ "${{ github.event_name }}" = "release" ]; then
+            TAG="${{ github.event.release.tag_name }}"
+          else
+            TAG="${GITHUB_REF_NAME}"
+          fi
+
+          # Only process cli-* tags
+          if [[ "$TAG" != cli-* ]]; then
+            echo "Skipping: tag '$TAG' is not a CLI release"
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          VERSION="${TAG#cli-}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "should_run=true" >> "$GITHUB_OUTPUT"
+          echo "Building CLI $VERSION from tag $TAG"
+
   build-cli:
     name: Build CLI (${{ matrix.target }})
+    needs: [resolve-version]
+    if: needs.resolve-version.outputs.should_run == 'true'
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -33,6 +80,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.resolve-version.outputs.tag }}
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -43,18 +92,11 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: sudo apt-get update && sudo apt-get install -y libssl-dev pkg-config
 
-      - name: Extract version from tag
-        id: version
-        shell: bash
-        run: |
-          VERSION="${GITHUB_REF_NAME#cli-}"
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-
       - name: Verify Cargo.toml version matches tag
         shell: bash
         run: |
           CARGO_VERSION=$(grep '^version' cli/Cargo.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')
-          TAG_VERSION="${GITHUB_REF_NAME#cli-}"
+          TAG_VERSION="${{ needs.resolve-version.outputs.version }}"
           if [ "$CARGO_VERSION" != "$TAG_VERSION" ]; then
             echo "ERROR: Cargo.toml version ($CARGO_VERSION) does not match tag version ($TAG_VERSION)"
             exit 1
@@ -68,7 +110,7 @@ jobs:
         shell: bash
         run: |
           BINARY=cli/target/${{ matrix.target }}/release/devtrail
-          ARCHIVE=devtrail-cli-v${{ steps.version.outputs.version }}-${{ matrix.target }}.tar.gz
+          ARCHIVE=devtrail-cli-v${{ needs.resolve-version.outputs.version }}-${{ matrix.target }}.tar.gz
           tar czf "$ARCHIVE" -C "$(dirname "$BINARY")" "$(basename "$BINARY")"
           echo "ARCHIVE=$ARCHIVE" >> "$GITHUB_ENV"
 
@@ -77,7 +119,7 @@ jobs:
         shell: bash
         run: |
           BINARY=cli/target/${{ matrix.target }}/release/devtrail.exe
-          ARCHIVE=devtrail-cli-v${{ steps.version.outputs.version }}-${{ matrix.target }}.zip
+          ARCHIVE=devtrail-cli-v${{ needs.resolve-version.outputs.version }}-${{ matrix.target }}.zip
           cp "$BINARY" devtrail.exe
           7z a "$ARCHIVE" devtrail.exe
           echo "ARCHIVE=$ARCHIVE" >> "$GITHUB_ENV"
@@ -88,18 +130,12 @@ jobs:
           name: cli-${{ matrix.target }}
           path: ${{ env.ARCHIVE }}
 
-  create-release:
-    name: Create Release
-    needs: [build-cli]
+  upload-to-release:
+    name: Upload binaries to release
+    needs: [resolve-version, build-cli]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Extract version from tag
-        id: version
-        run: |
-          VERSION="${GITHUB_REF_NAME#cli-}"
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -112,11 +148,22 @@ jobs:
           find release-artifacts -type f \( -name "*.zip" -o -name "*.tar.gz" \) -exec cp {} release/ \;
           ls -la release/
 
-      - name: Create GitHub Release
+      - name: Upload to existing release or create new one
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
         run: |
-          gh release create "${{ github.ref_name }}" \
-            --title "DevTrail CLI ${{ steps.version.outputs.version }}" \
-            --generate-notes \
-            release/*
+          TAG="${{ needs.resolve-version.outputs.tag }}"
+          VERSION="${{ needs.resolve-version.outputs.version }}"
+
+          # Check if release already exists
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "Release $TAG exists, uploading binaries..."
+            gh release upload "$TAG" release/* --clobber
+          else
+            echo "Creating release $TAG..."
+            gh release create "$TAG" \
+              --title "DevTrail CLI $VERSION" \
+              --generate-notes \
+              release/*
+          fi
