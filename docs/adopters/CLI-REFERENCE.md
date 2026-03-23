@@ -202,7 +202,7 @@ $ devtrail status
   ┌───────────┬──────────────────────────┐
   │ Path      │ /home/user/my-project    │
   │ Framework │ fw-2.1.0                 │
-  │ CLI       │ cli-1.1.0                │
+  │ CLI       │ cli-1.2.0                │
   │ Language  │ en                       │
   └───────────┴──────────────────────────┘
 
