@@ -1,4 +1,6 @@
 pub mod about;
+#[cfg(feature = "tui")]
+pub mod explore;
 pub mod init;
 pub mod remove;
 pub mod status;

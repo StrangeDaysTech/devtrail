@@ -8,6 +8,8 @@ mod inject;
 mod manifest;
 mod platform;
 mod self_update;
+#[cfg(feature = "tui")]
+mod tui;
 mod utils;
 
 /// DevTrail CLI - Documentation Governance for AI-Assisted Development
@@ -47,6 +49,13 @@ enum Commands {
     },
     /// Show version, author, and license information
     About,
+    /// Explore DevTrail documentation interactively
+    #[cfg(feature = "tui")]
+    Explore {
+        /// Target directory (default: current directory)
+        #[arg(default_value = ".")]
+        path: String,
+    },
 }
 
 fn main() {
@@ -63,6 +72,8 @@ fn main() {
         Commands::Remove { full } => commands::remove::run(full),
         Commands::Status { path } => commands::status::run(&path),
         Commands::About => commands::about::run(),
+        #[cfg(feature = "tui")]
+        Commands::Explore { path } => commands::explore::run(&path),
     };
 
     if let Err(e) = result {
