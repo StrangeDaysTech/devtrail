@@ -1,0 +1,178 @@
+# DevTrail — Development Instructions
+
+This is the DevTrail project repository. It contains two main components:
+
+- **Framework** (`dist/`): documentation templates, governance policies, agent directives, and scripts
+- **CLI** (`cli/`): the `devtrail` Rust binary that manages the framework in user projects
+
+## Project Structure
+
+```
+devtrail/
+├── cli/                    # Rust CLI source code
+│   ├── src/
+│   │   ├── main.rs         # Entry point, command routing
+│   │   ├── commands/       # Subcommands: init, update, remove, status, repair, explore, about
+│   │   ├── tui/            # Terminal UI for `explore` (ratatui + crossterm)
+│   │   ├── config.rs       # DevTrailConfig, Checksums
+│   │   ├── download.rs     # GitHub API, ZIP downloads
+│   │   ├── inject.rs       # Directive injection system
+│   │   ├── manifest.rs     # dist-manifest.yml parser
+│   │   ├── platform.rs     # OS/arch detection
+│   │   ├── self_update.rs  # CLI auto-update
+│   │   └── utils.rs        # Output helpers, file hashing
+│   ├── tests/              # Integration tests
+│   ├── Cargo.toml
+│   └── Cargo.lock
+├── dist/                   # Framework distribution files
+│   ├── .devtrail/          # Templates, governance, config
+│   ├── DEVTRAIL.md         # Unified governance rules
+│   └── dist-manifest.yml   # What gets installed
+├── docs/                   # Project documentation (EN + ES)
+├── .github/workflows/      # CI/CD
+│   ├── release-cli.yml     # Build + release CLI binaries
+│   └── release-framework.yml
+└── README.md
+```
+
+## Versioning
+
+DevTrail uses **independent versions** for framework and CLI:
+
+| Component | Tag format | Current | Example |
+|-----------|-----------|---------|---------|
+| Framework | `fw-X.Y.Z` | fw-2.1.0 | `fw-2.1.0` |
+| CLI | `cli-X.Y.Z` | cli-1.1.0 | `cli-1.1.0` |
+
+Follow [semver](https://semver.org/):
+- **Major**: breaking changes
+- **Minor**: new features (e.g., new command)
+- **Patch**: bug fixes, small improvements
+
+## Release Workflow — CLI
+
+### Step 1: Bump version
+
+Edit `cli/Cargo.toml`:
+```toml
+version = "X.Y.Z"
+```
+
+Run `cargo check` in `cli/` to update `Cargo.lock`.
+
+Update version references in docs if they mention the CLI version:
+- `docs/adopters/CLI-REFERENCE.md` (status example output)
+
+### Step 2: Commit and merge
+
+```bash
+git checkout -b chore/bump-cli-X.Y.Z
+git add cli/Cargo.toml cli/Cargo.lock docs/
+git commit -m "chore: bump CLI version to X.Y.Z"
+# Push, create PR, merge to main
+```
+
+### Step 3: Create GitHub release
+
+```bash
+gh release create cli-X.Y.Z \
+  --title "DevTrail CLI X.Y.Z" \
+  --notes "Release notes here..." \
+  --latest
+```
+
+### Step 4: CI builds binaries automatically
+
+The `release-cli.yml` workflow triggers automatically when a release with a `cli-*` tag is published. It:
+
+1. Compiles for 4 platforms in parallel:
+   - `x86_64-unknown-linux-gnu` (Ubuntu)
+   - `x86_64-apple-darwin` (macOS Intel)
+   - `aarch64-apple-darwin` (macOS ARM)
+   - `x86_64-pc-windows-msvc` (Windows)
+2. Packages each as `.tar.gz` (Unix) or `.zip` (Windows)
+3. Uploads all binaries to the existing release
+
+**If CI doesn't trigger** (e.g., release was created before workflow was merged), run manually:
+
+```bash
+gh workflow run release-cli.yml -f tag=cli-X.Y.Z
+```
+
+### Step 5: Delete old release (optional)
+
+```bash
+gh release delete cli-OLD.VERSION --yes
+```
+
+### Step 6: Verify
+
+```bash
+gh release view cli-X.Y.Z --json assets --jq '.assets[].name'
+# Should show 4 binaries
+```
+
+Users can now run `devtrail update-cli` to get the new version.
+
+## Release Workflow — Framework
+
+Framework releases are simpler (no binaries to compile):
+
+```bash
+# 1. Update dist/dist-manifest.yml version
+# 2. Commit, merge to main
+# 3. Create release:
+gh release create fw-X.Y.Z \
+  --title "DevTrail Framework X.Y.Z" \
+  --notes "Release notes..."
+```
+
+## CLI Commands Reference
+
+| Command | Description |
+|---------|-------------|
+| `devtrail init [path]` | Initialize DevTrail in a project |
+| `devtrail update` | Update both framework and CLI |
+| `devtrail update-framework` | Update only the framework |
+| `devtrail update-cli` | Update the CLI binary |
+| `devtrail remove [--full]` | Remove DevTrail from project |
+| `devtrail status [path]` | Show installation health and doc stats |
+| `devtrail repair [path]` | Restore missing directories and framework files |
+| `devtrail explore [path]` | Interactive TUI documentation browser |
+| `devtrail about` | Show version and license info |
+
+## Development
+
+### Build
+
+```bash
+cd cli
+cargo build              # Debug
+cargo build --release    # Release
+cargo build --no-default-features  # Without TUI
+```
+
+### Test
+
+```bash
+cargo test    # All 26 tests
+```
+
+### Feature Flags
+
+| Feature | Default | Description |
+|---------|---------|-------------|
+| `tui` | Yes | Terminal UI for `explore` (ratatui + crossterm + pulldown-cmark) |
+
+### Key Dependencies
+
+| Crate | Purpose |
+|-------|---------|
+| `clap` | CLI argument parsing |
+| `colored` | Terminal colors |
+| `ratatui` | TUI framework (optional) |
+| `crossterm` | Terminal backend (optional) |
+| `pulldown-cmark` | Markdown parser (optional) |
+| `reqwest` | HTTP client for downloads |
+| `serde_yaml` | YAML parsing |
+| `anyhow` | Error handling |
