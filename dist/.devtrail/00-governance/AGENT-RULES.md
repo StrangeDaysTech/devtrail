@@ -125,6 +125,21 @@ Before creating a document, load the corresponding template:
 | INC | `.devtrail/05-operations/incidents/` |
 | TDE | `.devtrail/06-evolution/technical-debt/` |
 
+### Tags and Related
+
+When populating the `tags` and `related` fields in frontmatter:
+
+**Tags:**
+- Use kebab-case keywords: `sqlite`, `api-design`, `gnome-integration`
+- 3 to 8 tags per document describing topic, technology, or component
+- Tags enable search and categorization in `devtrail explore`
+
+**Related:**
+- Reference other **DevTrail documents only** — use the document filename with `.md` extension
+- If the document is in a subdirectory within `.devtrail/`, include the relative path: `07-ai-audit/agent-logs/daemon/AILOG-2026-02-03-001-file.md`
+- If the document is in the same directory, the filename alone is sufficient
+- **Do not** put task IDs (T001, US3), issue numbers, or external URLs in `related` — put those in the document body instead
+
 ---
 
 ## 6. Communication with Humans

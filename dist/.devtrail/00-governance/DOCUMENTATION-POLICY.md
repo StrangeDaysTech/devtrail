@@ -70,10 +70,52 @@ related:
 | Field | Description |
 |-------|-------------|
 | `updated` | Last update date |
-| `tags` | Tags for categorization |
-| `related` | References to related documents |
+| `tags` | Tags for categorization (see conventions below) |
+| `related` | References to related documents (see conventions below) |
 | `supersedes` | ID of the document this one replaces |
 | `superseded_by` | ID of the document that replaces this one |
+
+### Tags Convention
+
+Tags are **free-form keywords** used for categorization and search. They help discover related documents across the project.
+
+**Format rules:**
+- Use **kebab-case** (lowercase, hyphens): `gnome-integration`, `sqlite`, `api-design`
+- One concept per tag — avoid compound tags like `auth-and-security`
+- Recommended range: **3 to 8 tags** per document
+- Tags should describe the **topic**, **technology**, **component**, or **concern** of the document
+
+**Example:**
+```yaml
+tags: [sqlite, persistence, hexagonal-architecture, repository-pattern]
+```
+
+### Related Convention
+
+Related references link documents to other **DevTrail documents** within the same project. They enable cross-navigation in tools like `devtrail explore`.
+
+**Format rules:**
+- Use the **document filename** (with `.md` extension): `AILOG-2026-02-03-001-implement-sync-item.md`
+- For governance or non-typed documents, use the filename as-is: `AGENT-RULES.md`, `DOCUMENTATION-POLICY.md`
+- Paths are resolved relative to `.devtrail/` — if the document is in a subdirectory, include the path from `.devtrail/`: `07-ai-audit/agent-logs/daemon/AILOG-2026-02-03-001-implement-sync-item.md`
+- When the file is in the same directory as the referencing document, the filename alone is sufficient
+- **Do not use** external task IDs (`T001`, `US3`), issue numbers, or URLs — those belong in the document body, not in frontmatter
+- **Do not use** partial IDs without description (prefer `AILOG-2026-02-03-001-implement-sync-item.md` over `AILOG-2026-02-03-001`)
+
+**Examples:**
+```yaml
+# Same directory or well-known location — filename is enough
+related:
+  - AIDEC-2026-02-02-001-sqlite-bundled-vs-system.md
+  - AGENT-RULES.md
+
+# Documents in specific subdirectories — include path from .devtrail/
+related:
+  - 07-ai-audit/agent-logs/daemon/AILOG-2026-02-03-001-implement-sync-item.md
+  - 02-design/decisions/ADR-2026-01-15-001-use-hexagonal-architecture.md
+```
+
+**Resolution:** The CLI resolves references by searching: (1) exact ID match, (2) filename match anywhere in `.devtrail/`, (3) path suffix match. Using the full filename provides the most reliable resolution.
 
 ---
 

@@ -147,8 +147,24 @@ agent: your-agent-id-v1.0
 confidence: high | medium | low
 review_required: true | false
 risk_level: low | medium | high | critical
+tags: [oauth, authentication, api]
+related:
+  - ADR-2025-01-20-001-use-jwt-tokens.md
 ---
 ```
+
+### Tags
+
+- Use **kebab-case** keywords: `sqlite`, `api-design`, `gnome-integration`
+- 3 to 8 tags per document — describe topic, technology, or component
+- Tags enable search and categorization in `devtrail explore`
+
+### Related
+
+- Reference other **DevTrail documents** by filename (with `.md`): `AILOG-2025-01-27-001-implement-oauth.md`
+- For documents in subdirectories, include path from `.devtrail/`: `07-ai-audit/agent-logs/daemon/AILOG-2026-02-03-001-file.md`
+- For documents in the same directory, filename alone is sufficient
+- **Do not** use task IDs, issue numbers, or URLs — those go in the document body
 
 ---
 

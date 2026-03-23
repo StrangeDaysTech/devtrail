@@ -72,10 +72,52 @@ related:
 | Campo | Descripción |
 |-------|-------------|
 | `updated` | Fecha de última actualización |
-| `tags` | Etiquetas para categorización |
-| `related` | Referencias a documentos relacionados |
+| `tags` | Etiquetas para categorización (ver convenciones abajo) |
+| `related` | Referencias a documentos relacionados (ver convenciones abajo) |
 | `supersedes` | ID del documento que este reemplaza |
 | `superseded_by` | ID del documento que reemplaza a este |
+
+### Convención de Tags
+
+Los tags son **palabras clave de formato libre** usadas para categorización y búsqueda. Ayudan a descubrir documentos relacionados en todo el proyecto.
+
+**Reglas de formato:**
+- Usar **kebab-case** (minúsculas con guiones): `gnome-integration`, `sqlite`, `api-design`
+- Un concepto por tag — evitar tags compuestos como `auth-y-seguridad`
+- Rango recomendado: **3 a 8 tags** por documento
+- Los tags deben describir el **tema**, **tecnología**, **componente** o **preocupación** del documento
+
+**Ejemplo:**
+```yaml
+tags: [sqlite, persistencia, hexagonal-architecture, repository-pattern]
+```
+
+### Convención de Related
+
+Las referencias relacionadas vinculan documentos con otros **documentos DevTrail** dentro del mismo proyecto. Permiten navegación cruzada en herramientas como `devtrail explore`.
+
+**Reglas de formato:**
+- Usar el **nombre del archivo** del documento (con extensión `.md`): `AILOG-2026-02-03-001-implementar-sincronizacion.md`
+- Para documentos de gobernanza u otros sin tipo, usar el nombre tal cual: `AGENT-RULES.md`, `DOCUMENTATION-POLICY.md`
+- Las rutas se resuelven relativas a `.devtrail/` — si el documento está en un subdirectorio, incluir la ruta desde `.devtrail/`: `07-ai-audit/agent-logs/daemon/AILOG-2026-02-03-001-implementar-sincronizacion.md`
+- Cuando el archivo está en el mismo directorio que el documento que lo referencia, el nombre de archivo es suficiente
+- **No usar** IDs de tareas externas (`T001`, `US3`), números de issues ni URLs — esos pertenecen al cuerpo del documento, no al frontmatter
+- **No usar** IDs parciales sin descripción (preferir `AILOG-2026-02-03-001-implementar-sincronizacion.md` sobre `AILOG-2026-02-03-001`)
+
+**Ejemplos:**
+```yaml
+# Mismo directorio o ubicación conocida — el nombre de archivo es suficiente
+related:
+  - AIDEC-2026-02-02-001-sqlite-bundled-vs-system.md
+  - AGENT-RULES.md
+
+# Documentos en subdirectorios específicos — incluir ruta desde .devtrail/
+related:
+  - 07-ai-audit/agent-logs/daemon/AILOG-2026-02-03-001-implementar-sincronizacion.md
+  - 02-design/decisions/ADR-2026-01-15-001-usar-arquitectura-hexagonal.md
+```
+
+**Resolución:** El CLI resuelve referencias buscando: (1) coincidencia exacta de ID, (2) coincidencia de nombre de archivo en cualquier parte de `.devtrail/`, (3) coincidencia de sufijo de ruta. Usar el nombre de archivo completo proporciona la resolución más confiable.
 
 ---
 

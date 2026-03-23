@@ -127,6 +127,21 @@ Antes de crear un documento, cargar la plantilla correspondiente:
 | INC | `.devtrail/05-operations/incidents/` |
 | TDE | `.devtrail/06-evolution/technical-debt/` |
 
+### Tags y Related
+
+Al poblar los campos `tags` y `related` en el frontmatter:
+
+**Tags:**
+- Usar palabras clave en kebab-case: `sqlite`, `api-design`, `gnome-integration`
+- 3 a 8 tags por documento describiendo tema, tecnología o componente
+- Los tags habilitan búsqueda y categorización en `devtrail explore`
+
+**Related:**
+- Referenciar únicamente otros **documentos DevTrail** — usar el nombre de archivo con extensión `.md`
+- Si el documento está en un subdirectorio dentro de `.devtrail/`, incluir la ruta relativa: `07-ai-audit/agent-logs/daemon/AILOG-2026-02-03-001-archivo.md`
+- Si el documento está en el mismo directorio, el nombre de archivo es suficiente
+- **No** colocar IDs de tareas (T001, US3), números de issues ni URLs externas en `related` — esos van en el cuerpo del documento
+
 ---
 
 ## 6. Comunicación con Humanos
