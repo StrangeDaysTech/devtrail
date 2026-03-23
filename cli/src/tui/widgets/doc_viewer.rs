@@ -20,7 +20,7 @@ impl<'a> DocViewer<'a> {
     pub fn render(self, area: Rect, buf: &mut Buffer) {
         let is_active = self.app.active_panel == ActivePanel::Document;
         let border_style = if is_active {
-            Style::default().fg(Color::Cyan)
+            Style::default().fg(theme::BORDER_ACTIVE)
         } else {
             Style::default().fg(theme::SUBTLE)
         };
