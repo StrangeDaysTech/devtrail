@@ -4,6 +4,8 @@ use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Clear, Paragraph, Widget};
 
+use crate::tui::theme;
+
 pub struct HelpPopup;
 
 impl Widget for HelpPopup {
@@ -20,7 +22,9 @@ impl Widget for HelpPopup {
                     .add_modifier(Modifier::BOLD),
             )
             .borders(Borders::ALL)
-            .border_style(Style::default().fg(Color::Cyan));
+            .border_type(theme::BORDER_TYPE)
+            .border_style(Style::default().fg(Color::Cyan))
+            .style(Style::default().bg(theme::SURFACE));
 
         let key_style = Style::default()
             .fg(Color::Yellow)

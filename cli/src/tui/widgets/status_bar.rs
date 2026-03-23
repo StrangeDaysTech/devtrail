@@ -5,6 +5,7 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::Widget;
 
 use crate::tui::app::App;
+use crate::tui::theme;
 
 pub struct StatusBar<'a> {
     app: &'a App,
@@ -18,11 +19,16 @@ impl<'a> StatusBar<'a> {
 
 impl Widget for StatusBar<'_> {
     fn render(self, area: Rect, buf: &mut Buffer) {
+        // Fill status bar background
+        for x in area.x..area.x + area.width {
+            buf[(x, area.y)].set_bg(theme::SURFACE);
+        }
+
         let key_style = Style::default()
             .fg(Color::Black)
             .bg(Color::DarkGray)
             .add_modifier(Modifier::BOLD);
-        let desc_style = Style::default().fg(Color::DarkGray);
+        let desc_style = Style::default().fg(theme::TEXT_DIM);
         let info_style = Style::default().fg(Color::Cyan);
 
         // Show notification if present

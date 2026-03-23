@@ -6,6 +6,7 @@ use ratatui::widgets::{Block, Borders, Paragraph, Widget, Wrap};
 
 use crate::tui::app::{ActivePanel, App};
 use crate::tui::document::{ConfidenceLevel, DocStatus, RiskLevel};
+use crate::tui::theme;
 
 pub struct MetadataPanel<'a> {
     app: &'a App,
@@ -34,7 +35,9 @@ impl Widget for MetadataPanel<'_> {
                     .add_modifier(Modifier::BOLD),
             )
             .borders(Borders::ALL)
-            .border_style(border_style);
+            .border_type(theme::BORDER_TYPE)
+            .border_style(border_style)
+            .style(Style::default().bg(theme::SURFACE));
 
         let inner = block.inner(area);
         block.render(area, buf);

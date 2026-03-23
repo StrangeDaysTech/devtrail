@@ -1,7 +1,10 @@
 use ratatui::layout::{Constraint, Layout};
+use ratatui::style::Style;
+use ratatui::widgets::{Block, Widget};
 use ratatui::Frame;
 
 use super::app::{App, ViewMode};
+use super::theme;
 use super::widgets::doc_viewer::DocViewer;
 use super::widgets::help_popup::HelpPopup;
 use super::widgets::metadata_panel::MetadataPanel;
@@ -11,6 +14,10 @@ use super::widgets::status_bar::StatusBar;
 pub fn render(frame: &mut Frame, app: &mut App) {
     let area = frame.area();
     let terminal_width = area.width;
+
+    // Fill entire background
+    let bg = Block::default().style(Style::default().bg(theme::BG));
+    bg.render(area, frame.buffer_mut());
 
     // Split: main area + status bar at bottom
     let vertical = Layout::vertical([Constraint::Min(3), Constraint::Length(1)]).split(area);

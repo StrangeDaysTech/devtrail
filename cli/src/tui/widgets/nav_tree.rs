@@ -6,6 +6,7 @@ use ratatui::widgets::{Block, Borders, Paragraph, Widget};
 
 use crate::tui::app::{ActivePanel, App, NavSelection, SortOrder};
 use crate::tui::index::DocEntry;
+use crate::tui::theme;
 
 pub struct NavTree<'a> {
     app: &'a App,
@@ -33,7 +34,9 @@ impl Widget for NavTree<'_> {
             }))
             .title_style(Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
             .borders(Borders::ALL)
-            .border_style(border_style);
+            .border_type(theme::BORDER_TYPE)
+            .border_style(border_style)
+            .style(Style::default().bg(theme::SURFACE));
 
         let inner = block.inner(area);
         block.render(area, buf);
