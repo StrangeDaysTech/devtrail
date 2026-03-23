@@ -12,7 +12,7 @@
 
 1. [Installation](#installation)
 2. [Versioning](#versioning)
-3. [Commands](#commands)
+3. [Commands](#commands) — init, update, remove, status, repair, explore, about
 4. [Environment Variables](#environment-variables)
 5. [Exit Codes](#exit-codes)
 
@@ -191,27 +191,121 @@ Show installation health and documentation statistics.
 
 **Example:**
 
-```bash
-$ devtrail status
-DevTrail Status
-───────────────
-Path:              /home/user/my-project
-Framework version: fw-2.1.0
-CLI version:       cli-1.0.0
-Language:          en
-Structure:         ✔ Complete
-
-Documents:
-  AILOG:  12
-  AIDEC:   4
-  ADR:     7
-  REQ:     3
-  TES:     2
-  TDE:     1
-  INC:     0
-  ETH:     1
-  Total:  30
 ```
+$ devtrail status
+
+  ╔════════════════════════════════════════════════╗
+  ║ DevTrail Status                                ║
+  ╚════════════════════════════════════════════════╝
+
+  Project
+  ┌───────────┬──────────────────────────┐
+  │ Path      │ /home/user/my-project    │
+  │ Framework │ fw-2.1.0                 │
+  │ CLI       │ cli-1.0.4                │
+  │ Language  │ en                       │
+  └───────────┴──────────────────────────┘
+
+  Structure
+  ✓ All 15 items present
+  ┌──────────────────────────────┬────────┐
+  │ Directory / File             │ Status │
+  ├──────────────────────────────┼────────┤
+  │ 00-governance/               │ ✓ OK   │
+  │ ...                          │ ...    │
+  └──────────────────────────────┴────────┘
+
+  Documentation
+  ┌──────────────────────────────┬───────┐
+  │ Type                         │ Count │
+  ├──────────────────────────────┼───────┤
+  │ AILOG AI Action Logs         │    12 │
+  │ ADR   Architecture Decisions │     7 │
+  │ ...                          │   ... │
+  ├──────────────────────────────┼───────┤
+  │ Total                        │    30 │
+  └──────────────────────────────┴───────┘
+
+  → Run devtrail explore to browse documentation interactively
+```
+
+---
+
+### `devtrail repair [path]`
+
+Repair a broken DevTrail installation by restoring missing directories and framework files.
+
+**Arguments:**
+
+| Argument | Default | Description |
+|----------|---------|-------------|
+| `path` | `.` (current directory) | Target project directory |
+
+**What it does:**
+
+1. Checks for missing directories and restores them with `.gitkeep`
+2. Downloads the framework release **once** if files need restoration (templates, governance docs, config)
+3. Re-injects directives if `DEVTRAIL.md` is missing
+4. Recalculates checksums after repair
+5. Never modifies or deletes user-generated documents
+
+**Example:**
+
+```bash
+$ devtrail repair
+Repairing DevTrail in /home/user/my-project
+  → Found 1 issue(s) to repair
+→ Restoring 1 missing directory...
+✓ Restored .devtrail/templates/
+→ Downloading framework to restore missing files...
+  Using version: fw-2.1.0
+✓ Restored 16 file(s) from framework
+→ Updating checksums...
+
+✓ DevTrail repaired successfully!
+```
+
+---
+
+### `devtrail explore [path]`
+
+Browse and read DevTrail documentation interactively in a terminal UI.
+
+**Arguments:**
+
+| Argument | Default | Description |
+|----------|---------|-------------|
+| `path` | `.` (current directory) | Target project directory |
+
+**Features:**
+
+- Two-panel layout: navigation tree + document viewer
+- Metadata panel showing status, confidence, risk, tags, and related links
+- Markdown rendering with colors, tables, code blocks, and heading indentation
+- Navigate between related documents via hyperlinks
+- Search by filename, title, tags, or date
+- Fullscreen document mode, vim-style keybindings
+
+**Key bindings:**
+
+| Key | Action |
+|-----|--------|
+| `↑↓` / `j/k` | Navigate / Scroll |
+| `Enter` | Expand group / Open document |
+| `Tab` | Cycle panels: Navigation → Metadata → Document |
+| `f` | Toggle fullscreen document |
+| `/` | Search |
+| `Esc` | Back / Collapse / Clear search |
+| `?` | Help popup with all shortcuts |
+| `q` | Quit |
+
+**Example:**
+
+```bash
+$ devtrail explore
+```
+
+> **Note:** The `explore` command requires the `tui` feature (enabled by default). To compile without it: `cargo build --no-default-features`.
 
 ---
 

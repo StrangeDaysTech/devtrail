@@ -12,7 +12,7 @@
 
 1. [Instalación](#instalación)
 2. [Versionado](#versionado)
-3. [Comandos](#comandos)
+3. [Comandos](#comandos) — init, update, remove, status, repair, explore, about
 4. [Variables de Entorno](#variables-de-entorno)
 5. [Códigos de Salida](#códigos-de-salida)
 
@@ -212,6 +212,82 @@ Documents:
   ETH:     1
   Total:  30
 ```
+
+---
+
+### `devtrail repair [path]`
+
+Repara una instalación de DevTrail rota restaurando directorios y archivos del framework faltantes.
+
+**Argumentos:**
+
+| Argumento | Default | Descripción |
+|-----------|---------|-------------|
+| `path` | `.` (directorio actual) | Directorio del proyecto |
+
+**Qué hace:**
+
+1. Verifica directorios faltantes y los restaura con `.gitkeep`
+2. Descarga el release del framework **una sola vez** si se necesitan archivos (templates, governance, config)
+3. Re-inyecta directivas si falta `DEVTRAIL.md`
+4. Recalcula checksums después de la reparación
+5. Nunca modifica ni elimina documentos generados por el usuario
+
+**Ejemplo:**
+
+```bash
+$ devtrail repair
+Repairing DevTrail in /home/user/mi-proyecto
+  → Found 1 issue(s) to repair
+→ Restoring 1 missing directory...
+✓ Restored .devtrail/templates/
+→ Downloading framework to restore missing files...
+✓ Restored 16 file(s) from framework
+
+✓ DevTrail repaired successfully!
+```
+
+---
+
+### `devtrail explore [path]`
+
+Explora y lee la documentación de DevTrail interactivamente en una interfaz de terminal (TUI).
+
+**Argumentos:**
+
+| Argumento | Default | Descripción |
+|-----------|---------|-------------|
+| `path` | `.` (directorio actual) | Directorio del proyecto |
+
+**Características:**
+
+- Layout de dos paneles: árbol de navegación + visor de documentos
+- Panel de metadatos con estado, confianza, riesgo, tags y enlaces relacionados
+- Renderizado de Markdown con colores, tablas, bloques de código e indentación por niveles
+- Navegación entre documentos relacionados mediante hipervínculos
+- Búsqueda por nombre de archivo, título, tags o fecha
+- Modo pantalla completa, atajos estilo vim
+
+**Atajos de teclado:**
+
+| Tecla | Acción |
+|-------|--------|
+| `↑↓` / `j/k` | Navegar / Scroll |
+| `Enter` | Expandir grupo / Abrir documento |
+| `Tab` | Ciclar paneles: Navegación → Metadatos → Documento |
+| `f` | Pantalla completa del documento |
+| `/` | Buscar |
+| `Esc` | Volver / Colapsar / Limpiar búsqueda |
+| `?` | Popup de ayuda con todos los atajos |
+| `q` | Salir |
+
+**Ejemplo:**
+
+```bash
+$ devtrail explore
+```
+
+> **Nota:** El comando `explore` requiere la feature `tui` (habilitada por defecto). Para compilar sin ella: `cargo build --no-default-features`.
 
 ---
 
