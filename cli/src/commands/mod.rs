@@ -3,6 +3,7 @@ pub mod about;
 pub mod explore;
 pub mod init;
 pub mod remove;
+pub mod repair;
 pub mod status;
 pub mod update;
 pub mod update_cli;

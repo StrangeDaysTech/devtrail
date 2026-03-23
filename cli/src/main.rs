@@ -47,6 +47,12 @@ enum Commands {
         #[arg(default_value = ".")]
         path: String,
     },
+    /// Repair DevTrail structure by restoring missing directories and files
+    Repair {
+        /// Target directory (default: current directory)
+        #[arg(default_value = ".")]
+        path: String,
+    },
     /// Show version, author, and license information
     About,
     /// Explore DevTrail documentation interactively
@@ -71,6 +77,7 @@ fn main() {
         Commands::UpdateCli => commands::update_cli::run(),
         Commands::Remove { full } => commands::remove::run(full),
         Commands::Status { path } => commands::status::run(&path),
+        Commands::Repair { path } => commands::repair::run(&path),
         Commands::About => commands::about::run(),
         #[cfg(feature = "tui")]
         Commands::Explore { path } => commands::explore::run(&path),
