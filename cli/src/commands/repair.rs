@@ -25,20 +25,23 @@ const EXPECTED_DIRS: &[&str] = &[
 ];
 
 pub fn run(path: &str) -> Result<()> {
-    let target = PathBuf::from(path)
-        .canonicalize()
-        .unwrap_or_else(|_| PathBuf::from(path));
+    let resolved = match utils::resolve_project_root(path) {
+        Some(r) => r,
+        None => {
+            utils::warn("DevTrail is not installed in this directory or repo root.");
+            utils::info("Run 'devtrail init' to initialize DevTrail.");
+            bail!("No DevTrail installation found");
+        }
+    };
 
-    let devtrail_dir = target.join(".devtrail");
-
-    if !devtrail_dir.exists() {
-        utils::warn(&format!(
-            "DevTrail is not installed in {}",
-            target.display()
+    if resolved.is_fallback {
+        utils::info(&format!(
+            "Using DevTrail installation at repo root: {}",
+            resolved.path.display()
         ));
-        utils::info("Run 'devtrail init' to initialize DevTrail in this directory.");
-        bail!("No DevTrail installation found");
     }
+
+    let target = resolved.path;
 
     println!(
         "{} DevTrail in {}",
