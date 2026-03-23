@@ -44,7 +44,12 @@ impl<'a> DocViewer<'a> {
         block.render(area, buf);
 
         if self.app.current_doc.is_none() {
-            let welcome = render_welcome(self.app.index.total_docs);
+            let fallback_info = if self.app.is_fallback {
+                Some(self.app.project_root.display().to_string())
+            } else {
+                None
+            };
+            let welcome = render_welcome(self.app.index.total_docs, fallback_info);
             let paragraph = Paragraph::new(welcome);
             paragraph.render(inner, buf);
             return;
@@ -89,7 +94,7 @@ impl<'a> DocViewer<'a> {
     }
 }
 
-fn render_welcome(total_docs: usize) -> Vec<Line<'static>> {
+fn render_welcome(total_docs: usize, fallback_path: Option<String>) -> Vec<Line<'static>> {
     let title = Style::default()
         .fg(Color::Cyan)
         .add_modifier(Modifier::BOLD);
@@ -99,7 +104,7 @@ fn render_welcome(total_docs: usize) -> Vec<Line<'static>> {
         .add_modifier(Modifier::BOLD);
     let text = Style::default().fg(Color::White);
 
-    vec![
+    let mut lines = vec![
         Line::from(""),
         Line::from(""),
         Line::from(Span::styled("  DevTrail Explorer", title)),
@@ -107,62 +112,73 @@ fn render_welcome(total_docs: usize) -> Vec<Line<'static>> {
             "  Documentation Governance for AI-Assisted Development",
             dim,
         )),
-        Line::from(""),
-        Line::from(vec![
-            Span::styled("  Total documents: ", dim),
-            Span::styled(
-                total_docs.to_string(),
-                text.add_modifier(Modifier::BOLD),
-            ),
-        ]),
-        Line::from(""),
-        Line::from(Span::styled("  Quick start", title)),
-        Line::from(""),
-        Line::from(vec![
-            Span::styled("    ↑↓ ", key),
-            Span::styled("Navigate groups in the left panel", text),
-        ]),
-        Line::from(vec![
-            Span::styled("  Enter ", key),
-            Span::styled("Expand a group and open a document", text),
-        ]),
-        Line::from(vec![
-            Span::styled("   Tab  ", key),
-            Span::styled("Cycle panels: Navigation → Metadata → Document", text),
-        ]),
-        Line::from(vec![
-            Span::styled("     /  ", key),
-            Span::styled("Search by filename, title, tags, or date", text),
-        ]),
-        Line::from(vec![
-            Span::styled("     f  ", key),
-            Span::styled("Toggle document fullscreen", text),
-        ]),
-        Line::from(vec![
-            Span::styled("     ?  ", key),
-            Span::styled("Show all keyboard shortcuts", text),
-        ]),
-        Line::from(vec![
-            Span::styled("     q  ", key),
-            Span::styled("Quit", text),
-        ]),
-        Line::from(""),
-        Line::from(Span::styled(
-            "  ─────────────────────────────────────────────",
-            dim,
-        )),
-        Line::from(vec![
-            Span::styled("  Developed by ", dim),
-            Span::styled("Strange Days Tech, S.A.S.", text),
-        ]),
-        Line::from(vec![
-            Span::raw("  "),
-            Span::styled(
-                "https://strangedays.tech",
-                Style::default()
-                    .fg(Color::Blue)
-                    .add_modifier(Modifier::UNDERLINED),
-            ),
-        ]),
-    ]
+    ];
+
+    if let Some(ref path) = fallback_path {
+        lines.push(Line::from(""));
+        lines.push(Line::from(vec![
+            Span::styled("  → Using repo root: ", Style::default().fg(Color::Yellow)),
+            Span::styled(path.clone(), text),
+        ]));
+    }
+
+    lines.push(Line::from(""));
+    lines.push(Line::from(vec![
+        Span::styled("  Total documents: ", dim),
+        Span::styled(
+            total_docs.to_string(),
+            text.add_modifier(Modifier::BOLD),
+        ),
+    ]));
+    lines.push(Line::from(""));
+    lines.push(Line::from(Span::styled("  Quick start", title)));
+    lines.push(Line::from(""));
+    lines.push(Line::from(vec![
+        Span::styled("    ↑↓ ", key),
+        Span::styled("Navigate groups in the left panel", text),
+    ]));
+    lines.push(Line::from(vec![
+        Span::styled("  Enter ", key),
+        Span::styled("Expand a group and open a document", text),
+    ]));
+    lines.push(Line::from(vec![
+        Span::styled("   Tab  ", key),
+        Span::styled("Cycle panels: Navigation → Metadata → Document", text),
+    ]));
+    lines.push(Line::from(vec![
+        Span::styled("     /  ", key),
+        Span::styled("Search by filename, title, tags, or date", text),
+    ]));
+    lines.push(Line::from(vec![
+        Span::styled("     f  ", key),
+        Span::styled("Toggle document fullscreen", text),
+    ]));
+    lines.push(Line::from(vec![
+        Span::styled("     ?  ", key),
+        Span::styled("Show all keyboard shortcuts", text),
+    ]));
+    lines.push(Line::from(vec![
+        Span::styled("     q  ", key),
+        Span::styled("Quit", text),
+    ]));
+    lines.push(Line::from(""));
+    lines.push(Line::from(Span::styled(
+        "  ─────────────────────────────────────────────",
+        dim,
+    )));
+    lines.push(Line::from(vec![
+        Span::styled("  Developed by ", dim),
+        Span::styled("Strange Days Tech, S.A.S.", text),
+    ]));
+    lines.push(Line::from(vec![
+        Span::raw("  "),
+        Span::styled(
+            "https://strangedays.tech",
+            Style::default()
+                .fg(Color::Blue)
+                .add_modifier(Modifier::UNDERLINED),
+        ),
+    ]));
+
+    lines
 }

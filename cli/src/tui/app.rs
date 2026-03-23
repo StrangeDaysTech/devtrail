@@ -87,10 +87,12 @@ pub struct App {
     pub should_quit: bool,
     /// Project root path
     pub project_root: PathBuf,
+    /// Whether we're using a fallback path (repo root instead of cwd)
+    pub is_fallback: bool,
 }
 
 impl App {
-    pub fn new(project_root: &Path) -> Self {
+    pub fn new(project_root: &Path, is_fallback: bool) -> Self {
         let devtrail_dir = project_root.join(".devtrail");
         let index = DocIndex::build(&devtrail_dir);
         let num_groups = index.groups.len();
@@ -115,6 +117,7 @@ impl App {
             notification: None,
             should_quit: false,
             project_root: project_root.to_path_buf(),
+            is_fallback,
         }
     }
 

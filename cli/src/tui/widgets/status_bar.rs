@@ -82,17 +82,26 @@ impl Widget for StatusBar<'_> {
             Span::styled("help ", desc_style),
         ];
 
-        // Right-aligned doc count
-        let count_str = format!(" {} docs ", self.app.index.total_docs);
+        // Right-aligned: path + doc count
+        let path_display = self.app.project_root
+            .file_name()
+            .and_then(|n| n.to_str())
+            .unwrap_or("?");
+        let right_str = format!(" {}  │  {} docs ", path_display, self.app.index.total_docs);
         let used_width: usize = spans.iter().map(|s| s.content.len()).sum();
         let remaining = area.width as usize - used_width.min(area.width as usize);
-        if remaining > count_str.len() {
-            let padding = remaining - count_str.len();
+        if remaining > right_str.len() {
+            let padding = remaining - right_str.len();
+            spans.push(Span::styled(" ".repeat(padding), Style::default()));
             spans.push(Span::styled(
-                " ".repeat(padding),
-                Style::default(),
+                format!(" {} ", path_display),
+                desc_style,
             ));
-            spans.push(Span::styled(count_str, info_style));
+            spans.push(Span::styled(" │ ", Style::default().fg(Color::DarkGray)));
+            spans.push(Span::styled(
+                format!("{} docs ", self.app.index.total_docs),
+                info_style,
+            ));
         }
 
         let line = Line::from(spans);
