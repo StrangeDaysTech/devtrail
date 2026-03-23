@@ -5,11 +5,16 @@ use ratatui::widgets::BorderType;
 pub const BG: Color = Color::Rgb(30, 30, 46);
 // Surface: slightly lighter for panels
 pub const SURFACE: Color = Color::Rgb(36, 36, 54);
-// Text
-#[allow(dead_code)]
+// Text: primary readable text
 pub const TEXT: Color = Color::Rgb(205, 214, 244);
-// Dimmed text
-pub const TEXT_DIM: Color = Color::Rgb(108, 112, 134);
+// Dimmed text: secondary info (counts, dates, badges, hints)
+pub const TEXT_DIM: Color = Color::Rgb(148, 155, 180);
+// Subtle: borders, separators when inactive
+pub const SUBTLE: Color = Color::Rgb(88, 91, 112);
+// Subgroup labels (yellow family, accessible on dark bg)
+pub const SUBGROUP: Color = Color::Rgb(249, 226, 145);
+// User dir labels (magenta/lavender family)
+pub const USER_DIR: Color = Color::Rgb(203, 166, 247);
 
 // Border type: rounded corners
 pub const BORDER_TYPE: BorderType = BorderType::Rounded;
