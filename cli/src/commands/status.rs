@@ -214,13 +214,22 @@ pub fn run(path: &str) -> Result<()> {
     print_border("  └", type_w, "┴", count_w, "┘");
     println!();
 
-    // ── Hint ──
+    // ── Hints ──
+    if total_missing > 0 {
+        println!(
+            "  {} Run {} to restore missing directories and files",
+            "→".blue().bold(),
+            "devtrail repair".cyan().bold()
+        );
+    }
     if total > 0 {
         println!(
             "  {} Run {} to browse documentation interactively",
             "→".blue().bold(),
             "devtrail explore".cyan().bold()
         );
+    }
+    if total_missing > 0 || total > 0 {
         println!();
     }
 
