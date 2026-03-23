@@ -31,6 +31,13 @@ anyhow = "1"
 semver = "1"
 flate2 = "1"
 tar = "0.4"
+ratatui = { version = "0.29", optional = true, default-features = false, features = ["crossterm"] }
+crossterm = { version = "0.28", optional = true }
+pulldown-cmark = { version = "0.12", optional = true }
+
+[features]
+default = ["tui"]
+tui = ["ratatui", "crossterm", "pulldown-cmark"]
 
 [dev-dependencies]
 assert_cmd = "2"
