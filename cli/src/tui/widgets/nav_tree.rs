@@ -72,10 +72,10 @@ impl Widget for NavTree<'_> {
             let style = if is_selected {
                 Style::default()
                     .bg(theme::SUBTLE)
-                    .fg(Color::White)
+                    .fg(theme::TEXT)
                     .add_modifier(Modifier::BOLD)
             } else {
-                Style::default().fg(Color::White)
+                Style::default().fg(theme::TEXT)
             };
 
             if is_selected {
@@ -263,7 +263,7 @@ fn file_style(selected: bool) -> Style {
     if selected {
         Style::default()
             .bg(Color::Blue)
-            .fg(Color::White)
+            .fg(theme::TEXT)
             .add_modifier(Modifier::BOLD)
     } else {
         Style::default().fg(theme::TEXT)

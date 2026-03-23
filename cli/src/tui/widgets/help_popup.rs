@@ -29,7 +29,7 @@ impl Widget for HelpPopup {
         let key_style = Style::default()
             .fg(Color::Yellow)
             .add_modifier(Modifier::BOLD);
-        let desc_style = Style::default().fg(Color::White);
+        let desc_style = Style::default().fg(theme::TEXT);
         let section_style = Style::default()
             .fg(Color::Cyan)
             .add_modifier(Modifier::BOLD);
