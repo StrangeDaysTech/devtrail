@@ -105,7 +105,7 @@ fn render_welcome(total_docs: usize, fallback_path: Option<String>) -> Vec<Line<
     let key = Style::default()
         .fg(Color::Yellow)
         .add_modifier(Modifier::BOLD);
-    let text = Style::default().fg(Color::White);
+    let text = Style::default().fg(theme::TEXT);
 
     let mut lines = vec![
         Line::from(""),

@@ -60,7 +60,7 @@ impl Widget for MetadataPanel<'_> {
                 let lines = vec![
                     Line::from(vec![
                         Span::styled(" File:  ", Style::default().fg(theme::TEXT_DIM)),
-                        Span::styled(doc.filename.clone(), Style::default().fg(Color::White)),
+                        Span::styled(doc.filename.clone(), Style::default().fg(theme::TEXT)),
                     ]),
                     Line::from(Span::styled(
                         " No frontmatter",
@@ -75,7 +75,7 @@ impl Widget for MetadataPanel<'_> {
         };
 
         let l = Style::default().fg(theme::TEXT_DIM);
-        let v = Style::default().fg(Color::White);
+        let v = Style::default().fg(theme::TEXT);
         let mut lines: Vec<Line<'static>> = Vec::new();
 
         // Status

@@ -59,9 +59,9 @@ impl Widget for StatusBar<'_> {
                 Span::styled(" / ", key_style),
                 Span::styled(
                     format!(" {} ", self.app.search_input),
-                    Style::default().fg(Color::White),
+                    Style::default().fg(theme::TEXT),
                 ),
-                Span::styled("█", Style::default().fg(Color::White)),
+                Span::styled("█", Style::default().fg(theme::TEXT)),
                 Span::styled("  Enter", key_style),
                 Span::styled(" apply  ", desc_style),
                 Span::styled("Esc", key_style),

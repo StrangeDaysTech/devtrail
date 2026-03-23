@@ -2,6 +2,8 @@ use pulldown_cmark::{Event, HeadingLevel, Options, Parser, Tag, TagEnd};
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
 
+use crate::tui::theme;
+
 /// Convert markdown text to styled ratatui Lines
 pub fn markdown_to_lines(markdown: &str, available_width: usize) -> Vec<Line<'static>> {
     let options = Options::ENABLE_TABLES
@@ -52,7 +54,7 @@ pub fn markdown_to_lines(markdown: &str, available_width: usize) -> Vec<Line<'st
                     flush_spans(&mut current_spans, &mut lines, content_indent);
                     push_indented(&mut lines, content_indent, Span::styled(
                         "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄",
-                        Style::default().fg(Color::DarkGray),
+                        Style::default().fg(theme::SUBTLE),
                     ));
                 }
                 Tag::List(start) => {
@@ -104,7 +106,7 @@ pub fn markdown_to_lines(markdown: &str, available_width: usize) -> Vec<Line<'st
                 }
                 Tag::BlockQuote(_) => {
                     let current = current_style(&style_stack);
-                    style_stack.push(current.fg(Color::DarkGray).add_modifier(Modifier::ITALIC));
+                    style_stack.push(current.fg(theme::SUBTLE).add_modifier(Modifier::ITALIC));
                 }
                 _ => {}
             },
@@ -157,7 +159,7 @@ pub fn markdown_to_lines(markdown: &str, available_width: usize) -> Vec<Line<'st
                     in_code_block = false;
                     push_indented(&mut lines, content_indent, Span::styled(
                         "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄",
-                        Style::default().fg(Color::DarkGray),
+                        Style::default().fg(theme::SUBTLE),
                     ));
                     lines.push(Line::from(""));
                 }
@@ -230,7 +232,7 @@ pub fn markdown_to_lines(markdown: &str, available_width: usize) -> Vec<Line<'st
                         }
                         spans.push(Span::styled(
                             format!("  {code_line}  "),
-                            Style::default().fg(Color::White).bg(Color::DarkGray),
+                            Style::default().fg(theme::TEXT).bg(theme::SUBTLE),
                         ));
                         lines.push(Line::from(spans));
                     }
@@ -247,7 +249,7 @@ pub fn markdown_to_lines(markdown: &str, available_width: usize) -> Vec<Line<'st
                 } else {
                     current_spans.push(Span::styled(
                         format!(" {code} "),
-                        Style::default().fg(Color::White).bg(Color::Rgb(60, 60, 60)),
+                        Style::default().fg(theme::TEXT).bg(Color::Rgb(60, 60, 60)),
                     ));
                 }
             }
@@ -265,7 +267,7 @@ pub fn markdown_to_lines(markdown: &str, available_width: usize) -> Vec<Line<'st
                 flush_spans(&mut current_spans, &mut lines, content_indent);
                 push_indented(&mut lines, content_indent, Span::styled(
                     "────────────────────────────────────────────────────",
-                    Style::default().fg(Color::DarkGray),
+                    Style::default().fg(theme::SUBTLE),
                 ));
                 lines.push(Line::from(""));
             }
@@ -273,7 +275,7 @@ pub fn markdown_to_lines(markdown: &str, available_width: usize) -> Vec<Line<'st
                 let marker = if checked {
                     Span::styled(" ✓ ", Style::default().fg(Color::Green).add_modifier(Modifier::BOLD))
                 } else {
-                    Span::styled(" □ ", Style::default().fg(Color::DarkGray))
+                    Span::styled(" □ ", Style::default().fg(theme::SUBTLE))
                 };
                 current_spans.push(marker);
             }
@@ -322,7 +324,7 @@ fn heading_style(level: HeadingLevel) -> Style {
         HeadingLevel::H2 => Color::Yellow,
         HeadingLevel::H3 => Color::Green,
         HeadingLevel::H4 => Color::Magenta,
-        _ => Color::White,
+        _ => theme::TEXT,
     };
     Style::default().fg(color).add_modifier(Modifier::BOLD)
 }
@@ -441,7 +443,7 @@ fn render_table_row(
     } else {
         Style::default()
     };
-    let border = Style::default().fg(Color::DarkGray);
+    let border = Style::default().fg(theme::SUBTLE);
 
     // Wrap each cell's content and determine how many visual lines this row needs
     let wrapped: Vec<Vec<String>> = col_widths
@@ -486,7 +488,7 @@ fn render_table_separator(
     lines: &mut Vec<Line<'static>>,
     indent: usize,
 ) {
-    let sep_style = Style::default().fg(Color::DarkGray);
+    let sep_style = Style::default().fg(theme::SUBTLE);
     let mut s = String::new();
     if indent > 0 {
         s.push_str(&" ".repeat(indent));
