@@ -42,20 +42,30 @@ const DOC_TYPES: &[(&str, &str)] = &[
 ];
 
 pub fn run(path: &str) -> Result<()> {
-    let target = PathBuf::from(path)
-        .canonicalize()
-        .unwrap_or_else(|_| PathBuf::from(path));
+    let resolved = match utils::resolve_project_root(path) {
+        Some(r) => r,
+        None => {
+            let target = PathBuf::from(path)
+                .canonicalize()
+                .unwrap_or_else(|_| PathBuf::from(path));
+            utils::info(&format!(
+                "DevTrail is not installed in {}",
+                target.display()
+            ));
+            utils::info("Run 'devtrail init' to initialize DevTrail in this directory.");
+            return Ok(());
+        }
+    };
 
-    let devtrail_dir = target.join(".devtrail");
-
-    if !devtrail_dir.exists() {
+    if resolved.is_fallback {
         utils::info(&format!(
-            "DevTrail is not installed in {}",
-            target.display()
+            "Using DevTrail installation at repo root: {}",
+            resolved.path.display()
         ));
-        utils::info("Run 'devtrail init' to initialize DevTrail in this directory.");
-        return Ok(());
     }
+
+    let target = resolved.path;
+    let devtrail_dir = target.join(".devtrail");
 
     let version = load_version(&target);
     let language = load_language(&target);
