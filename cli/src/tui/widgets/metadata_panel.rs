@@ -4,7 +4,7 @@ use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Paragraph, Widget, Wrap};
 
-use crate::tui::app::{ActivePanel, App};
+use crate::tui::app::{ActivePanel, App, MetaSelection};
 use crate::tui::document::{ConfidenceLevel, DocStatus, RiskLevel};
 use crate::tui::theme;
 
@@ -29,11 +29,11 @@ impl Widget for MetadataPanel<'_> {
 
         let block = Block::default()
             .title(" Metadata ")
-            .title_style(
-                Style::default()
-                    .fg(Color::Cyan)
-                    .add_modifier(Modifier::BOLD),
-            )
+            .title_style(if is_active {
+                Style::default().fg(theme::ACCENT).add_modifier(Modifier::BOLD)
+            } else {
+                Style::default().fg(theme::SUBTLE)
+            })
             .borders(Borders::ALL)
             .border_type(theme::BORDER_TYPE)
             .border_style(border_style)
@@ -76,7 +76,7 @@ impl Widget for MetadataPanel<'_> {
 
         let l = Style::default().fg(theme::TEXT_DIM);
         let v = Style::default().fg(theme::TEXT);
-        let mut lines: Vec<Line<'static>> = Vec::new();
+        let mut lines: Vec<Line<'static>> = vec![Line::from("")];
 
         // Status
         if let Some(ref status) = fm.status {
@@ -139,7 +139,7 @@ impl Widget for MetadataPanel<'_> {
                 Span::styled(
                     "⚠ REQUIRED",
                     Style::default()
-                        .fg(Color::Yellow)
+                        .fg(theme::YELLOW)
                         .add_modifier(Modifier::BOLD),
                 ),
             ]));
@@ -147,50 +147,61 @@ impl Widget for MetadataPanel<'_> {
 
         // Tags
         if !fm.tags.is_empty() {
-            let mut spans: Vec<Span<'static>> = vec![Span::styled(" Tags:        ", l)];
-            let colors = [
-                Color::Cyan,
-                Color::Magenta,
-                Color::Green,
-                Color::Yellow,
-                Color::Blue,
-            ];
+            let tag_hint = match self.app.meta_selection {
+                Some(MetaSelection::Tag(_)) => " (Enter: search)",
+                _ => "",
+            };
+            lines.push(Line::from(vec![
+                Span::styled(" Tags:", l),
+                Span::styled(tag_hint, Style::default().fg(theme::TEXT_DIM)),
+            ]));
+            let tag_style = Style::default()
+                .fg(theme::TEXT_DIM)
+                .bg(Color::Rgb(45, 45, 60));
+            let tag_selected_style = Style::default()
+                .fg(Color::Rgb(220, 224, 242))
+                .bg(Color::Rgb(45, 50, 80))
+                .add_modifier(Modifier::BOLD);
             for (i, tag) in fm.tags.iter().enumerate() {
-                let color = colors[i % colors.len()];
-                spans.push(Span::styled(format!("[{tag}]"), Style::default().fg(color)));
+                let is_sel = self.app.meta_selection == Some(MetaSelection::Tag(i));
+                let marker = if is_sel { " ▸ " } else { "   " };
+                let st = if is_sel { tag_selected_style } else { tag_style };
+                lines.push(Line::from(vec![
+                    Span::styled(marker, l),
+                    Span::styled(format!(" {tag} "), st),
+                ]));
             }
-            lines.push(Line::from(spans));
         }
 
         // Separator before related
         if !fm.related.is_empty() {
+            let sep_width = inner.width.saturating_sub(2) as usize;
             lines.push(Line::from(Span::styled(
-                " ─────────────────────────────",
-                Style::default().fg(theme::TEXT_DIM),
+                format!(" {}", "─".repeat(sep_width)),
+                Style::default().fg(theme::SUBTLE),
             )));
 
-            let hint = if self.app.selected_related.is_some() {
-                "Enter: follow  Tab: next"
-            } else {
-                "Tab: select"
+            let hint = match self.app.meta_selection {
+                Some(MetaSelection::Related(_)) => " (Enter: follow)",
+                _ => "",
             };
             lines.push(Line::from(vec![
-                Span::styled(" Related      ", l),
+                Span::styled(" Related:", l),
                 Span::styled(hint, Style::default().fg(theme::TEXT_DIM)),
             ]));
 
-            let max_link_width = inner.width.saturating_sub(4) as usize; // 3 marker + 1 padding
+            let max_link_width = inner.width.saturating_sub(4) as usize;
             for (i, rel) in fm.related.iter().enumerate() {
-                let is_selected = self.app.selected_related == Some(i);
+                let is_selected = self.app.meta_selection == Some(MetaSelection::Related(i));
                 let marker = if is_selected { " ▸ " } else { "   " };
                 let style = if is_selected {
                     Style::default()
-                        .fg(Color::Black)
-                        .bg(Color::Cyan)
-                        .add_modifier(Modifier::BOLD)
+                        .fg(Color::Rgb(220, 224, 242))
+                        .bg(Color::Rgb(45, 50, 80))
+                        .add_modifier(Modifier::BOLD | Modifier::UNDERLINED)
                 } else {
                     Style::default()
-                        .fg(Color::Blue)
+                        .fg(theme::TEXT)
                         .add_modifier(Modifier::UNDERLINED)
                 };
                 let display = truncate_str(rel, max_link_width);
@@ -201,15 +212,22 @@ impl Widget for MetadataPanel<'_> {
             }
         }
 
-        // Calculate scroll to ensure selected related is visible
+        // Calculate scroll: find the line with ▸ marker to keep it visible
         let total_lines = lines.len() as u16;
         let scroll = if total_lines > inner.height {
-            if let Some(sel_idx) = self.app.selected_related {
-                // The selected related link's line position in the list
-                let related_start = total_lines.saturating_sub(fm.related.len() as u16);
-                let selected_line = related_start + sel_idx as u16;
-                // Scroll so the selected line is visible
-                selected_line.saturating_sub(inner.height.saturating_sub(1))
+            if let Some(selected_pos) = lines.iter().position(|line| {
+                line.spans
+                    .first()
+                    .map(|s| s.content.contains('▸'))
+                    .unwrap_or(false)
+            }) {
+                let sel = selected_pos as u16;
+                if sel >= inner.height {
+                    sel.saturating_sub(inner.height.saturating_sub(3))
+                        .min(total_lines.saturating_sub(inner.height))
+                } else {
+                    0
+                }
             } else {
                 0
             }
@@ -225,9 +243,9 @@ impl Widget for MetadataPanel<'_> {
 
 fn status_style(status: &DocStatus) -> (&'static str, Color) {
     match status {
-        DocStatus::Draft => ("○", Color::Yellow),
-        DocStatus::Accepted => ("■", Color::Green),
-        DocStatus::Deprecated => ("✗", Color::Red),
+        DocStatus::Draft => ("○", theme::YELLOW),
+        DocStatus::Accepted => ("■", theme::GREEN),
+        DocStatus::Deprecated => ("✗", theme::RED),
         DocStatus::Superseded => ("◌", theme::TEXT_DIM),
         DocStatus::Unknown => ("?", theme::TEXT_DIM),
     }
@@ -235,29 +253,31 @@ fn status_style(status: &DocStatus) -> (&'static str, Color) {
 
 fn confidence_bar(level: &ConfidenceLevel) -> (usize, usize, Color, &'static str) {
     match level {
-        ConfidenceLevel::High => (8, 10, Color::Green, "high"),
-        ConfidenceLevel::Medium => (5, 10, Color::Yellow, "medium"),
-        ConfidenceLevel::Low => (2, 10, Color::Red, "low"),
+        ConfidenceLevel::High => (8, 10, theme::GREEN, "high"),
+        ConfidenceLevel::Medium => (5, 10, theme::YELLOW, "medium"),
+        ConfidenceLevel::Low => (2, 10, theme::RED, "low"),
         ConfidenceLevel::Unknown => (0, 10, theme::TEXT_DIM, "unknown"),
     }
 }
 
 fn risk_bar(level: &RiskLevel) -> (usize, usize, Color, &'static str) {
     match level {
-        RiskLevel::Low => (2, 10, Color::Green, "low"),
-        RiskLevel::Medium => (5, 10, Color::Yellow, "medium"),
-        RiskLevel::High => (7, 10, Color::Red, "high"),
-        RiskLevel::Critical => (10, 10, Color::Red, "critical"),
+        RiskLevel::Low => (2, 10, theme::GREEN, "low"),
+        RiskLevel::Medium => (5, 10, theme::YELLOW, "medium"),
+        RiskLevel::High => (7, 10, theme::RED, "high"),
+        RiskLevel::Critical => (10, 10, theme::RED, "critical"),
         RiskLevel::Unknown => (0, 10, theme::TEXT_DIM, "unknown"),
     }
 }
 
 fn truncate_str(s: &str, max: usize) -> String {
-    if s.len() <= max {
+    let char_count: usize = s.chars().count();
+    if char_count <= max {
         s.to_string()
     } else if max > 3 {
-        format!("{}...", &s[..max - 3])
+        let truncated: String = s.chars().take(max - 3).collect();
+        format!("{truncated}...")
     } else {
-        s[..max].to_string()
+        s.chars().take(max).collect()
     }
 }

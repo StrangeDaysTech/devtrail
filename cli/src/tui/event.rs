@@ -51,6 +51,7 @@ fn handle_key(app: &mut App, key: KeyEvent) {
     match key.code {
         KeyCode::Char('q') => app.should_quit = true,
         KeyCode::Char('?') => app.toggle_help(),
+        KeyCode::BackTab => app.toggle_panel_reverse(),
         KeyCode::Tab => app.toggle_panel(),
         KeyCode::Char('f') => app.toggle_fullscreen(),
         KeyCode::Char('/') => app.start_search(),
@@ -61,16 +62,16 @@ fn handle_key(app: &mut App, key: KeyEvent) {
             app.jump_to_group(c.to_digit(10).unwrap() as usize);
         }
 
-        // Navigation or document scrolling depending on active panel
+        // Navigation, metadata, or document scrolling depending on active panel
         KeyCode::Char('j') | KeyCode::Down => match app.active_panel {
             ActivePanel::Document => app.scroll_down(1),
             ActivePanel::Navigation => app.nav_down(),
-            ActivePanel::Metadata => {}
+            ActivePanel::Metadata => app.metadata_down(),
         },
         KeyCode::Char('k') | KeyCode::Up => match app.active_panel {
             ActivePanel::Document => app.scroll_up(1),
             ActivePanel::Navigation => app.nav_up(),
-            ActivePanel::Metadata => {}
+            ActivePanel::Metadata => app.metadata_up(),
         },
 
         // Enter: open/expand or follow selected related link
@@ -78,9 +79,9 @@ fn handle_key(app: &mut App, key: KeyEvent) {
             if app.active_panel == ActivePanel::Navigation {
                 app.nav_enter();
             } else if app.active_panel == ActivePanel::Metadata
-                && app.selected_related.is_some()
+                && app.meta_selection.is_some()
             {
-                app.follow_selected_related();
+                app.metadata_enter();
             }
         }
 
@@ -95,7 +96,7 @@ fn handle_key(app: &mut App, key: KeyEvent) {
                     }
                 }
                 ActivePanel::Metadata if key.code == KeyCode::Esc => {
-                    app.selected_related = None;
+                    app.meta_selection = None;
                     app.active_panel = ActivePanel::Navigation;
                 }
                 ActivePanel::Navigation => {

@@ -111,7 +111,7 @@ fn metadata_panel_height(app: &App) -> u16 {
         lines += 1;
     }
     if !fm.tags.is_empty() {
-        lines += 1;
+        lines += 1 + fm.tags.len() as u16; // header + one per tag
     }
     // Related: separator + header + one per link
     if !fm.related.is_empty() {

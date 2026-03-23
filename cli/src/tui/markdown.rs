@@ -26,6 +26,7 @@ pub fn markdown_to_lines(markdown: &str, available_width: usize) -> Vec<Line<'st
     let mut cell_text = String::new();
     let mut table_header_row: Vec<String> = Vec::new();
     let mut table_body_rows: Vec<Vec<String>> = Vec::new();
+    let mut code_block_lines: Vec<String> = Vec::new();
     // Current indent level based on last heading seen (2 spaces per level, max 3)
     let mut content_indent: usize = 0;
 
@@ -51,11 +52,8 @@ pub fn markdown_to_lines(markdown: &str, available_width: usize) -> Vec<Line<'st
                 }
                 Tag::CodeBlock(_) => {
                     in_code_block = true;
+                    code_block_lines.clear();
                     flush_spans(&mut current_spans, &mut lines, content_indent);
-                    push_indented(&mut lines, content_indent, Span::styled(
-                        "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄",
-                        Style::default().fg(theme::SUBTLE),
-                    ));
                 }
                 Tag::List(start) => {
                     list_depth += 1;
@@ -77,7 +75,7 @@ pub fn markdown_to_lines(markdown: &str, available_width: usize) -> Vec<Line<'st
                     }
                     current_spans.push(Span::styled(
                         bullet,
-                        Style::default().fg(Color::Blue).add_modifier(Modifier::BOLD),
+                        Style::default().fg(theme::ACCENT).add_modifier(Modifier::BOLD),
                     ));
                 }
                 Tag::Link { dest_url, .. } => {
@@ -106,7 +104,7 @@ pub fn markdown_to_lines(markdown: &str, available_width: usize) -> Vec<Line<'st
                 }
                 Tag::BlockQuote(_) => {
                     let current = current_style(&style_stack);
-                    style_stack.push(current.fg(theme::SUBTLE).add_modifier(Modifier::ITALIC));
+                    style_stack.push(current.fg(theme::TEXT_DIM).add_modifier(Modifier::ITALIC));
                 }
                 _ => {}
             },
@@ -128,21 +126,18 @@ pub fn markdown_to_lines(markdown: &str, available_width: usize) -> Vec<Line<'st
                         content_indent = 6;
                     }
 
-                    if heading_indent > 0 {
-                        let spans = vec![
+                    if heading_level == HeadingLevel::H1 {
+                        lines.push(
+                            Line::from(Span::styled(text, style))
+                                .alignment(ratatui::layout::Alignment::Center),
+                        );
+                    } else if heading_indent > 0 {
+                        lines.push(Line::from(vec![
                             Span::raw(" ".repeat(heading_indent)),
                             Span::styled(text, style),
-                        ];
-                        lines.push(Line::from(spans));
+                        ]));
                     } else {
                         lines.push(Line::from(Span::styled(text, style)));
-                    }
-
-                    if heading_level == HeadingLevel::H1 {
-                        lines.push(Line::from(Span::styled(
-                            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
-                            style.remove_modifier(Modifier::BOLD),
-                        )));
                     }
                     lines.push(Line::from(""));
                 }
@@ -157,10 +152,26 @@ pub fn markdown_to_lines(markdown: &str, available_width: usize) -> Vec<Line<'st
                 }
                 TagEnd::CodeBlock => {
                     in_code_block = false;
-                    push_indented(&mut lines, content_indent, Span::styled(
-                        "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄",
-                        Style::default().fg(theme::SUBTLE),
-                    ));
+                    // Calculate uniform width: max line length + padding
+                    let max_len = code_block_lines
+                        .iter()
+                        .map(|l| l.len())
+                        .max()
+                        .unwrap_or(0);
+                    let code_bg = Style::default()
+                        .fg(Color::Rgb(210, 215, 235))
+                        .bg(Color::Rgb(45, 45, 60));
+
+                    for code_line in &code_block_lines {
+                        let padded = format!("  {:<width$}  ", code_line, width = max_len);
+                        let mut spans: Vec<Span<'static>> = Vec::new();
+                        if content_indent > 0 {
+                            spans.push(Span::raw(" ".repeat(content_indent)));
+                        }
+                        spans.push(Span::styled(padded, code_bg));
+                        lines.push(Line::from(spans));
+                    }
+                    code_block_lines.clear();
                     lines.push(Line::from(""));
                 }
                 TagEnd::List(_) => {
@@ -226,15 +237,7 @@ pub fn markdown_to_lines(markdown: &str, available_width: usize) -> Vec<Line<'st
                     cell_text.push_str(&text);
                 } else if in_code_block {
                     for code_line in text.lines() {
-                        let mut spans: Vec<Span<'static>> = Vec::new();
-                        if content_indent > 0 {
-                            spans.push(Span::raw(" ".repeat(content_indent)));
-                        }
-                        spans.push(Span::styled(
-                            format!("  {code_line}  "),
-                            Style::default().fg(theme::TEXT).bg(theme::SUBTLE),
-                        ));
-                        lines.push(Line::from(spans));
+                        code_block_lines.push(code_line.to_string());
                     }
                 } else if in_heading {
                     current_spans.push(Span::raw(text.to_string()));
@@ -318,15 +321,10 @@ fn heading_indent_level(level: HeadingLevel) -> usize {
     }
 }
 
-fn heading_style(level: HeadingLevel) -> Style {
-    let color = match level {
-        HeadingLevel::H1 => Color::Cyan,
-        HeadingLevel::H2 => Color::Yellow,
-        HeadingLevel::H3 => Color::Green,
-        HeadingLevel::H4 => Color::Magenta,
-        _ => theme::TEXT,
-    };
-    Style::default().fg(color).add_modifier(Modifier::BOLD)
+fn heading_style(_level: HeadingLevel) -> Style {
+    Style::default()
+        .fg(Color::Rgb(250, 179, 135))
+        .add_modifier(Modifier::BOLD)
 }
 
 fn compute_column_widths(
@@ -438,7 +436,7 @@ fn render_table_row(
 ) {
     let style = if is_header {
         Style::default()
-            .fg(Color::Cyan)
+            .fg(theme::ACCENT)
             .add_modifier(Modifier::BOLD)
     } else {
         Style::default()

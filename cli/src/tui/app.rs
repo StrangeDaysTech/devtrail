@@ -40,6 +40,13 @@ pub enum NavSelection {
     UserDirFile(usize, usize, usize, usize),
 }
 
+/// What is selected within the Metadata panel
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MetaSelection {
+    Tag(usize),
+    Related(usize),
+}
+
 /// Sort order for file listings
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SortOrder {
@@ -79,8 +86,8 @@ pub struct App {
     pub search_query: Option<String>,
     pub search_input: String,
     pub is_searching: bool,
-    /// Currently selected related link index (for Tab cycling in document panel)
-    pub selected_related: Option<usize>,
+    /// Current selection within the Metadata panel
+    pub meta_selection: Option<MetaSelection>,
     /// Temporary notification message shown in the status bar
     pub notification: Option<String>,
     /// Should the app quit
@@ -113,7 +120,7 @@ impl App {
             search_query: None,
             search_input: String::new(),
             is_searching: false,
-            selected_related: None,
+            meta_selection: None,
             notification: None,
             should_quit: false,
             project_root: project_root.to_path_buf(),
@@ -270,60 +277,141 @@ impl App {
     }
 
     /// Toggle between panels, or cycle related links when in document panel
+    /// Cycle panels forward: Navigation → Metadata → Document → Navigation
     pub fn toggle_panel(&mut self) {
         if self.current_doc.is_some() {
             match self.active_panel {
                 ActivePanel::Navigation => {
-                    // Nav → Metadata (if doc has frontmatter)
-                    self.selected_related = None;
                     self.active_panel = ActivePanel::Metadata;
+                    self.enter_metadata();
                 }
                 ActivePanel::Metadata => {
-                    // In Metadata panel, Tab cycles related links
-                    let related_count = self.related_count();
-                    if related_count > 0 {
-                        match self.selected_related {
-                            None => {
-                                self.selected_related = Some(0);
-                            }
-                            Some(idx) => {
-                                let next = idx + 1;
-                                if next >= related_count {
-                                    // Past last related → move to Document
-                                    self.selected_related = None;
-                                    self.active_panel = ActivePanel::Document;
-                                } else {
-                                    self.selected_related = Some(next);
-                                }
-                            }
-                        }
-                    } else {
-                        // No related links → move to Document
-                        self.active_panel = ActivePanel::Document;
-                    }
+                    self.meta_selection = None;
+                    self.active_panel = ActivePanel::Document;
                 }
                 ActivePanel::Document => {
-                    // Doc → back to Navigation
-                    self.selected_related = None;
                     self.active_panel = ActivePanel::Navigation;
                 }
             }
         }
     }
 
-    /// Follow the currently selected related link
-    pub fn follow_selected_related(&mut self) {
-        if let Some(idx) = self.selected_related {
-            if let Some(ref doc) = self.current_doc {
-                if let Some(ref fm) = doc.frontmatter {
-                    if let Some(related_id) = fm.related.get(idx) {
-                        let id = related_id.clone();
-                        self.selected_related = None;
-                        self.navigate_to_id(&id);
-                    }
+    /// Cycle panels reverse: Navigation → Document → Metadata → Navigation
+    pub fn toggle_panel_reverse(&mut self) {
+        if self.current_doc.is_some() {
+            match self.active_panel {
+                ActivePanel::Document => {
+                    self.active_panel = ActivePanel::Metadata;
+                    self.enter_metadata();
+                }
+                ActivePanel::Metadata => {
+                    self.meta_selection = None;
+                    self.active_panel = ActivePanel::Navigation;
+                }
+                ActivePanel::Navigation => {
+                    self.active_panel = ActivePanel::Document;
                 }
             }
         }
+    }
+
+    /// When entering Metadata panel, preselect first navigable item
+    fn enter_metadata(&mut self) {
+        let tags = self.tag_count();
+        let related = self.related_count();
+        if tags > 0 {
+            self.meta_selection = Some(MetaSelection::Tag(0));
+        } else if related > 0 {
+            self.meta_selection = Some(MetaSelection::Related(0));
+        } else {
+            self.meta_selection = None;
+        }
+    }
+
+    /// Move selection down in metadata (tags then related)
+    pub fn metadata_down(&mut self) {
+        let tags = self.tag_count();
+        let related = self.related_count();
+        match self.meta_selection {
+            None => {
+                if tags > 0 {
+                    self.meta_selection = Some(MetaSelection::Tag(0));
+                } else if related > 0 {
+                    self.meta_selection = Some(MetaSelection::Related(0));
+                }
+            }
+            Some(MetaSelection::Tag(idx)) => {
+                if idx + 1 < tags {
+                    self.meta_selection = Some(MetaSelection::Tag(idx + 1));
+                } else if related > 0 {
+                    self.meta_selection = Some(MetaSelection::Related(0));
+                }
+            }
+            Some(MetaSelection::Related(idx)) => {
+                if idx + 1 < related {
+                    self.meta_selection = Some(MetaSelection::Related(idx + 1));
+                }
+            }
+        }
+    }
+
+    /// Move selection up in metadata (related then tags)
+    pub fn metadata_up(&mut self) {
+        let tags = self.tag_count();
+        match self.meta_selection {
+            None => {}
+            Some(MetaSelection::Tag(0)) => {}
+            Some(MetaSelection::Tag(idx)) => {
+                self.meta_selection = Some(MetaSelection::Tag(idx - 1));
+            }
+            Some(MetaSelection::Related(0)) => {
+                if tags > 0 {
+                    self.meta_selection = Some(MetaSelection::Tag(tags - 1));
+                }
+            }
+            Some(MetaSelection::Related(idx)) => {
+                self.meta_selection = Some(MetaSelection::Related(idx - 1));
+            }
+        }
+    }
+
+    /// Execute action on the selected metadata item
+    pub fn metadata_enter(&mut self) {
+        match self.meta_selection {
+            Some(MetaSelection::Tag(idx)) => {
+                // Search by this tag
+                if let Some(ref doc) = self.current_doc {
+                    if let Some(ref fm) = doc.frontmatter {
+                        if let Some(tag) = fm.tags.get(idx) {
+                            self.search_query = Some(tag.clone());
+                            self.meta_selection = None;
+                            self.active_panel = ActivePanel::Navigation;
+                        }
+                    }
+                }
+            }
+            Some(MetaSelection::Related(idx)) => {
+                if let Some(ref doc) = self.current_doc {
+                    if let Some(ref fm) = doc.frontmatter {
+                        if let Some(related_id) = fm.related.get(idx) {
+                            let id = related_id.clone();
+                            self.meta_selection = None;
+                            self.navigate_to_id(&id);
+                        }
+                    }
+                }
+            }
+            None => {}
+        }
+    }
+
+    /// Get the number of tags in the current document
+    fn tag_count(&self) -> usize {
+        self.current_doc
+            .as_ref()
+            .and_then(|doc| doc.frontmatter.as_ref())
+            .map(|fm| fm.tags.len())
+            .unwrap_or(0)
     }
 
     /// Get the number of related links in the current document
@@ -495,7 +583,7 @@ impl App {
             self.current_doc = Some(doc);
         }
         self.doc_scroll = 0;
-        self.selected_related = None;
+        self.meta_selection = None;
         self.active_panel = ActivePanel::Document;
     }
 

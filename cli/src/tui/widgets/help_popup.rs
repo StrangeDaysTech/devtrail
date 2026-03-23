@@ -18,22 +18,22 @@ impl Widget for HelpPopup {
             .title(" Keyboard Shortcuts ")
             .title_style(
                 Style::default()
-                    .fg(Color::Cyan)
+                    .fg(theme::ACCENT)
                     .add_modifier(Modifier::BOLD),
             )
             .borders(Borders::ALL)
             .border_type(theme::BORDER_TYPE)
-            .border_style(Style::default().fg(Color::Cyan))
+            .border_style(Style::default().fg(theme::ACCENT))
             .style(Style::default().bg(theme::SURFACE));
 
         let key_style = Style::default()
-            .fg(Color::Yellow)
+            .fg(theme::ACCENT)
             .add_modifier(Modifier::BOLD);
         let desc_style = Style::default().fg(theme::TEXT);
         let section_style = Style::default()
-            .fg(Color::Cyan)
+            .fg(Color::Rgb(250, 179, 135))
             .add_modifier(Modifier::BOLD);
-        let dim = Style::default().fg(Color::DarkGray);
+        let dim = Style::default().fg(theme::TEXT_DIM);
 
         let lines = vec![
             Line::from(""),
@@ -45,7 +45,8 @@ impl Widget for HelpPopup {
             help_line("  1-8         ", "Jump to group by number", key_style, desc_style),
             Line::from(""),
             Line::from(Span::styled("  Metadata panel", section_style)),
-            help_line("  Tab         ", "Cycle through related links", key_style, desc_style),
+            help_line("  j / ↓       ", "Move between related links", key_style, desc_style),
+            help_line("  k / ↑       ", "Move between related links", key_style, desc_style),
             help_line("  Enter       ", "Follow selected related link", key_style, desc_style),
             help_line("  Esc         ", "Back to Navigation", key_style, desc_style),
             Line::from(""),
@@ -60,7 +61,8 @@ impl Widget for HelpPopup {
             help_line("  Esc         ", "Exit fullscreen / Back to Nav", key_style, desc_style),
             Line::from(""),
             Line::from(Span::styled("  General", section_style)),
-            help_line("  Tab         ", "Cycle: Nav → Metadata → Doc", key_style, desc_style),
+            help_line("  Tab         ", "Next panel: Nav → Meta → Doc", key_style, desc_style),
+            help_line("  Shift+Tab   ", "Prev panel: Doc → Meta → Nav", key_style, desc_style),
             help_line("  /           ", "Search by name, title, tags, date", key_style, desc_style),
             help_line("  s           ", "Cycle sort order", key_style, desc_style),
             help_line("  r           ", "Refresh document index", key_style, desc_style),
