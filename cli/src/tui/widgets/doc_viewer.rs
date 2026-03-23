@@ -22,7 +22,7 @@ impl<'a> DocViewer<'a> {
         let border_style = if is_active {
             Style::default().fg(Color::Cyan)
         } else {
-            Style::default().fg(Color::DarkGray)
+            Style::default().fg(theme::SUBTLE)
         };
 
         let title = match &self.app.current_doc {
@@ -101,7 +101,7 @@ fn render_welcome(total_docs: usize, fallback_path: Option<String>) -> Vec<Line<
     let title = Style::default()
         .fg(Color::Cyan)
         .add_modifier(Modifier::BOLD);
-    let dim = Style::default().fg(Color::DarkGray);
+    let dim = Style::default().fg(theme::SUBTLE);
     let key = Style::default()
         .fg(Color::Yellow)
         .add_modifier(Modifier::BOLD);

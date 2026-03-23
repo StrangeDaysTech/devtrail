@@ -24,7 +24,7 @@ impl Widget for MetadataPanel<'_> {
         let border_style = if is_active {
             Style::default().fg(Color::Cyan)
         } else {
-            Style::default().fg(Color::DarkGray)
+            Style::default().fg(theme::SUBTLE)
         };
 
         let block = Block::default()
@@ -47,7 +47,7 @@ impl Widget for MetadataPanel<'_> {
             None => {
                 let line = Line::from(Span::styled(
                     " No document selected",
-                    Style::default().fg(Color::DarkGray),
+                    Style::default().fg(theme::TEXT_DIM),
                 ));
                 Paragraph::new(vec![line]).render(inner, buf);
                 return;
@@ -59,12 +59,12 @@ impl Widget for MetadataPanel<'_> {
             None => {
                 let lines = vec![
                     Line::from(vec![
-                        Span::styled(" File:  ", Style::default().fg(Color::DarkGray)),
+                        Span::styled(" File:  ", Style::default().fg(theme::TEXT_DIM)),
                         Span::styled(doc.filename.clone(), Style::default().fg(Color::White)),
                     ]),
                     Line::from(Span::styled(
                         " No frontmatter",
-                        Style::default().fg(Color::DarkGray),
+                        Style::default().fg(theme::TEXT_DIM),
                     )),
                 ];
                 Paragraph::new(lines)
@@ -74,7 +74,7 @@ impl Widget for MetadataPanel<'_> {
             }
         };
 
-        let l = Style::default().fg(Color::DarkGray);
+        let l = Style::default().fg(theme::TEXT_DIM);
         let v = Style::default().fg(Color::White);
         let mut lines: Vec<Line<'static>> = Vec::new();
 
@@ -166,7 +166,7 @@ impl Widget for MetadataPanel<'_> {
         if !fm.related.is_empty() {
             lines.push(Line::from(Span::styled(
                 " ─────────────────────────────",
-                Style::default().fg(Color::DarkGray),
+                Style::default().fg(theme::TEXT_DIM),
             )));
 
             let hint = if self.app.selected_related.is_some() {
@@ -176,7 +176,7 @@ impl Widget for MetadataPanel<'_> {
             };
             lines.push(Line::from(vec![
                 Span::styled(" Related      ", l),
-                Span::styled(hint, Style::default().fg(Color::DarkGray)),
+                Span::styled(hint, Style::default().fg(theme::TEXT_DIM)),
             ]));
 
             let max_link_width = inner.width.saturating_sub(4) as usize; // 3 marker + 1 padding
@@ -228,8 +228,8 @@ fn status_style(status: &DocStatus) -> (&'static str, Color) {
         DocStatus::Draft => ("○", Color::Yellow),
         DocStatus::Accepted => ("■", Color::Green),
         DocStatus::Deprecated => ("✗", Color::Red),
-        DocStatus::Superseded => ("◌", Color::DarkGray),
-        DocStatus::Unknown => ("?", Color::DarkGray),
+        DocStatus::Superseded => ("◌", theme::TEXT_DIM),
+        DocStatus::Unknown => ("?", theme::TEXT_DIM),
     }
 }
 
@@ -238,7 +238,7 @@ fn confidence_bar(level: &ConfidenceLevel) -> (usize, usize, Color, &'static str
         ConfidenceLevel::High => (8, 10, Color::Green, "high"),
         ConfidenceLevel::Medium => (5, 10, Color::Yellow, "medium"),
         ConfidenceLevel::Low => (2, 10, Color::Red, "low"),
-        ConfidenceLevel::Unknown => (0, 10, Color::DarkGray, "unknown"),
+        ConfidenceLevel::Unknown => (0, 10, theme::TEXT_DIM, "unknown"),
     }
 }
 
@@ -248,7 +248,7 @@ fn risk_bar(level: &RiskLevel) -> (usize, usize, Color, &'static str) {
         RiskLevel::Medium => (5, 10, Color::Yellow, "medium"),
         RiskLevel::High => (7, 10, Color::Red, "high"),
         RiskLevel::Critical => (10, 10, Color::Red, "critical"),
-        RiskLevel::Unknown => (0, 10, Color::DarkGray, "unknown"),
+        RiskLevel::Unknown => (0, 10, theme::TEXT_DIM, "unknown"),
     }
 }
 

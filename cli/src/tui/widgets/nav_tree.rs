@@ -24,7 +24,7 @@ impl Widget for NavTree<'_> {
         let border_style = if is_active {
             Style::default().fg(Color::Cyan)
         } else {
-            Style::default().fg(Color::DarkGray)
+            Style::default().fg(theme::SUBTLE)
         };
 
         let block = Block::default()
@@ -71,7 +71,7 @@ impl Widget for NavTree<'_> {
 
             let style = if is_selected {
                 Style::default()
-                    .bg(Color::DarkGray)
+                    .bg(theme::SUBTLE)
                     .fg(Color::White)
                     .add_modifier(Modifier::BOLD)
             } else {
@@ -84,7 +84,7 @@ impl Widget for NavTree<'_> {
             lines.push(Line::from(vec![
                 Span::styled(format!(" {arrow} "), Style::default().fg(Color::Cyan)),
                 Span::styled(group.label.clone(), style),
-                Span::styled(count_str, Style::default().fg(Color::DarkGray)),
+                Span::styled(count_str, Style::default().fg(theme::TEXT_DIM)),
             ]));
 
             if show_children {
@@ -112,11 +112,11 @@ impl Widget for NavTree<'_> {
                     let sg_arrow = if sg_expanded { "▾" } else { "▸" };
                     let sg_style = if is_sel {
                         Style::default()
-                            .bg(Color::DarkGray)
-                            .fg(Color::Yellow)
+                            .bg(theme::SUBTLE)
+                            .fg(theme::SUBGROUP)
                             .add_modifier(Modifier::BOLD)
                     } else {
-                        Style::default().fg(Color::Yellow)
+                        Style::default().fg(theme::SUBGROUP)
                     };
 
                     if is_sel {
@@ -124,11 +124,11 @@ impl Widget for NavTree<'_> {
                     }
                     lines.push(Line::from(vec![
                         Span::raw("   "),
-                        Span::styled(format!("{sg_arrow} "), Style::default().fg(Color::Yellow)),
+                        Span::styled(format!("{sg_arrow} "), Style::default().fg(theme::SUBGROUP)),
                         Span::styled(format!("{}/", sg.label), sg_style),
                         Span::styled(
                             format!(" ({sg_count})"),
-                            Style::default().fg(Color::DarkGray),
+                            Style::default().fg(theme::TEXT_DIM),
                         ),
                     ]));
 
@@ -162,11 +162,11 @@ impl Widget for NavTree<'_> {
                             let ud_arrow = if ud_expanded { "▾" } else { "▸" };
                             let ud_style = if is_sel {
                                 Style::default()
-                                    .bg(Color::DarkGray)
-                                    .fg(Color::Magenta)
+                                    .bg(theme::SUBTLE)
+                                    .fg(theme::USER_DIR)
                                     .add_modifier(Modifier::BOLD)
                             } else {
-                                Style::default().fg(Color::Magenta)
+                                Style::default().fg(theme::USER_DIR)
                             };
 
                             if is_sel {
@@ -176,12 +176,12 @@ impl Widget for NavTree<'_> {
                                 Span::raw("     "),
                                 Span::styled(
                                     format!("{ud_arrow} "),
-                                    Style::default().fg(Color::Magenta),
+                                    Style::default().fg(theme::USER_DIR),
                                 ),
                                 Span::styled(format!("{}/", ud.name), ud_style),
                                 Span::styled(
                                     format!(" ({ud_count})"),
-                                    Style::default().fg(Color::DarkGray),
+                                    Style::default().fg(theme::TEXT_DIM),
                                 ),
                             ]));
 
@@ -225,8 +225,8 @@ impl Widget for NavTree<'_> {
 
 fn file_entry_line(entry: &DocEntry, indent: &str, max_width: usize, selected: bool) -> Line<'static> {
     let style = file_style(selected);
-    let badge_style = Style::default().fg(Color::DarkGray);
-    let date_style = Style::default().fg(Color::DarkGray);
+    let badge_style = Style::default().fg(theme::TEXT_DIM);
+    let date_style = Style::default().fg(theme::TEXT_DIM);
 
     let badge = if entry.doc_type.is_empty() {
         String::from("   ")
@@ -266,7 +266,7 @@ fn file_style(selected: bool) -> Style {
             .fg(Color::White)
             .add_modifier(Modifier::BOLD)
     } else {
-        Style::default().fg(Color::Gray)
+        Style::default().fg(theme::TEXT)
     }
 }
 
