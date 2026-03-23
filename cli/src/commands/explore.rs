@@ -12,12 +12,5 @@ pub fn run(path: &str) -> Result<()> {
         }
     };
 
-    if resolved.is_fallback {
-        utils::info(&format!(
-            "Using DevTrail installation at repo root: {}",
-            resolved.path.display()
-        ));
-    }
-
-    crate::tui::run(&resolved.path)
+    crate::tui::run(&resolved.path, resolved.is_fallback)
 }

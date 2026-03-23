@@ -128,7 +128,8 @@ fn handle_key(app: &mut App, key: KeyEvent) {
         // Refresh
         KeyCode::Char('r') => {
             let root = app.project_root.clone();
-            *app = App::new(&root);
+            let fallback = app.is_fallback;
+            *app = App::new(&root, fallback);
         }
 
         _ => {}
