@@ -3,7 +3,7 @@ use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
 
 /// Convert markdown text to styled ratatui Lines
-pub fn markdown_to_lines(markdown: &str) -> Vec<Line<'static>> {
+pub fn markdown_to_lines(markdown: &str, available_width: usize) -> Vec<Line<'static>> {
     let options = Options::ENABLE_TABLES
         | Options::ENABLE_STRIKETHROUGH
         | Options::ENABLE_TASKLISTS;
@@ -193,12 +193,16 @@ pub fn markdown_to_lines(markdown: &str) -> Vec<Line<'static>> {
                     table_row.clear();
                 }
                 TagEnd::Table => {
-                    // Calculate column widths from all rows
-                    let col_widths = compute_column_widths(&table_header_row, &table_body_rows);
-                    // Render header
+                    // Calculate column widths, fitting to available width
+                    let col_widths = compute_column_widths(
+                        &table_header_row,
+                        &table_body_rows,
+                        available_width.saturating_sub(content_indent),
+                    );
+                    // Render header (multiline cells)
                     render_table_row(&table_header_row, &col_widths, true, &mut lines, content_indent);
                     render_table_separator(&col_widths, &mut lines, content_indent);
-                    // Render body rows
+                    // Render body rows (multiline cells)
                     for row in &table_body_rows {
                         render_table_row(row, &col_widths, false, &mut lines, content_indent);
                     }
@@ -323,29 +327,104 @@ fn heading_style(level: HeadingLevel) -> Style {
     Style::default().fg(color).add_modifier(Modifier::BOLD)
 }
 
-fn compute_column_widths(header: &[String], body: &[Vec<String>]) -> Vec<usize> {
-    let num_cols = header.len().max(
-        body.iter().map(|r| r.len()).max().unwrap_or(0),
-    );
-    let mut widths = vec![0usize; num_cols];
+fn compute_column_widths(
+    header: &[String],
+    body: &[Vec<String>],
+    available_width: usize,
+) -> Vec<usize> {
+    let num_cols = header
+        .len()
+        .max(body.iter().map(|r| r.len()).max().unwrap_or(0));
+    if num_cols == 0 {
+        return Vec::new();
+    }
 
+    // Calculate natural (max content) width per column
+    let mut natural = vec![0usize; num_cols];
     for (i, cell) in header.iter().enumerate() {
-        widths[i] = widths[i].max(cell.len());
+        natural[i] = natural[i].max(cell.len());
     }
     for row in body {
         for (i, cell) in row.iter().enumerate() {
             if i < num_cols {
-                widths[i] = widths[i].max(cell.len());
+                natural[i] = natural[i].max(cell.len());
             }
         }
     }
-
-    // Minimum width of 3 per column
-    for w in &mut widths {
+    for w in &mut natural {
         *w = (*w).max(3);
     }
 
+    // Overhead: indent is handled outside; here we account for borders
+    // "│ " + (" │ " between cols) + " │" = 2 + (num_cols - 1) * 3 + 2
+    let border_overhead = 2 + (num_cols.saturating_sub(1)) * 3 + 2;
+    let content_budget = available_width.saturating_sub(border_overhead);
+
+    let total_natural: usize = natural.iter().sum();
+    if total_natural <= content_budget {
+        return natural;
+    }
+
+    // Distribute available width proportionally
+    let mut widths = vec![0usize; num_cols];
+    for (i, &nat) in natural.iter().enumerate() {
+        widths[i] = ((nat as f64 / total_natural as f64) * content_budget as f64).floor() as usize;
+        widths[i] = widths[i].max(3);
+    }
+
+    // Distribute any remaining space to the largest columns
+    let assigned: usize = widths.iter().sum();
+    let mut remaining = content_budget.saturating_sub(assigned);
+    while remaining > 0 {
+        // Find column with largest deficit
+        let mut best = 0;
+        let mut best_deficit = 0usize;
+        for (i, (&nat, &w)) in natural.iter().zip(widths.iter()).enumerate() {
+            let deficit = nat.saturating_sub(w);
+            if deficit > best_deficit {
+                best_deficit = deficit;
+                best = i;
+            }
+        }
+        if best_deficit == 0 {
+            break;
+        }
+        widths[best] += 1;
+        remaining -= 1;
+    }
+
     widths
+}
+
+/// Wrap text into lines of at most `width` characters, breaking at word boundaries
+fn wrap_cell_text(text: &str, width: usize) -> Vec<String> {
+    if width == 0 {
+        return vec![text.to_string()];
+    }
+    if text.len() <= width {
+        return vec![text.to_string()];
+    }
+
+    let mut result = Vec::new();
+    let mut remaining = text;
+
+    while !remaining.is_empty() {
+        if remaining.len() <= width {
+            result.push(remaining.to_string());
+            break;
+        }
+        // Find last space within width
+        let chunk = &remaining[..width];
+        let break_at = chunk.rfind(' ').unwrap_or(width);
+        let break_at = if break_at == 0 { width } else { break_at };
+        result.push(remaining[..break_at].to_string());
+        remaining = remaining[break_at..].trim_start();
+    }
+
+    if result.is_empty() {
+        result.push(String::new());
+    }
+    result
 }
 
 fn render_table_row(
@@ -364,20 +443,42 @@ fn render_table_row(
     };
     let border = Style::default().fg(Color::DarkGray);
 
-    let mut spans: Vec<Span<'static>> = Vec::new();
-    if indent > 0 {
-        spans.push(Span::raw(" ".repeat(indent)));
-    }
-    spans.push(Span::styled("│ ", border));
-    for (i, width) in col_widths.iter().enumerate() {
-        if i > 0 {
-            spans.push(Span::styled(" │ ", border));
+    // Wrap each cell's content and determine how many visual lines this row needs
+    let wrapped: Vec<Vec<String>> = col_widths
+        .iter()
+        .enumerate()
+        .map(|(i, &w)| {
+            let text = cells.get(i).map(|s| s.as_str()).unwrap_or("");
+            wrap_cell_text(text, w)
+        })
+        .collect();
+
+    let max_lines = wrapped.iter().map(|w| w.len()).max().unwrap_or(1);
+
+    // Render each visual line of the row
+    for line_idx in 0..max_lines {
+        let mut spans: Vec<Span<'static>> = Vec::new();
+        if indent > 0 {
+            spans.push(Span::raw(" ".repeat(indent)));
         }
-        let text = cells.get(i).map(|s| s.as_str()).unwrap_or("");
-        spans.push(Span::styled(format!("{:<width$}", text, width = width), style));
+        spans.push(Span::styled("│ ", border));
+        for (col, width) in col_widths.iter().enumerate() {
+            if col > 0 {
+                spans.push(Span::styled(" │ ", border));
+            }
+            let text = wrapped
+                .get(col)
+                .and_then(|w| w.get(line_idx))
+                .map(|s| s.as_str())
+                .unwrap_or("");
+            spans.push(Span::styled(
+                format!("{:<width$}", text, width = width),
+                style,
+            ));
+        }
+        spans.push(Span::styled(" │", border));
+        lines.push(Line::from(spans));
     }
-    spans.push(Span::styled(" │", border));
-    lines.push(Line::from(spans));
 }
 
 fn render_table_separator(

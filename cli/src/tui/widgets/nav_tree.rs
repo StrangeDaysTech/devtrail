@@ -4,7 +4,7 @@ use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Paragraph, Widget};
 
-use crate::tui::app::{ActivePanel, App, NavSelection};
+use crate::tui::app::{ActivePanel, App, NavSelection, SortOrder};
 use crate::tui::index::DocEntry;
 
 pub struct NavTree<'a> {
@@ -27,7 +27,10 @@ impl Widget for NavTree<'_> {
         };
 
         let block = Block::default()
-            .title(" Navigation ")
+            .title(format!(" Navigation {} ", match self.app.sort_order {
+                SortOrder::Name => "[s:sort ↓name]",
+                SortOrder::Date => "[s:sort ↓date]",
+            }))
             .title_style(Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
             .borders(Borders::ALL)
             .border_style(border_style);
@@ -36,22 +39,20 @@ impl Widget for NavTree<'_> {
         block.render(area, buf);
 
         let mut lines: Vec<Line<'static>> = Vec::new();
+        let mut selected_line: Option<usize> = None;
         let search = self.app.search_query.as_deref();
-
         let has_search = search.is_some();
 
         for (gi, group) in self.app.index.groups.iter().enumerate() {
             let is_expanded = self.app.expanded_groups[gi];
             let is_selected = self.app.selection == NavSelection::Group(gi);
 
-            // When searching, auto-expand groups that have matches
             let show_children = if has_search {
                 group_has_matches(group, search)
             } else {
                 is_expanded
             };
 
-            // When searching, skip groups with no matches
             if has_search && !show_children {
                 continue;
             }
@@ -74,6 +75,9 @@ impl Widget for NavTree<'_> {
                 Style::default().fg(Color::White)
             };
 
+            if is_selected {
+                selected_line = Some(lines.len());
+            }
             lines.push(Line::from(vec![
                 Span::styled(format!(" {arrow} "), Style::default().fg(Color::Cyan)),
                 Span::styled(group.label.clone(), style),
@@ -81,29 +85,28 @@ impl Widget for NavTree<'_> {
             ]));
 
             if show_children {
-                // Direct files in group
                 for (fi, entry) in group.files.iter().enumerate() {
                     if !matches_search(entry, search) {
                         continue;
                     }
                     let is_sel = self.app.selection == NavSelection::GroupFile(gi, fi);
-                    let style = file_style(is_sel);
-                    lines.push(Line::from(vec![
-                        Span::raw("     "),
-                        Span::styled(truncate_filename(&entry.filename, inner.width as usize - 6), style),
-                    ]));
+                    if is_sel {
+                        selected_line = Some(lines.len());
+                    }
+                    lines.push(file_entry_line(entry, "     ", inner.width as usize, is_sel));
                 }
 
-                // Subgroups
                 for (si, sg) in group.subgroups.iter().enumerate() {
-                    // When searching, skip subgroups with no matches
-                    let sg_has_matches = sg.files.iter().any(|e| matches_search(e, search));
-                    if has_search && !sg_has_matches {
+                    let sg_matches = subgroup_has_search_matches(sg, search);
+                    if has_search && !sg_matches {
                         continue;
                     }
 
                     let is_sel = self.app.selection == NavSelection::Subgroup(gi, si);
-                    let sg_count = sg.files.len();
+                    let sg_expanded = has_search || self.app.is_subgroup_expanded(gi, si);
+                    let sg_count = sg.files.len()
+                        + sg.user_dirs.iter().map(|ud| ud.files.len()).sum::<usize>();
+                    let sg_arrow = if sg_expanded { "▾" } else { "▸" };
                     let sg_style = if is_sel {
                         Style::default()
                             .bg(Color::DarkGray)
@@ -113,9 +116,12 @@ impl Widget for NavTree<'_> {
                         Style::default().fg(Color::Yellow)
                     };
 
+                    if is_sel {
+                        selected_line = Some(lines.len());
+                    }
                     lines.push(Line::from(vec![
                         Span::raw("   "),
-                        Span::styled("▸ ", Style::default().fg(Color::Yellow)),
+                        Span::styled(format!("{sg_arrow} "), Style::default().fg(Color::Yellow)),
                         Span::styled(format!("{}/", sg.label), sg_style),
                         Span::styled(
                             format!(" ({sg_count})"),
@@ -123,29 +129,131 @@ impl Widget for NavTree<'_> {
                         ),
                     ]));
 
-                    // Files in subgroup
-                    for (fi, entry) in sg.files.iter().enumerate() {
-                        if !matches_search(entry, search) {
-                            continue;
+                    if sg_expanded {
+                        // Direct files in subgroup
+                        for (fi, entry) in sg.files.iter().enumerate() {
+                            if !matches_search(entry, search) {
+                                continue;
+                            }
+                            let is_sel =
+                                self.app.selection == NavSelection::SubgroupFile(gi, si, fi);
+                            if is_sel {
+                                selected_line = Some(lines.len());
+                            }
+                            lines.push(file_entry_line(entry, "       ", inner.width as usize, is_sel));
                         }
-                        let is_sel =
-                            self.app.selection == NavSelection::SubgroupFile(gi, si, fi);
-                        let style = file_style(is_sel);
-                        lines.push(Line::from(vec![
-                            Span::raw("       "),
-                            Span::styled(
-                                truncate_filename(&entry.filename, inner.width as usize - 8),
-                                style,
-                            ),
-                        ]));
+
+                        // User-created subdirectories
+                        for (di, ud) in sg.user_dirs.iter().enumerate() {
+                            let ud_has_matches =
+                                ud.files.iter().any(|e| matches_search(e, search));
+                            if has_search && !ud_has_matches {
+                                continue;
+                            }
+
+                            let is_sel =
+                                self.app.selection == NavSelection::UserDir(gi, si, di);
+                            let ud_expanded =
+                                has_search || self.app.is_userdir_expanded(gi, si, di);
+                            let ud_count = ud.files.len();
+                            let ud_arrow = if ud_expanded { "▾" } else { "▸" };
+                            let ud_style = if is_sel {
+                                Style::default()
+                                    .bg(Color::DarkGray)
+                                    .fg(Color::Magenta)
+                                    .add_modifier(Modifier::BOLD)
+                            } else {
+                                Style::default().fg(Color::Magenta)
+                            };
+
+                            if is_sel {
+                                selected_line = Some(lines.len());
+                            }
+                            lines.push(Line::from(vec![
+                                Span::raw("     "),
+                                Span::styled(
+                                    format!("{ud_arrow} "),
+                                    Style::default().fg(Color::Magenta),
+                                ),
+                                Span::styled(format!("{}/", ud.name), ud_style),
+                                Span::styled(
+                                    format!(" ({ud_count})"),
+                                    Style::default().fg(Color::DarkGray),
+                                ),
+                            ]));
+
+                            if ud_expanded {
+                                // Files in user dir
+                                for (fi, entry) in ud.files.iter().enumerate() {
+                                    if !matches_search(entry, search) {
+                                        continue;
+                                    }
+                                    let is_sel = self.app.selection
+                                        == NavSelection::UserDirFile(gi, si, di, fi);
+                                    if is_sel {
+                                        selected_line = Some(lines.len());
+                                    }
+                                    lines.push(file_entry_line(entry, "         ", inner.width as usize, is_sel));
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
 
-        let paragraph = Paragraph::new(lines);
+        // Calculate scroll to keep selected item visible
+        let visible_height = inner.height as usize;
+        let scroll = if let Some(sel) = selected_line {
+            if sel >= visible_height {
+                // Keep selected item near the bottom with some margin
+                (sel - visible_height + 3).min(lines.len().saturating_sub(visible_height))
+            } else {
+                0
+            }
+        } else {
+            0
+        };
+
+        let paragraph = Paragraph::new(lines).scroll((scroll as u16, 0));
         paragraph.render(inner, buf);
     }
+}
+
+fn file_entry_line(entry: &DocEntry, indent: &str, max_width: usize, selected: bool) -> Line<'static> {
+    let style = file_style(selected);
+    let badge_style = Style::default().fg(Color::DarkGray);
+    let date_style = Style::default().fg(Color::DarkGray);
+
+    let badge = if entry.doc_type.is_empty() {
+        String::from("   ")
+    } else {
+        format!("{} ", entry.doc_type)
+    };
+    let badge_len = badge.len();
+
+    // Compact date: show MM-DD from YYYY-MM-DD
+    let date = if entry.created.len() >= 10 {
+        format!(" {}", &entry.created[5..10])
+    } else {
+        String::new()
+    };
+    let date_len = date.len();
+
+    let indent_len = indent.len();
+    let title_budget = max_width
+        .saturating_sub(indent_len)
+        .saturating_sub(badge_len)
+        .saturating_sub(date_len);
+
+    let title = truncate_str(&entry.title, title_budget);
+
+    Line::from(vec![
+        Span::raw(indent.to_string()),
+        Span::styled(badge, badge_style),
+        Span::styled(title, style),
+        Span::styled(date, date_style),
+    ])
 }
 
 fn file_style(selected: bool) -> Style {
@@ -161,11 +269,18 @@ fn file_style(selected: bool) -> Style {
 
 fn count_group_docs(group: &crate::tui::index::DocGroup) -> usize {
     let direct = group.files.len();
-    let sub: usize = group.subgroups.iter().map(|sg| sg.files.len()).sum();
+    let sub: usize = group
+        .subgroups
+        .iter()
+        .map(|sg| {
+            sg.files.len()
+                + sg.user_dirs.iter().map(|ud| ud.files.len()).sum::<usize>()
+        })
+        .sum();
     direct + sub
 }
 
-fn truncate_filename(name: &str, max_width: usize) -> String {
+fn truncate_str(name: &str, max_width: usize) -> String {
     if name.len() <= max_width {
         name.to_string()
     } else if max_width > 3 {
@@ -175,14 +290,28 @@ fn truncate_filename(name: &str, max_width: usize) -> String {
     }
 }
 
+fn subgroup_has_search_matches(
+    sg: &crate::tui::index::DocSubgroup,
+    search: Option<&str>,
+) -> bool {
+    sg.files.iter().any(|e| matches_search(e, search))
+        || sg
+            .user_dirs
+            .iter()
+            .any(|ud| ud.files.iter().any(|e| matches_search(e, search)))
+}
+
 fn group_has_matches(group: &crate::tui::index::DocGroup, search: Option<&str>) -> bool {
     if group.files.iter().any(|e| matches_search(e, search)) {
         return true;
     }
-    group
-        .subgroups
-        .iter()
-        .any(|sg| sg.files.iter().any(|e| matches_search(e, search)))
+    group.subgroups.iter().any(|sg| {
+        sg.files.iter().any(|e| matches_search(e, search))
+            || sg
+                .user_dirs
+                .iter()
+                .any(|ud| ud.files.iter().any(|e| matches_search(e, search)))
+    })
 }
 
 fn matches_search(entry: &DocEntry, search: Option<&str>) -> bool {
@@ -191,26 +320,9 @@ fn matches_search(entry: &DocEntry, search: Option<&str>) -> bool {
     };
     let query = q.to_lowercase();
 
-    // Search in filename
-    if entry.filename.to_lowercase().contains(&query) {
-        return true;
-    }
-    // Search in title
-    if entry.title.to_lowercase().contains(&query) {
-        return true;
-    }
-    // Search in tags
-    if entry.tags.iter().any(|t| t.to_lowercase().contains(&query)) {
-        return true;
-    }
-    // Search in created date
-    if !entry.created.is_empty() && entry.created.contains(&query) {
-        return true;
-    }
-    // Search in id
-    if entry.id.to_lowercase().contains(&query) {
-        return true;
-    }
-
-    false
+    entry.filename.to_lowercase().contains(&query)
+        || entry.title.to_lowercase().contains(&query)
+        || entry.tags.iter().any(|t| t.to_lowercase().contains(&query))
+        || (!entry.created.is_empty() && entry.created.contains(&query))
+        || entry.id.to_lowercase().contains(&query)
 }

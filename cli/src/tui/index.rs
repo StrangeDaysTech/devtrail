@@ -26,6 +26,18 @@ pub struct DocSubgroup {
     /// Display label (e.g., "Technical debt")
     pub label: String,
     pub path: PathBuf,
+    /// Files directly in this subgroup
+    pub files: Vec<DocEntry>,
+    /// User-created subdirectories within this subgroup
+    pub user_dirs: Vec<UserDir>,
+}
+
+/// A user-created subdirectory within a subgroup (e.g., "daemon" under "agent-logs")
+#[derive(Debug, Clone)]
+#[allow(dead_code)]
+pub struct UserDir {
+    pub name: String,
+    pub path: PathBuf,
     pub files: Vec<DocEntry>,
 }
 
@@ -35,8 +47,11 @@ pub struct DocSubgroup {
 pub struct DocEntry {
     pub filename: String,
     pub path: PathBuf,
+    /// Display title (from frontmatter, H1, or humanized filename)
     pub title: String,
     pub id: String,
+    /// Short type badge: "AI", "DC", "AD", "ET", "RQ", "TS", "IN", "TD"
+    pub doc_type: String,
     pub tags: Vec<String>,
     pub created: String,
     pub has_frontmatter: bool,
@@ -111,22 +126,50 @@ impl DocIndex {
                 continue;
             }
 
-            // Scan files directly in the group dir
-            let files = scan_md_files(&group_path, &mut relations);
+            // Scan files directly in the group dir (non-recursive, subgroups scanned separately)
+            let files = scan_md_files_flat(&group_path, &mut relations);
             total_docs += files.len();
 
-            // Scan subgroups
+            // Scan subgroups and their user-created subdirectories
             let mut subgroups = Vec::new();
             for &(sg_name, sg_label) in subgroup_defs {
                 let sg_path = group_path.join(sg_name);
                 if sg_path.exists() {
-                    let sg_files = scan_md_files(&sg_path, &mut relations);
+                    // Files directly in the subgroup
+                    let sg_files = scan_md_files_flat(&sg_path, &mut relations);
                     total_docs += sg_files.len();
+
+                    // Scan user-created subdirectories
+                    let mut user_dirs = Vec::new();
+                    if let Ok(entries) = std::fs::read_dir(&sg_path) {
+                        let mut dirs: Vec<PathBuf> = entries
+                            .flatten()
+                            .map(|e| e.path())
+                            .filter(|p| p.is_dir())
+                            .collect();
+                        dirs.sort();
+                        for dir_path in dirs {
+                            let dir_name = dir_path
+                                .file_name()
+                                .and_then(|n| n.to_str())
+                                .unwrap_or("")
+                                .to_string();
+                            let dir_files = scan_md_files(&dir_path, &mut relations);
+                            total_docs += dir_files.len();
+                            user_dirs.push(UserDir {
+                                name: dir_name,
+                                path: dir_path,
+                                files: dir_files,
+                            });
+                        }
+                    }
+
                     subgroups.push(DocSubgroup {
                         name: sg_name.to_string(),
                         label: sg_label.to_string(),
                         path: sg_path,
                         files: sg_files,
+                        user_dirs,
                     });
                 } else {
                     subgroups.push(DocSubgroup {
@@ -134,6 +177,7 @@ impl DocIndex {
                         label: sg_label.to_string(),
                         path: sg_path,
                         files: Vec::new(),
+                        user_dirs: Vec::new(),
                     });
                 }
             }
@@ -191,6 +235,13 @@ impl DocIndex {
                         candidates.push(&entry.path);
                     }
                 }
+                for ud in &sg.user_dirs {
+                    for entry in &ud.files {
+                        if entry_matches(&entry.filename, &entry.path, ref_filename, clean_ref) {
+                            candidates.push(&entry.path);
+                        }
+                    }
+                }
             }
         }
 
@@ -226,7 +277,8 @@ fn entry_matches(filename: &str, path: &Path, ref_filename: &str, clean_ref: &st
     false
 }
 
-fn scan_md_files(dir: &Path, relations: &mut RelationIndex) -> Vec<DocEntry> {
+/// Scan only direct .md files in a directory (non-recursive, for group root dirs)
+fn scan_md_files_flat(dir: &Path, relations: &mut RelationIndex) -> Vec<DocEntry> {
     let mut entries = Vec::new();
 
     let Ok(read_dir) = std::fs::read_dir(dir) else {
@@ -247,7 +299,67 @@ fn scan_md_files(dir: &Path, relations: &mut RelationIndex) -> Vec<DocEntry> {
         })
         .collect();
 
-    paths.sort();
+    paths.sort_by(|a, b| {
+        let name_a = a.file_name().and_then(|n| n.to_str()).unwrap_or("");
+        let name_b = b.file_name().and_then(|n| n.to_str()).unwrap_or("");
+        name_a.cmp(name_b)
+    });
+
+    for path in paths {
+        let filename = path
+            .file_name()
+            .and_then(|n| n.to_str())
+            .unwrap_or("")
+            .to_string();
+
+        let meta = quick_scan_frontmatter(&path, relations);
+
+        entries.push(DocEntry {
+            filename,
+            path,
+            title: meta.title,
+            id: meta.id,
+            doc_type: meta.doc_type,
+            tags: meta.tags,
+            created: meta.created,
+            has_frontmatter: meta.has_frontmatter,
+        });
+    }
+
+    entries
+}
+
+/// Scan .md files recursively (for subgroups that may have nested subdirectories)
+fn scan_md_files(dir: &Path, relations: &mut RelationIndex) -> Vec<DocEntry> {
+    let mut entries = Vec::new();
+    let mut paths = Vec::new();
+    collect_md_files(dir, &mut paths);
+    paths.sort_by(|a, b| {
+        let name_a = a.file_name().and_then(|n| n.to_str()).unwrap_or("");
+        let name_b = b.file_name().and_then(|n| n.to_str()).unwrap_or("");
+        name_a.cmp(name_b)
+    });
+
+    fn collect_md_files(dir: &Path, paths: &mut Vec<PathBuf>) {
+        let Ok(read_dir) = std::fs::read_dir(dir) else {
+            return;
+        };
+        for entry in read_dir.flatten() {
+            let path = entry.path();
+            if path.is_dir() {
+                collect_md_files(&path, paths);
+            } else if path.is_file()
+                && path.extension().and_then(|e| e.to_str()) == Some("md")
+                && !path
+                    .file_name()
+                    .and_then(|n| n.to_str())
+                    .map(|n| n.starts_with("TEMPLATE-") || n.starts_with('.'))
+                    .unwrap_or(true)
+            {
+                paths.push(path);
+            }
+        }
+    }
 
     for path in paths {
         let filename = path
@@ -264,6 +376,7 @@ fn scan_md_files(dir: &Path, relations: &mut RelationIndex) -> Vec<DocEntry> {
             path,
             title: meta.title,
             id: meta.id,
+            doc_type: meta.doc_type,
             tags: meta.tags,
             created: meta.created,
             has_frontmatter: meta.has_frontmatter,
@@ -276,19 +389,70 @@ fn scan_md_files(dir: &Path, relations: &mut RelationIndex) -> Vec<DocEntry> {
 struct ScannedMeta {
     title: String,
     id: String,
+    doc_type: String,
     tags: Vec<String>,
     created: String,
     has_frontmatter: bool,
 }
 
-fn fallback_meta(path: &Path) -> ScannedMeta {
+/// Extract doc type badge from filename prefix
+fn doc_type_badge(filename: &str) -> String {
+    let badges: &[(&str, &str)] = &[
+        ("AILOG-", "AI"),
+        ("AIDEC-", "DC"),
+        ("ADR-", "AD"),
+        ("ETH-", "ET"),
+        ("REQ-", "RQ"),
+        ("TES-", "TS"),
+        ("INC-", "IN"),
+        ("TDE-", "TD"),
+    ];
+    for &(prefix, badge) in badges {
+        if filename.starts_with(prefix) {
+            return badge.to_string();
+        }
+    }
+    String::new()
+}
+
+/// Try to find the first H1 title (# Title) in markdown content
+fn find_h1_title(content: &str) -> Option<String> {
+    for line in content.lines() {
+        let trimmed = line.trim();
+        if let Some(title) = trimmed.strip_prefix("# ") {
+            let title = title.trim();
+            if !title.is_empty() {
+                return Some(title.to_string());
+            }
+        }
+    }
+    None
+}
+
+/// Convert a filename stem to a human-readable title
+fn humanize_filename(stem: &str) -> String {
+    stem.replace('-', " ").replace('_', " ")
+}
+
+fn fallback_meta(path: &Path, content: Option<&str>) -> ScannedMeta {
+    let filename = path
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("Unknown");
+    let stem = path
+        .file_stem()
+        .and_then(|n| n.to_str())
+        .unwrap_or("Unknown");
+
+    // Try H1 from content, then humanize filename
+    let title = content
+        .and_then(find_h1_title)
+        .unwrap_or_else(|| humanize_filename(stem));
+
     ScannedMeta {
-        title: path
-            .file_stem()
-            .and_then(|n| n.to_str())
-            .unwrap_or("Unknown")
-            .to_string(),
+        title,
         id: String::new(),
+        doc_type: doc_type_badge(filename),
         tags: Vec::new(),
         created: String::new(),
         has_frontmatter: false,
@@ -298,32 +462,42 @@ fn fallback_meta(path: &Path) -> ScannedMeta {
 fn quick_scan_frontmatter(path: &Path, relations: &mut RelationIndex) -> ScannedMeta {
     let content = match std::fs::read_to_string(path) {
         Ok(c) => c,
-        Err(_) => return fallback_meta(path),
+        Err(_) => return fallback_meta(path, None),
     };
 
     let trimmed = content.trim_start();
     if !trimmed.starts_with("---") {
-        return fallback_meta(path);
+        return fallback_meta(path, Some(&content));
     }
 
     let after = &trimmed[3..];
     let Some(end) = after.find("\n---") else {
-        return fallback_meta(path);
+        return fallback_meta(path, Some(&content));
     };
 
     let yaml_str = &after[..end];
+    let body = &after[end + 4..]; // content after closing ---
     let fm: Option<DocFrontMatter> = serde_yaml::from_str(yaml_str).ok();
+
+    let filename = path
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("");
 
     match fm {
         Some(fm) => {
             let id = fm.id.clone();
-            let title = if fm.title.is_empty() {
-                path.file_stem()
-                    .and_then(|n| n.to_str())
-                    .unwrap_or("Unknown")
-                    .to_string()
-            } else {
+            let title = if !fm.title.is_empty() {
                 fm.title.clone()
+            } else {
+                // Try H1 from body, then humanize filename
+                find_h1_title(body).unwrap_or_else(|| {
+                    humanize_filename(
+                        path.file_stem()
+                            .and_then(|n| n.to_str())
+                            .unwrap_or("Unknown"),
+                    )
+                })
             };
             let tags = fm.tags.clone();
             let created = fm.created.clone().unwrap_or_default();
@@ -351,11 +525,12 @@ fn quick_scan_frontmatter(path: &Path, relations: &mut RelationIndex) -> Scanned
             ScannedMeta {
                 title,
                 id,
+                doc_type: doc_type_badge(filename),
                 tags,
                 created,
                 has_frontmatter: true,
             }
         }
-        None => fallback_meta(path),
+        None => fallback_meta(path, Some(body)),
     }
 }
