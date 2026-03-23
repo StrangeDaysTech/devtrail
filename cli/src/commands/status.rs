@@ -30,7 +30,16 @@ const EXPECTED_FILES: &[(&str, &str)] = &[
 ];
 
 /// Document type prefixes for counting
-const DOC_TYPES: &[&str] = &["ADR", "AIDEC", "AILOG", "ETH", "INC", "REQ", "TDE", "TES"];
+const DOC_TYPES: &[(&str, &str)] = &[
+    ("ADR", "Architecture Decisions"),
+    ("AIDEC", "AI Decisions"),
+    ("AILOG", "AI Action Logs"),
+    ("ETH", "Ethical Reviews"),
+    ("INC", "Incident Post-mortems"),
+    ("REQ", "Requirements"),
+    ("TDE", "Technical Debt"),
+    ("TES", "Test Plans"),
+];
 
 pub fn run(path: &str) -> Result<()> {
     let target = PathBuf::from(path)
@@ -39,7 +48,6 @@ pub fn run(path: &str) -> Result<()> {
 
     let devtrail_dir = target.join(".devtrail");
 
-    // Phase 1: Check installation
     if !devtrail_dir.exists() {
         utils::info(&format!(
             "DevTrail is not installed in {}",
@@ -49,67 +57,189 @@ pub fn run(path: &str) -> Result<()> {
         return Ok(());
     }
 
-    // Phase 2: Header
     let version = load_version(&target);
     let language = load_language(&target);
-
     let cli_version = env!("CARGO_PKG_VERSION");
 
+    // ── Header ──
     println!();
-    println!("{}", "DevTrail Status".bold());
-    println!("  {}      {}", "Path:".dimmed(), target.display());
-    println!("  {} fw-{}", "Framework:".dimmed(), version);
-    println!("  {}       cli-{}", "CLI:".dimmed(), cli_version);
-    println!("  {}  {}", "Language:".dimmed(), language);
-
-    // Phase 2: Structure check
+    let header = "DevTrail Status";
+    let w = 48;
+    let pad = w - 2 - header.len();
+    let top = format!("  ╔{}╗", "═".repeat(w));
+    let mid = format!("  ║ {}{} ║", header, " ".repeat(pad));
+    let bot = format!("  ╚{}╝", "═".repeat(w));
+    println!("{}", top.cyan());
+    println!("{}", mid.bold().cyan());
+    println!("{}", bot.cyan());
     println!();
-    println!("{}", "Structure".bold());
 
+    // ── Project Info ──
+    println!("  {}", "Project".bold());
+    let project_rows: Vec<(&str, String)> = vec![
+        ("Path", target.display().to_string()),
+        ("Framework", format!("fw-{}", version)),
+        ("CLI", format!("cli-{}", cli_version)),
+        ("Language", language.clone()),
+    ];
+    let label_w = project_rows.iter().map(|(l, _)| l.len()).max().unwrap_or(5);
+    let value_w = project_rows.iter().map(|(_, v)| v.len()).max().unwrap_or(10);
+    print_border("  ┌", label_w, "┬", value_w, "┐");
+    for (label, value) in &project_rows {
+        println!(
+            "  │ {:<label_w$} │ {:<value_w$} │",
+            format!("{label}").dimmed(),
+            value
+        );
+    }
+    print_border("  └", label_w, "┴", value_w, "┘");
+
+    // ── Structure ──
+    println!();
+    println!("  {}", "Structure".bold());
+
+    // Collect all structure items with their status
+    let mut struct_items: Vec<(String, bool)> = Vec::new();
     for dir in EXPECTED_DIRS {
         let dir_path = devtrail_dir.join(dir);
-        if dir_path.exists() {
-            utils::success(&format!("{dir}/"));
-        } else {
-            println!(
-                "{} {}  {}",
-                "!".yellow().bold(),
-                format!("{dir}/").yellow(),
-                "(missing)".dimmed()
-            );
-        }
+        struct_items.push((format!("{dir}/"), dir_path.exists()));
     }
-
     for &(rel_path, label) in EXPECTED_FILES {
         let file_path = target.join(rel_path);
-        if file_path.exists() {
-            utils::success(label);
+        struct_items.push((label.to_string(), file_path.exists()));
+    }
+
+    let total_items = struct_items.len();
+    let total_ok = struct_items.iter().filter(|(_, ok)| *ok).count();
+    let total_missing = total_items - total_ok;
+
+    if total_missing == 0 {
+        println!(
+            "  {} All {} items present",
+            "✓".green().bold(),
+            total_items
+        );
+    } else {
+        println!(
+            "  {} {}/{} items present ({} missing)",
+            "!".yellow().bold(),
+            total_ok,
+            total_items,
+            total_missing
+        );
+    }
+
+    // Calculate column widths dynamically
+    let name_w = struct_items
+        .iter()
+        .map(|(name, _)| name.len())
+        .max()
+        .unwrap_or(10)
+        .max("Directory / File".len());
+    let status_w = 6; // "✓ OK " or "✗ -- "
+
+    print_border("  ┌", name_w, "┬", status_w, "┐");
+    println!(
+        "  │ {:<name_w$} │ {:<status_w$} │",
+        "Directory / File".dimmed(),
+        "Status".dimmed()
+    );
+    print_border("  ├", name_w, "┼", status_w, "┤");
+
+    for (name, exists) in &struct_items {
+        let status_text = if *exists { "✓ OK" } else { "✗ --" };
+        let plain_row = format!("  │ {:<name_w$} │ {:<status_w$} │", name, status_text);
+        if *exists {
+            println!("{}", plain_row.replace(status_text, &status_text.green().to_string()));
         } else {
             println!(
-                "{} {}  {}",
-                "!".yellow().bold(),
-                label.yellow(),
-                "(missing)".dimmed()
+                "{}",
+                plain_row
+                    .replace(name.as_str(), &name.yellow().to_string())
+                    .replace(status_text, &status_text.yellow().to_string())
             );
         }
     }
 
-    // Phase 3: Documentation statistics
+    print_border("  └", name_w, "┴", status_w, "┘");
+
+    // ── Documentation ──
     let counts = count_documents(&devtrail_dir);
-    let total: usize = counts.iter().map(|(_, c)| c).sum();
+    let total: usize = counts.iter().map(|(_, _, c)| c).sum();
 
     println!();
-    println!("{}", "Documentation".bold());
-    println!("  {:<7}  {:>5}", "Type", "Count");
-    println!("  {:<7}  {:>5}", "───────", "─────");
-    for (doc_type, count) in &counts {
-        println!("  {:<7}  {:>5}", doc_type, count);
+    println!("  {}", "Documentation".bold());
+
+    let type_w = DOC_TYPES
+        .iter()
+        .map(|(p, l)| format!("{:<6}{}", p, l).len())
+        .max()
+        .unwrap_or(20)
+        .max("Type".len());
+    let count_w = 5;
+
+    print_border("  ┌", type_w, "┬", count_w, "┐");
+    println!(
+        "  │ {:<type_w$} │ {:<count_w$} │",
+        "Type".dimmed(),
+        "Count".dimmed()
+    );
+    print_border("  ├", type_w, "┼", count_w, "┤");
+
+    for (prefix, label, count) in &counts {
+        let display = format!("{prefix:<6}{label}");
+        let count_str = format!("{count:>count_w$}");
+        if *count > 0 {
+            println!(
+                "  │ {:<type_w$} │ {} │",
+                display,
+                count_str.green().bold()
+            );
+        } else {
+            println!(
+                "  │ {} │ {} │",
+                format!("{:<type_w$}", display).dimmed(),
+                count_str.dimmed()
+            );
+        }
     }
-    println!("  {:<7}  {:>5}", "───────", "─────");
-    println!("  {:<7}  {:>5}", "Total", total);
+
+    print_border("  ├", type_w, "┼", count_w, "┤");
+    let total_str = format!("{total:>count_w$}");
+    println!(
+        "  │ {:<type_w$} │ {} │",
+        "Total".bold(),
+        total_str.cyan().bold()
+    );
+    print_border("  └", type_w, "┴", count_w, "┘");
     println!();
+
+    // ── Hint ──
+    if total > 0 {
+        println!(
+            "  {} Run {} to browse documentation interactively",
+            "→".blue().bold(),
+            "devtrail explore".cyan().bold()
+        );
+        println!();
+    }
 
     Ok(())
+}
+
+fn print_border(prefix: &str, w1: usize, mid: &str, w2: usize, suffix: &str) {
+    println!(
+        "{}",
+        format!(
+            "{}{}{}{}{}",
+            prefix,
+            "─".repeat(w1 + 2),
+            mid,
+            "─".repeat(w2 + 2),
+            suffix
+        )
+        .dimmed()
+    );
 }
 
 fn load_version(project_root: &std::path::Path) -> String {
@@ -133,11 +263,11 @@ fn load_language(project_root: &std::path::Path) -> String {
     }
 }
 
-fn count_documents(devtrail_dir: &std::path::Path) -> Vec<(&'static str, usize)> {
+fn count_documents(devtrail_dir: &std::path::Path) -> Vec<(&'static str, &'static str, usize)> {
     let files = walk_files(devtrail_dir);
     DOC_TYPES
         .iter()
-        .map(|&doc_type| {
+        .map(|&(doc_type, label)| {
             let prefix = format!("{}-", doc_type);
             let count = files
                 .iter()
@@ -149,7 +279,7 @@ fn count_documents(devtrail_dir: &std::path::Path) -> Vec<(&'static str, usize)>
                             .unwrap_or(false)
                 })
                 .count();
-            (doc_type, count)
+            (doc_type, label, count)
         })
         .collect()
 }
