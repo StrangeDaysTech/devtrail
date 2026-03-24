@@ -194,6 +194,8 @@ fn create_empty_dirs(target: &Path) -> Result<()> {
         ".devtrail/07-ai-audit/agent-logs",
         ".devtrail/07-ai-audit/decisions",
         ".devtrail/07-ai-audit/ethical-reviews",
+        ".devtrail/08-security",
+        ".devtrail/09-ai-models",
         ".devtrail/00-governance/exceptions",
     ];
 

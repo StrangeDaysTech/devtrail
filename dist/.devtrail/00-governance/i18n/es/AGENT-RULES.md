@@ -30,13 +30,17 @@ confidence: high | medium | low
 
 | Situación | Tipo | Notas |
 |-----------|------|-------|
-| >10 líneas de código en lógica de negocio | AILOG | - |
+| >20 líneas de lógica de negocio | AILOG | Usar juicio cualitativo para casos límite |
 | Decisión entre 2+ alternativas técnicas | AIDEC | Documentar alternativas |
-| Cambios en seguridad/autenticación | AILOG | `risk_level: high` |
-| Manejo de datos personales (PII/GDPR) | AILOG + ETH | ETH requiere aprobación |
+| Cambios en auth/autorización/PII | AILOG + ETH | `risk_level: high`, ETH requiere aprobación |
+| Cambios en API pública o esquema de BD | AILOG | `risk_level: medium+`, considerar ADR |
+| Cambios en modelos ML o prompts de IA | AILOG | `risk_level: medium+`, revisión humana requerida |
 | Integración con servicio externo | AILOG | - |
-| Cambio en API pública | AILOG | `risk_level: medium+` |
-| Cambio en esquema de base de datos | AILOG | `risk_level: medium+` |
+| Adición/eliminación/actualización de dependencias críticas de seguridad | AILOG | Revisión humana requerida |
+| Cambios que afectan el ciclo de vida del sistema de IA (despliegue, retirada) | AILOG + ADR | Revisión humana requerida |
+| Cambios en instrumentación OTel (spans, atributos, pipeline) | AILOG | Tag `observabilidad`, ver §9 |
+
+> **Umbral basado en complejidad (cuando está disponible):** Si el CLI de DevTrail y `lizard` están instalados, los agentes pueden invocar `devtrail analyze-complexity` para medir el delta de complejidad ciclomática. Documentar si delta CCN > 5. Recurrir a la regla de >20 líneas cuando las herramientas no están disponibles.
 
 ### PROHIBIDO - No documentar
 
@@ -76,6 +80,20 @@ confidence: high | medium | low
 | REQ | Requisitos del sistema |
 | TES | Planes de prueba |
 
+### Crear Borrador → Requiere Aprobación Humana (tipos nuevos)
+
+| Tipo | Descripción |
+|------|-------------|
+| SEC | Evaluaciones de seguridad (`review_required: true` siempre) |
+| MCARD | Tarjetas de modelo/sistema (`review_required: true` siempre) |
+| DPIA | Evaluaciones de impacto en protección de datos (`review_required: true` siempre) |
+
+### Crear Libremente (tipos nuevos)
+
+| Tipo | Descripción |
+|------|-------------|
+| SBOM | Lista de materiales de software (inventario factual) |
+
 ### Solo Identificar → Humano Prioriza
 
 | Tipo | Descripción |
@@ -95,6 +113,10 @@ Marcar `review_required: true` cuando:
 4. **Cambios irreversibles**: Migraciones, eliminaciones
 5. **Impacto en usuarios**: Cambios que afectan UX
 6. **Preocupaciones éticas**: Privacidad, sesgo, accesibilidad
+7. **Cambios en modelos ML**: Cambios en parámetros del modelo, arquitectura o datos de entrenamiento
+8. **Cambios en prompts de IA**: Modificaciones a prompts o instrucciones de agentes
+9. **Dependencias críticas de seguridad**: Adición, eliminación o actualización de paquetes sensibles a la seguridad
+10. **Cambios en ciclo de vida de IA**: Despliegue, retirada o cambios de versión mayor de sistemas de IA
 
 ---
 
@@ -126,6 +148,10 @@ Antes de crear un documento, cargar la plantilla correspondiente:
 | TES | `.devtrail/04-testing/` |
 | INC | `.devtrail/05-operations/incidents/` |
 | TDE | `.devtrail/06-evolution/technical-debt/` |
+| SEC | `.devtrail/08-security/` |
+| MCARD | `.devtrail/09-ai-models/` |
+| SBOM | `.devtrail/07-ai-audit/` |
+| DPIA | `.devtrail/07-ai-audit/ethical-reviews/` |
 
 ### Tags y Related
 
@@ -196,4 +222,30 @@ Si el agente comete un error:
 
 ---
 
-*DevTrail v1.0.0 | [Strange Days Tech](https://strangedays.tech)*
+## 9. Observabilidad (OpenTelemetry)
+
+Cuando se trabaja en proyectos que usan OpenTelemetry:
+
+### Reglas
+
+- **No** capturar PII, tokens o secretos en atributos o logs de OTel
+- **Registrar** cambios en el pipeline de instrumentación (nuevos spans, atributos modificados, configuración del Collector) en AILOG con tag `observabilidad`
+- **Crear** AIDEC o ADR al adoptar OTel en proyectos distribuidos — documentar la decisión de adopción y selección de backend
+- **Establecer** `observability_scope` en el frontmatter cuando el cambio involucra instrumentación OTel
+
+### Disparadores de Documentación
+
+| Cambio | Documento | Adicional |
+|--------|----------|-----------|
+| Nuevos spans o atributos modificados | AILOG | Tag `observabilidad` |
+| Selección de backend OTel | AIDEC o ADR | Si sistema distribuido |
+| Configuración del pipeline del Collector | AILOG | Tag `observabilidad` |
+| Cambios en estrategia de muestreo | AIDEC | Documentar justificación |
+| Requisitos de observabilidad | REQ | Usar sección de Requisitos de Observabilidad |
+| Pruebas de propagación de trazas | TES | Usar sección de Pruebas de Observabilidad |
+| Incidente con evidencia de trazas | INC | Incluir trace_id/span_id en la línea temporal |
+| Deuda de instrumentación | TDE | Tag `observabilidad` |
+
+---
+
+*DevTrail v3.0.0 | [Strange Days Tech](https://strangedays.tech)*

@@ -51,8 +51,8 @@ echo ""
 echo "📋 Validating file naming convention..."
 
 # Valid pattern: TYPE-YYYY-MM-DD-NNN-description.md
-# Allowed types: ADR, REQ, TES, OPS, INC, TDE, AILOG, AIDEC, ETH, DOC
-VALID_PATTERN="^(ADR|REQ|TES|OPS|INC|TDE|AILOG|AIDEC|ETH|DOC)-[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{3}-[a-z0-9-]+\.md$"
+# Allowed types: ADR, REQ, TES, OPS, INC, TDE, AILOG, AIDEC, ETH, DOC, SEC, MCARD, SBOM, DPIA
+VALID_PATTERN="^(ADR|REQ|TES|OPS|INC|TDE|AILOG|AIDEC|ETH|DOC|SEC|MCARD|SBOM|DPIA)-[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{3}-[a-z0-9-]+\.md$"
 
 # Files excluded from naming validation
 EXCLUDED_FILES="PRINCIPLES.md|DOCUMENTATION-POLICY.md|AGENT-RULES.md|TEMPLATE-.*\.md|README.md|QUICK-REFERENCE.md|INDEX.md|\.gitkeep"
@@ -70,7 +70,7 @@ for file in $STAGED_DOCS; do
     if ! echo "$filename" | grep -qE "$VALID_PATTERN"; then
         echo -e "  ${RED}✗ Invalid naming: $filename${NC}"
         echo -e "    Expected: [TYPE]-[YYYY-MM-DD]-[NNN]-[description].md"
-        echo -e "    Valid types: ADR, REQ, TES, OPS, INC, TDE, AILOG, AIDEC, ETH, DOC"
+        echo -e "    Valid types: ADR, REQ, TES, OPS, INC, TDE, AILOG, AIDEC, ETH, DOC, SEC, MCARD, SBOM, DPIA"
         ((ERRORS++))
     else
         echo -e "  ${GREEN}✓ $filename${NC}"
@@ -190,7 +190,153 @@ done
 echo ""
 
 # =============================================================================
-# 6. Run markdownlint if available
+# 6. Validate risk_level / review_required cross-check
+# =============================================================================
+
+echo "📋 Validating risk_level and review_required..."
+
+for file in $STAGED_DOCS; do
+    filename=$(basename "$file")
+
+    # Skip excluded files
+    if echo "$filename" | grep -qE "$EXCLUDED_FILES"; then
+        continue
+    fi
+
+    FRONTMATTER=$(sed -n '/^---$/,/^---$/p' "$file" | sed '1d;$d')
+
+    if [ -z "$FRONTMATTER" ]; then
+        continue
+    fi
+
+    # Check risk_level high/critical requires review_required: true
+    RISK_LEVEL=$(echo "$FRONTMATTER" | grep "^risk_level:" | head -1 | sed 's/risk_level: *//' | tr -d '\r' || true)
+    REVIEW_REQUIRED=$(echo "$FRONTMATTER" | grep "^review_required:" | head -1 | sed 's/review_required: *//' | tr -d '\r' || true)
+
+    if [ "$RISK_LEVEL" = "high" ] || [ "$RISK_LEVEL" = "critical" ]; then
+        if [ "$REVIEW_REQUIRED" != "true" ]; then
+            echo -e "  ${RED}✗ $filename: risk_level is '$RISK_LEVEL' but review_required is not true${NC}"
+            ((ERRORS++))
+        fi
+    fi
+done
+
+echo ""
+
+# =============================================================================
+# 7. Validate id matches filename prefix
+# =============================================================================
+
+echo "📋 Validating id matches filename..."
+
+for file in $STAGED_DOCS; do
+    filename=$(basename "$file")
+
+    # Skip excluded files
+    if echo "$filename" | grep -qE "$EXCLUDED_FILES"; then
+        continue
+    fi
+
+    FRONTMATTER=$(sed -n '/^---$/,/^---$/p' "$file" | sed '1d;$d')
+
+    if [ -z "$FRONTMATTER" ]; then
+        continue
+    fi
+
+    # Extract id from frontmatter
+    DOC_ID=$(echo "$FRONTMATTER" | grep "^id:" | head -1 | sed 's/id: *//' | tr -d '\r' || true)
+
+    if [ -n "$DOC_ID" ]; then
+        # Expected: filename starts with the id value
+        EXPECTED_PREFIX="$DOC_ID"
+        FILENAME_PREFIX=$(echo "$filename" | sed 's/\(.*-[0-9]\{3\}\).*/\1/')
+
+        if [ "$DOC_ID" != "$FILENAME_PREFIX" ]; then
+            echo -e "  ${RED}✗ $filename: id '$DOC_ID' does not match filename prefix '$FILENAME_PREFIX'${NC}"
+            ((ERRORS++))
+        else
+            echo -e "  ${GREEN}✓ $filename - id matches filename${NC}"
+        fi
+    fi
+done
+
+echo ""
+
+# =============================================================================
+# 8. Validate review_required for specific types
+# =============================================================================
+
+echo "📋 Validating review_required for governance types..."
+
+REVIEW_REQUIRED_TYPES="^(ETH|ADR|SEC|MCARD|DPIA)-"
+
+for file in $STAGED_DOCS; do
+    filename=$(basename "$file")
+
+    # Skip excluded files
+    if echo "$filename" | grep -qE "$EXCLUDED_FILES"; then
+        continue
+    fi
+
+    # Only check specific types
+    if ! echo "$filename" | grep -qE "$REVIEW_REQUIRED_TYPES"; then
+        continue
+    fi
+
+    FRONTMATTER=$(sed -n '/^---$/,/^---$/p' "$file" | sed '1d;$d')
+
+    if [ -z "$FRONTMATTER" ]; then
+        continue
+    fi
+
+    REVIEW_REQUIRED=$(echo "$FRONTMATTER" | grep "^review_required:" | head -1 | sed 's/review_required: *//' | tr -d '\r' || true)
+
+    if [ "$REVIEW_REQUIRED" != "true" ]; then
+        DOC_TYPE=$(echo "$filename" | sed 's/-.*//')
+        echo -e "  ${RED}✗ $filename: type '$DOC_TYPE' requires review_required: true${NC}"
+        ((ERRORS++))
+    else
+        echo -e "  ${GREEN}✓ $filename - review_required is set${NC}"
+    fi
+done
+
+echo ""
+
+# =============================================================================
+# 9. Validate observability tag has matching section
+# =============================================================================
+
+echo "📋 Validating observability tag consistency..."
+
+for file in $STAGED_DOCS; do
+    filename=$(basename "$file")
+
+    # Skip excluded files
+    if echo "$filename" | grep -qE "$EXCLUDED_FILES"; then
+        continue
+    fi
+
+    FRONTMATTER=$(sed -n '/^---$/,/^---$/p' "$file" | sed '1d;$d')
+
+    if [ -z "$FRONTMATTER" ]; then
+        continue
+    fi
+
+    # Check if tags contain observabilidad
+    if echo "$FRONTMATTER" | grep -qi "observabilidad"; then
+        # Check body (after frontmatter) for an Observab header
+        BODY=$(sed -n '/^---$/,/^---$/!p' "$file" | tail -n +2)
+        if ! echo "$BODY" | grep -qiE "^#+.*Observab"; then
+            echo -e "  ${YELLOW}⚠ $filename: has tag 'observabilidad' but no Observability section header${NC}"
+            ((WARNINGS++))
+        fi
+    fi
+done
+
+echo ""
+
+# =============================================================================
+# 10. Run markdownlint if available
 # =============================================================================
 
 if command -v markdownlint &> /dev/null; then
@@ -210,7 +356,7 @@ fi
 echo ""
 
 # =============================================================================
-# 7. Summary and result
+# 11. Summary and result
 # =============================================================================
 
 echo "═══════════════════════════════════════════════════════════════════════════"

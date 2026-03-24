@@ -104,6 +104,8 @@ const GROUP_DEFS: &[(&str, &str, &[SubgroupDef])] = &[
             ("ethical-reviews", "Ethical reviews"),
         ],
     ),
+    ("08-security", "Security", &[]),
+    ("09-ai-models", "AI Models", &[]),
 ];
 
 impl DocIndex {
@@ -406,6 +408,10 @@ fn doc_type_badge(filename: &str) -> String {
         ("TES-", "TS"),
         ("INC-", "IN"),
         ("TDE-", "TD"),
+        ("SEC-", "SC"),
+        ("MCARD-", "MC"),
+        ("SBOM-", "SB"),
+        ("DPIA-", "DP"),
     ];
     for &(prefix, badge) in badges {
         if filename.starts_with(prefix) {

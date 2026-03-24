@@ -8,6 +8,9 @@ agent: [agent-name-v1.0]
 confidence: high | medium | low
 review_required: true
 risk_level: medium | high | critical
+eu_ai_act_risk: not_applicable  # unacceptable | high | limited | minimal | not_applicable
+iso_42001_clause: []            # 4 | 5 | 6 | 7 | 8 | 9 | 10
+alternatives_documented: []     # Enlace a documentos AIDEC-* relacionados
 tags: []
 related: []
 supersedes: []
@@ -20,6 +23,8 @@ supersedes: []
 [draft | accepted | deprecated | superseded]
 
 **Nota**: Este documento fue creado por un agente de IA y requiere revisión humana.
+
+> **Regla de Inmutabilidad**: Una vez que un ADR alcanza el estado `accepted`, NO DEBE modificarse. Si la decisión cambia, crear un nuevo ADR con `supersedes: ADR-YYYY-MM-DD-NNN` en su frontmatter. El estado del ADR original cambia a `superseded`.
 
 ## Contexto
 
@@ -45,6 +50,9 @@ supersedes: []
 
 ## Consecuencias
 
+> Evaluar consecuencias contra las características de calidad relevantes de ISO/IEC 25010:2023.
+> Ver `00-governance/ISO-25010-2023-REFERENCE.md` para el modelo de calidad completo.
+
 ### Positivas
 - [Beneficio 1]
 - [Beneficio 2]
@@ -55,6 +63,24 @@ supersedes: []
 
 ### Neutrales
 - [Consecuencia que no es claramente positiva ni negativa]
+
+### Evaluación de Impacto en Calidad
+
+> Completar solo las características afectadas por esta decisión.
+
+| Característica de Calidad (ISO 25010:2023) | Impacto | Descripción |
+|--------------------------------------------|---------|-------------|
+| Idoneidad Funcional | [+/-/~] | [Cómo afecta esta decisión la cobertura funcional, corrección o pertinencia] |
+| Eficiencia de Desempeño | [+/-/~] | [Impacto en comportamiento temporal, utilización de recursos o capacidad] |
+| Compatibilidad | [+/-/~] | [Impacto en coexistencia o interoperabilidad] |
+| Capacidad de Interacción | [+/-/~] | [Impacto en aprendizaje, operabilidad, inclusividad, etc.] |
+| Fiabilidad | [+/-/~] | [Impacto en ausencia de faltas, disponibilidad, tolerancia a fallos o recuperabilidad] |
+| Seguridad | [+/-/~] | [Impacto en confidencialidad, integridad, autenticidad o resistencia] |
+| Mantenibilidad | [+/-/~] | [Impacto en modularidad, analizabilidad, modificabilidad o capacidad de prueba] |
+| Flexibilidad | [+/-/~] | [Impacto en adaptabilidad, instalabilidad o escalabilidad] |
+| Seguridad Física (Safety) | [+/-/~] | [Impacto en restricciones operacionales, modo seguro, advertencias de peligro o integración segura] |
+
+> **Leyenda**: `+` = impacto positivo, `-` = impacto negativo, `~` = neutral/trade-off. Eliminar filas no aplicables.
 
 ## Componentes Afectados
 
@@ -68,6 +94,15 @@ supersedes: []
 1. [Paso 1]
 2. [Paso 2]
 3. [Paso 3]
+
+## Criterios de Validación
+
+> Definir criterios medibles para evaluar si esta decisión fue correcta.
+
+| Métrica | Valor Objetivo | Método de Medición | Plazo |
+|---------|---------------|-------------------|-------|
+| [ej. Tiempo de respuesta] | [ej. < 200ms] | [ej. Prueba de carga en p95] | [ej. 30 días post-despliegue] |
+| [Métrica 2] | [Objetivo] | [Método] | [Plazo] |
 
 ## Métricas de Éxito
 

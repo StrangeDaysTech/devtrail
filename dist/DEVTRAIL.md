@@ -42,7 +42,7 @@ DevTrail: Created AILOG-2025-01-27-001-implement-auth.md
 
 **If documentation was not needed:**
 ```
-DevTrail: No documentation required (minor change / <10 lines)
+DevTrail: No documentation required (minor change / <20 lines)
 ```
 
 **If you should have documented but didn't:**
@@ -111,12 +111,13 @@ gh pr create --title "fix: description" --body "..."
 
 | Situation | Action |
 |-----------|--------|
-| >10 lines of code in business logic | Create AILOG |
+| >20 lines of business logic | Create AILOG |
 | Decision between technical alternatives | Create AIDEC |
-| Changes in security/authentication | Create AILOG + mark `risk_level: high` |
-| Personal data (GDPR/PII) | Create AILOG + request ETH |
-| Integration with external service | Create AILOG |
-| Change in public API or DB schema | Create AILOG |
+| Changes in auth/authorization/PII | Create AILOG (`risk_level: high`) + ETH draft |
+| Changes in public API or DB schema | Create AILOG + consider ADR |
+| Changes in ML models or AI prompts | Create AILOG + human review |
+| Security-critical dependency changes | Create AILOG + human review |
+| OTel instrumentation changes | Create AILOG + tag `observabilidad` |
 
 ### DO NOT DOCUMENT
 
@@ -139,17 +140,22 @@ gh pr create --title "fix: description" --body "..."
 
 ```yaml
 ---
-id: AILOG-2025-01-27-001
+id: AILOG-2026-03-25-001
 title: Brief description
 status: accepted
-created: 2025-01-27
+created: 2026-03-25
 agent: your-agent-id-v1.0
 confidence: high | medium | low
 review_required: true | false
 risk_level: low | medium | high | critical
 tags: [oauth, authentication, api]
 related:
-  - ADR-2025-01-20-001-use-jwt-tokens.md
+  - ADR-2026-01-20-001-use-jwt-tokens.md
+# Optional regulatory fields (activate by context):
+# eu_ai_act_risk: not_applicable
+# nist_genai_risks: []
+# iso_42001_clause: []
+# observability_scope: none
 ---
 ```
 
@@ -172,11 +178,16 @@ related:
 
 | Type | Agent can do | Requires human |
 |------|----------|----------------|
-| **AILOG** | Create freely | - |
-| **AIDEC** | Create freely | - |
+| **AILOG** | Create freely | — |
+| **AIDEC** | Create freely | — |
+| **SBOM** | Create freely | — |
 | **ETH** | Create draft | Approval |
 | **ADR** | Create draft | Review |
+| **SEC** | Create draft | Approval (always) |
+| **MCARD** | Create draft | Approval (always) |
+| **DPIA** | Create draft | Approval (always) |
 | **REQ** | Propose | Validation |
+| **TES** | Propose | Validation |
 | **INC** | Contribute analysis | Conclusions |
 | **TDE** | Identify | Prioritize |
 
@@ -222,18 +233,16 @@ related:
 │   │   └── [AILOG-*.md]
 │   ├── decisions/              # Agent decisions (AIDEC)
 │   │   └── [AIDEC-*.md]
-│   └── ethical-reviews/        # Ethical reviews (ETH)
+│   └── ethical-reviews/        # Ethical reviews (ETH, DPIA)
 │       └── [ETH-*.md]
 │
-├── templates/                  ← TEMPLATES
-│   ├── TEMPLATE-AILOG.md
-│   ├── TEMPLATE-AIDEC.md
-│   ├── TEMPLATE-ADR.md
-│   ├── TEMPLATE-ETH.md
-│   ├── TEMPLATE-REQ.md
-│   ├── TEMPLATE-INC.md
-│   ├── TEMPLATE-TDE.md
-│   └── TEMPLATE-TES.md
+├── 08-security/                ← SECURITY ASSESSMENTS (SEC)
+│   └── [SEC-*.md]
+│
+├── 09-ai-models/               ← AI MODEL CARDS (MCARD)
+│   └── [MCARD-*.md]
+│
+├── templates/                  ← TEMPLATES (12 types)
 │
 └── QUICK-REFERENCE.md          ← 1-page quick reference
 ```
@@ -287,6 +296,29 @@ related:
 | `TES` | Test Plan | `.devtrail/04-testing/` |
 | `INC` | Incident Post-mortem | `.devtrail/05-operations/incidents/` |
 | `TDE` | Technical Debt | `.devtrail/06-evolution/technical-debt/` |
+| `SEC` | Security Assessment | `.devtrail/08-security/` |
+| `MCARD` | Model/System Card | `.devtrail/09-ai-models/` |
+| `SBOM` | Software Bill of Materials | `.devtrail/07-ai-audit/` |
+| `DPIA` | Data Protection Impact Assessment | `.devtrail/07-ai-audit/ethical-reviews/` |
+
+---
+
+## 14. Regulatory Alignment
+
+DevTrail is aligned with the following standards and regulations:
+
+| Standard | Role in DevTrail | Key Documents |
+|----------|-----------------|---------------|
+| **ISO/IEC 42001:2023** | Vertebral standard — AI Management System | AI-GOVERNANCE-POLICY.md |
+| **EU AI Act** | Risk classification, incident reporting, transparency | ETH, INC, AILOG regulatory fields |
+| **NIST AI RMF / 600-1** | Risk management, 12 GenAI risk categories | ETH, AILOG |
+| **ISO/IEC 25010:2023** | Software quality model (9 characteristics) | REQ, ADR |
+| **ISO/IEC/IEEE 29148:2018** | Requirements engineering | REQ |
+| **ISO/IEC/IEEE 29119-3:2021** | Software testing documentation | TES |
+| **GDPR** | Data protection and privacy | ETH (Data Privacy) |
+| **OpenTelemetry** | Observability (optional, complementary) | Tag `observabilidad` |
+
+> **Reference**: See `AI-GOVERNANCE-POLICY.md` for the full ISO 42001 Annex A mapping to DevTrail documents.
 
 ---
 

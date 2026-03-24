@@ -71,7 +71,7 @@ jobs:
           echo "📋 Validating file naming convention..."
           ERRORS=0
 
-          VALID_PATTERN="^(ADR|REQ|TES|OPS|INC|TDE|AILOG|AIDEC|ETH|DOC)-[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{3}-[a-z0-9-]+\.md$"
+          VALID_PATTERN="^(ADR|REQ|TES|OPS|INC|TDE|AILOG|AIDEC|ETH|DOC|SEC|MCARD|SBOM|DPIA)-[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{3}-[a-z0-9-]+\.md$"
           EXCLUDED="PRINCIPLES.md|DOCUMENTATION-POLICY.md|AGENT-RULES.md|TEMPLATE-.*\.md|README.md|QUICK-REFERENCE.md|INDEX.md|GIT-BRANCHING-STRATEGY.md"
 
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
@@ -142,6 +142,49 @@ jobs:
           fi
 
           echo "✅ Metadata valid"
+
+      # =========================================================================
+      # Validate risk_level / review_required cross-check
+      # =========================================================================
+      - name: Validate risk_level requires review_required
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          echo "📋 Validating risk_level and review_required..."
+          ERRORS=0
+
+          EXCLUDED="PRINCIPLES.md|DOCUMENTATION-POLICY.md|AGENT-RULES.md|TEMPLATE-.*\.md|README.md|QUICK-REFERENCE.md|INDEX.md|GIT-BRANCHING-STRATEGY.md"
+
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            filename=$(basename "$file")
+
+            # Skip excluded files
+            if echo "$filename" | grep -qE "$EXCLUDED"; then
+              continue
+            fi
+
+            # Extract front-matter
+            FRONTMATTER=$(sed -n '/^---$/,/^---$/p' "$file" | sed '1d;$d')
+            if [ -z "$FRONTMATTER" ]; then
+              continue
+            fi
+
+            RISK_LEVEL=$(echo "$FRONTMATTER" | grep "^risk_level:" | head -1 | sed 's/risk_level: *//' | tr -d '\r' || true)
+            REVIEW_REQUIRED=$(echo "$FRONTMATTER" | grep "^review_required:" | head -1 | sed 's/review_required: *//' | tr -d '\r' || true)
+
+            if [ "$RISK_LEVEL" = "high" ] || [ "$RISK_LEVEL" = "critical" ]; then
+              if [ "$REVIEW_REQUIRED" != "true" ]; then
+                echo "::error file=$file::risk_level is '$RISK_LEVEL' but review_required is not true"
+                ERRORS=$((ERRORS + 1))
+              fi
+            fi
+          done
+
+          if [ $ERRORS -gt 0 ]; then
+            echo "::error::Found $ERRORS risk_level/review_required errors"
+            exit 1
+          fi
+
+          echo "✅ Risk level validation passed"
 
       # =========================================================================
       # Detect sensitive information

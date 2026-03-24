@@ -8,6 +8,10 @@ confidence: medium
 review_required: true
 risk_level: high | critical
 severity: SEV1 | SEV2 | SEV3 | SEV4
+eu_ai_act_applicable: false
+incident_report_deadline: null  # YYYY-MM-DD — regulatory deadline if applicable
+iso_42001_clause: []            # 4 | 5 | 6 | 7 | 8 | 9 | 10
+observability_scope: none        # none | basic | full — set when OTel instrumentation is relevant
 tags: []
 related: []
 incident_date: YYYY-MM-DD
@@ -42,15 +46,17 @@ resolved_date: null
 
 ## Timeline
 
-| Time (UTC) | Event |
-|------------|-------|
-| HH:MM | [First symptom detected] |
-| HH:MM | [Alert triggered] |
-| HH:MM | [Team notified] |
-| HH:MM | [Initial diagnosis] |
-| HH:MM | [Mitigation applied] |
-| HH:MM | [Service restored] |
-| HH:MM | [Incident closed] |
+> If your system uses OpenTelemetry, include trace-id for correlated evidence.
+
+| Time (UTC) | Event | Trace ID | Span ID | Dashboard Link |
+|------------|-------|----------|---------|----------------|
+| HH:MM | [First symptom detected] | [trace-id if available] | [span-id] | [link] |
+| HH:MM | [Alert triggered] | | | |
+| HH:MM | [Team notified] | | | |
+| HH:MM | [Initial diagnosis] | | | |
+| HH:MM | [Mitigation applied] | | | |
+| HH:MM | [Service restored] | | | |
+| HH:MM | [Incident closed] | | | |
 
 ## Root Cause Analysis
 
@@ -107,6 +113,23 @@ resolved_date: null
 
 ### Where we got lucky
 - [Aspect that could have been worse]
+
+## EU AI Act Incident Reporting
+
+> For high-risk AI systems under EU AI Act, incidents must be reported to the market surveillance authority within:
+> - **15 days** (standard incidents)
+> - **10 days** (incidents resulting in death)
+> - **2 days** (widespread or very serious incidents)
+>
+> Reference: Article 73, EU AI Act.
+>
+> Complete this section only if `eu_ai_act_applicable` is `true`.
+
+| Field | Value |
+|-------|-------|
+| Report Deadline | [YYYY-MM-DD] |
+| Authority Notified | [Yes/No/NA] |
+| Report Reference | [Reference number if submitted] |
 
 ## Open Questions
 

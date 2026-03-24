@@ -39,7 +39,7 @@ Write-Host ""
 # 2. Define patterns and exclusions
 # =============================================================================
 
-$ValidTypes = @("ADR", "REQ", "TES", "OPS", "INC", "TDE", "AILOG", "AIDEC", "ETH", "DOC")
+$ValidTypes = @("ADR", "REQ", "TES", "OPS", "INC", "TDE", "AILOG", "AIDEC", "ETH", "DOC", "SEC", "MCARD", "SBOM", "DPIA")
 $ExcludedFiles = @("PRINCIPLES.md", "DOCUMENTATION-POLICY.md", "AGENT-RULES.md", "README.md", "QUICK-REFERENCE.md", "INDEX.md", ".gitkeep")
 $ExcludedPatterns = @("TEMPLATE-.*\.md")
 
@@ -216,7 +216,170 @@ foreach ($file in $MarkdownFiles) {
 Write-Host ""
 
 # =============================================================================
-# 8. Summary
+# 8. Validate risk_level / review_required cross-check
+# =============================================================================
+
+Write-Host "📋 Validating risk_level and review_required..." -ForegroundColor Cyan
+
+foreach ($file in $MarkdownFiles) {
+    $fileName = $file.Name
+
+    if (Test-ExcludedFile -FileName $fileName) {
+        continue
+    }
+
+    $content = Get-Content -Path $file.FullName -Raw -ErrorAction SilentlyContinue
+
+    if (-not $content) { continue }
+
+    if ($content -match "(?s)^---\r?\n(.+?)\r?\n---") {
+        $frontmatter = $Matches[1]
+
+        if ($frontmatter -match "(?m)^risk_level:\s*(.+)$") {
+            $riskLevel = $Matches[1].Trim()
+
+            if ($riskLevel -eq "high" -or $riskLevel -eq "critical") {
+                if ($frontmatter -match "(?m)^review_required:\s*(.+)$") {
+                    $reviewRequired = $Matches[1].Trim()
+                } else {
+                    $reviewRequired = ""
+                }
+
+                if ($reviewRequired -ne "true") {
+                    Write-Host "  ✗ $fileName`: risk_level is '$riskLevel' but review_required is not true" -ForegroundColor Red
+                    $ErrorCount++
+                }
+            }
+        }
+    }
+}
+
+Write-Host ""
+
+# =============================================================================
+# 9. Validate id matches filename prefix
+# =============================================================================
+
+Write-Host "📋 Validating id matches filename..." -ForegroundColor Cyan
+
+foreach ($file in $MarkdownFiles) {
+    $fileName = $file.Name
+
+    if (Test-ExcludedFile -FileName $fileName) {
+        continue
+    }
+
+    $content = Get-Content -Path $file.FullName -Raw -ErrorAction SilentlyContinue
+
+    if (-not $content) { continue }
+
+    if ($content -match "(?s)^---\r?\n(.+?)\r?\n---") {
+        $frontmatter = $Matches[1]
+
+        if ($frontmatter -match "(?m)^id:\s*(.+)$") {
+            $docId = $Matches[1].Trim()
+
+            # Extract prefix from filename: TYPE-YYYY-MM-DD-NNN
+            if ($fileName -match "^(.+-\d{3})-.+\.md$") {
+                $filenamePrefix = $Matches[1]
+
+                if ($docId -ne $filenamePrefix) {
+                    Write-Host "  ✗ $fileName`: id '$docId' does not match filename prefix '$filenamePrefix'" -ForegroundColor Red
+                    $ErrorCount++
+                } else {
+                    Write-Host "  ✓ $fileName - id matches filename" -ForegroundColor Green
+                }
+            }
+        }
+    }
+}
+
+Write-Host ""
+
+# =============================================================================
+# 10. Validate review_required for specific types
+# =============================================================================
+
+Write-Host "📋 Validating review_required for governance types..." -ForegroundColor Cyan
+
+$ReviewRequiredTypes = @("ETH", "ADR", "SEC", "MCARD", "DPIA")
+
+foreach ($file in $MarkdownFiles) {
+    $fileName = $file.Name
+
+    if (Test-ExcludedFile -FileName $fileName) {
+        continue
+    }
+
+    # Extract document type from filename
+    if ($fileName -match "^([A-Z]+)-") {
+        $docType = $Matches[1]
+    } else {
+        continue
+    }
+
+    if ($ReviewRequiredTypes -notcontains $docType) {
+        continue
+    }
+
+    $content = Get-Content -Path $file.FullName -Raw -ErrorAction SilentlyContinue
+
+    if (-not $content) { continue }
+
+    if ($content -match "(?s)^---\r?\n(.+?)\r?\n---") {
+        $frontmatter = $Matches[1]
+
+        if ($frontmatter -match "(?m)^review_required:\s*(.+)$") {
+            $reviewRequired = $Matches[1].Trim()
+        } else {
+            $reviewRequired = ""
+        }
+
+        if ($reviewRequired -ne "true") {
+            Write-Host "  ✗ $fileName`: type '$docType' requires review_required: true" -ForegroundColor Red
+            $ErrorCount++
+        } else {
+            Write-Host "  ✓ $fileName - review_required is set" -ForegroundColor Green
+        }
+    }
+}
+
+Write-Host ""
+
+# =============================================================================
+# 11. Validate observability tag has matching section
+# =============================================================================
+
+Write-Host "📋 Validating observability tag consistency..." -ForegroundColor Cyan
+
+foreach ($file in $MarkdownFiles) {
+    $fileName = $file.Name
+
+    if (Test-ExcludedFile -FileName $fileName) {
+        continue
+    }
+
+    $content = Get-Content -Path $file.FullName -Raw -ErrorAction SilentlyContinue
+
+    if (-not $content) { continue }
+
+    if ($content -match "(?s)^---\r?\n(.+?)\r?\n---") {
+        $frontmatter = $Matches[1]
+        $body = $content -replace "(?s)^---\r?\n.+?\r?\n---\r?\n", ""
+
+        if ($frontmatter -match "(?i)observabilidad") {
+            if ($body -notmatch "(?im)^#+.*Observab") {
+                Write-Host "  ⚠ $fileName`: has tag 'observabilidad' but no Observability section header" -ForegroundColor Yellow
+                $WarningCount++
+            }
+        }
+    }
+}
+
+Write-Host ""
+
+# =============================================================================
+# 12. Summary
 # =============================================================================
 
 Write-Host "═══════════════════════════════════════════════════════════════════════════" -ForegroundColor Cyan

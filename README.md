@@ -45,7 +45,7 @@ Every meaningful change—whether by human or AI—is documented, attributed, an
 
 ### 📋 Structured Documentation
 
-Eight document types covering the full development lifecycle:
+Twelve document types covering the full development lifecycle:
 
 | Type | Purpose | Example |
 |------|---------|---------|
@@ -57,6 +57,23 @@ Eight document types covering the full development lifecycle:
 | **AILOG** | AI Action Logs | What AI assistants did and why |
 | **AIDEC** | AI Decisions | Choices made by AI with alternatives |
 | **ETH** | Ethical Reviews | Privacy, bias, responsible AI |
+| **SEC** | Security Assessments | Threat modeling, vulnerability analysis |
+| **MCARD** | Model/System Cards | AI model documentation |
+| **SBOM** | Software Bill of Materials | AI component inventory |
+| **DPIA** | Data Protection Impact Assessment | Privacy impact analysis |
+
+### 📐 Standards Alignment
+
+| Standard | DevTrail Integration |
+|----------|---------------------|
+| **ISO/IEC 42001:2023** | Vertebral standard — AI Management System governance |
+| **EU AI Act** | Risk classification, incident reporting, transparency |
+| **NIST AI RMF / 600-1** | 12 GenAI risk categories in ETH/AILOG |
+| **ISO/IEC 25010:2023** | Software quality model in REQ/ADR |
+| **ISO/IEC/IEEE 29148:2018** | Requirements engineering in REQ |
+| **ISO/IEC/IEEE 29119-3:2021** | Test documentation in TES |
+| **GDPR** | Data protection in ETH/DPIA |
+| **OpenTelemetry** | Observability (optional) |
 
 ### 🤖 AI Agent Support
 

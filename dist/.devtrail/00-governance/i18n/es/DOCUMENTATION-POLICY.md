@@ -69,13 +69,19 @@ related:
 
 ### Campos Opcionales
 
-| Campo | Descripción |
-|-------|-------------|
-| `updated` | Fecha de última actualización |
-| `tags` | Etiquetas para categorización (ver convenciones abajo) |
-| `related` | Referencias a documentos relacionados (ver convenciones abajo) |
-| `supersedes` | ID del documento que este reemplaza |
-| `superseded_by` | ID del documento que reemplaza a este |
+| Campo | Descripción | Cuándo Usar |
+|-------|-------------|-------------|
+| `updated` | Fecha de última actualización | En cualquier actualización |
+| `tags` | Etiquetas para categorización (ver convenciones abajo) | Siempre recomendado |
+| `related` | Referencias a documentos relacionados (ver convenciones abajo) | Cuando existen referencias cruzadas |
+| `supersedes` | ID del documento que este reemplaza | Al reemplazar un documento |
+| `superseded_by` | ID del documento que reemplaza a este | Establecido por el documento que reemplaza |
+| `eu_ai_act_risk` | Clasificación de riesgo EU AI Act: `unacceptable \| high \| limited \| minimal \| not_applicable` | Cuando el cambio involucra sistemas de IA bajo EU AI Act |
+| `nist_genai_risks` | Categorías de riesgo NIST AI 600-1: `[privacy, bias, confabulation, ...]` | Cuando el cambio involucra componentes de IA generativa |
+| `iso_42001_clause` | Cláusulas ISO 42001: `[4, 5, 6, 7, 8, 9, 10]` | Al mapear a controles ISO 42001 |
+| `lines_changed` | Conteo de líneas cambiadas (auto-calculable) | En documentos AILOG |
+| `files_modified` | Lista de archivos modificados (auto-calculable) | En documentos AILOG |
+| `observability_scope` | Nivel de instrumentación OTel: `none \| basic \| full` | Cuando el cambio involucra instrumentación de observabilidad |
 
 ### Convención de Tags
 
@@ -178,8 +184,27 @@ draft ──────► accepted ──────► deprecated
 │   ├── agent-logs/         # AILOG
 │   ├── decisions/          # AIDEC
 │   └── ethical-reviews/    # ETH
+├── 08-security/            # SEC — Evaluaciones de seguridad
+├── 09-ai-models/           # MCARD — Tarjetas de modelo/sistema
 └── templates/              # Plantillas
 ```
+
+### Tipos de Documentos
+
+| Tipo | Nombre | Carpeta | Estado por Defecto | Requiere Revisión |
+|------|--------|---------|-------------------|-------------------|
+| `AILOG` | Log de Acción IA | `07-ai-audit/agent-logs/` | `accepted` | No |
+| `AIDEC` | Decisión IA | `07-ai-audit/decisions/` | `accepted` | No |
+| `ETH` | Revisión Ética | `07-ai-audit/ethical-reviews/` | `draft` | Sí |
+| `ADR` | Registro de Decisión de Arquitectura | `02-design/decisions/` | `draft` | Sí |
+| `REQ` | Requisito | `01-requirements/` | `draft` | Sí |
+| `TES` | Plan de Pruebas | `04-testing/` | `draft` | Sí |
+| `INC` | Post-mortem de Incidente | `05-operations/incidents/` | `draft` | Sí |
+| `TDE` | Deuda Técnica | `06-evolution/technical-debt/` | `identified` | No |
+| `SEC` | Evaluación de Seguridad | `08-security/` | `draft` | Sí (siempre) |
+| `MCARD` | Tarjeta de Modelo/Sistema | `09-ai-models/` | `draft` | Sí (siempre) |
+| `SBOM` | Lista de Materiales de Software | `07-ai-audit/` | `accepted` | No |
+| `DPIA` | Evaluación de Impacto en Protección de Datos | `07-ai-audit/ethical-reviews/` | `draft` | Sí (siempre) |
 
 ---
 
@@ -194,4 +219,21 @@ Ver también [ADR-2025-01-20-001] para contexto arquitectónico.
 
 ---
 
-*DevTrail v1.0.0 | [Strange Days Tech](https://strangedays.tech)*
+## 8. Estándares Referenciados
+
+| Estándar | Versión | Alcance en DevTrail |
+|----------|---------|---------------------|
+| ISO/IEC/IEEE 29148:2018 | 2018 | Ingeniería de requisitos — TEMPLATE-REQ.md |
+| ISO/IEC 25010:2023 | 2023 | Modelo de calidad de software — TEMPLATE-REQ.md, TEMPLATE-ADR.md |
+| ISO/IEC/IEEE 29119-3:2021 | 2021 | Documentación de pruebas de software — TEMPLATE-TES.md |
+| ISO/IEC 42001:2023 | 2023 | Sistema de Gestión de IA — AI-GOVERNANCE-POLICY.md (estándar vertebral) |
+| EU AI Act | 2024 (vigente ago 2026) | Regulación de IA — ETH, INC, campos regulatorios de AILOG |
+| NIST AI RMF 1.0 | 2023 | Gestión de riesgos de IA — ETH, categorías de riesgo de AILOG |
+| NIST AI 600-1 | 2024 | Perfil de IA generativa — 12 categorías de riesgo en ETH/AILOG |
+| ISO/IEC 23894:2023 | 2023 | Gestión de riesgos de IA — AI-RISK-CATALOG (Fase 3) |
+| GDPR | 2016/679 | Protección de datos — ETH (Privacidad de Datos), DPIA (Fase 2) |
+| OpenTelemetry | Actual | Observabilidad — OBSERVABILITY-GUIDE (Fase 3), opcional |
+
+---
+
+*DevTrail v3.0.0 | [Strange Days Tech](https://strangedays.tech)*

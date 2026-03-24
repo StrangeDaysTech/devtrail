@@ -7,6 +7,9 @@ agent: [agent-name-v1.0]
 confidence: high | medium | low
 review_required: false
 risk_level: low | medium | high | critical
+eu_ai_act_risk: not_applicable  # unacceptable | high | limited | minimal | not_applicable
+nist_genai_risks: []            # privacy | bias | confabulation | cbrn | dangerous_content | environmental | human_ai_config | information_integrity | information_security | intellectual_property | obscene_content | value_chain
+iso_42001_clause: []            # 4 | 5 | 6 | 7 | 8 | 9 | 10
 tags: []
 related: []
 ---

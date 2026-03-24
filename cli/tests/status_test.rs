@@ -54,6 +54,15 @@ fn test_status_with_minimal_install() {
     )
     .unwrap();
 
+    // Create new Fase 1 directories
+    let sec_dir = devtrail.join("08-security");
+    std::fs::create_dir_all(&sec_dir).unwrap();
+    std::fs::write(sec_dir.join(".gitkeep"), "").unwrap();
+
+    let models_dir = devtrail.join("09-ai-models");
+    std::fs::create_dir_all(&models_dir).unwrap();
+    std::fs::write(models_dir.join(".gitkeep"), "").unwrap();
+
     let mut cmd = Command::cargo_bin("devtrail").unwrap();
     cmd.arg("status")
         .arg(dir.path().to_str().unwrap())
@@ -64,6 +73,51 @@ fn test_status_with_minimal_install() {
                 .and(predicate::str::contains("es"))
                 .and(predicate::str::contains("REQ"))
                 .and(predicate::str::contains("AILOG")),
+        );
+}
+
+#[test]
+fn test_status_recognizes_new_doc_types() {
+    let dir = TempDir::new().unwrap();
+    let devtrail = dir.path().join(".devtrail");
+    std::fs::create_dir_all(&devtrail).unwrap();
+
+    std::fs::write(
+        devtrail.join("config.yml"),
+        "language: en\n",
+    )
+    .unwrap();
+    std::fs::write(
+        devtrail.join("dist-manifest.yml"),
+        "version: \"3.0.0\"\ndescription: test\nfiles: []\n",
+    )
+    .unwrap();
+
+    // Create documents of new types
+    let sec_dir = devtrail.join("08-security");
+    std::fs::create_dir_all(&sec_dir).unwrap();
+    std::fs::write(
+        sec_dir.join("SEC-2026-03-25-001-threat-model.md"),
+        "# Security Assessment",
+    )
+    .unwrap();
+
+    let models_dir = devtrail.join("09-ai-models");
+    std::fs::create_dir_all(&models_dir).unwrap();
+    std::fs::write(
+        models_dir.join("MCARD-2026-03-25-001-classifier.md"),
+        "# Model Card",
+    )
+    .unwrap();
+
+    let mut cmd = Command::cargo_bin("devtrail").unwrap();
+    cmd.arg("status")
+        .arg(dir.path().to_str().unwrap())
+        .assert()
+        .success()
+        .stdout(
+            predicate::str::contains("SEC")
+                .and(predicate::str::contains("MCARD")),
         );
 }
 

@@ -122,34 +122,43 @@ DevTrail aligns with and supports compliance for:
 
 | Standard | How DevTrail Helps |
 |----------|-------------------|
-| **IEEE 830** (SRS) | REQ documents follow structured requirements format |
-| **ISO/IEC 25010** | Quality attributes documented in ADRs |
+| **ISO/IEC/IEEE 29148:2018** | REQ documents follow structured requirements format with external interfaces and traceability |
+| **ISO/IEC 25010:2023** | 9 quality characteristics evaluated in ADRs and REQ non-functional requirements |
+| **ISO/IEC/IEEE 29119-3:2021** | TES documents follow test documentation hierarchy (Policy → Strategy → Plan) |
 | **ISO/IEC 12207** | Lifecycle documentation coverage |
+
+### AI Management & Governance
+
+| Standard | How DevTrail Helps |
+|----------|-------------------|
+| **ISO/IEC 42001:2023** | Vertebral standard — AI-GOVERNANCE-POLICY.md maps all Annex A controls to DevTrail documents |
+| **EU AI Act** | Risk classification in ETH, incident reporting timelines in INC, regulatory fields in AILOG |
+| **NIST AI RMF 1.0 / 600-1** | 12 GenAI risk categories in ETH/AILOG, MAP/MEASURE/MANAGE/GOVERN coverage |
+| **ISO/IEC 23894:2023** | AI risk management aligned with ETH and AI-RISK-CATALOG (Fase 3) |
+| **GDPR** | ETH documents with GDPR Legal Basis section, DPIA for privacy impact assessments |
 
 ### Architecture Documentation
 
 | Standard | How DevTrail Helps |
 |----------|-------------------|
-| **ADR (Architecture Decision Records)** | Native ADR support with extended metadata |
+| **ADR (Architecture Decision Records)** | Native ADR support with extended metadata and immutability rules |
 | **arc42** | ADRs complement arc42 decision documentation |
-| **C4 Model** | ADRs document decisions at each C4 level |
+| **C4 Model** | ADRs document decisions at each C4 level (C4-DIAGRAM-GUIDE in Fase 4) |
 
 ### Compliance & Governance
 
 | Regulation | How DevTrail Helps |
 |------------|-------------------|
-| **GDPR** | ETH documents for privacy impact assessments |
-| **SOC 2** | Change documentation and access logging |
-| **ISO 27001** | Security decision documentation |
+| **GDPR** | ETH documents for privacy, DPIA for data protection impact |
+| **SOC 2** | Change documentation and access logging via AILOG |
+| **ISO 27001** | Security decision documentation via SEC assessments |
 | **HIPAA** | Audit trails for healthcare applications |
 
-### AI Governance
+### Observability (Optional)
 
-| Framework | How DevTrail Helps |
-|-----------|-------------------|
-| **EU AI Act** | Transparency through AILOG/AIDEC; human oversight via ETH |
-| **NIST AI RMF** | Risk documentation in decision records |
-| **IEEE 7000** | Ethical considerations in ETH documents |
+| Standard | How DevTrail Helps |
+|----------|-------------------|
+| **OpenTelemetry** | Optional observability sections in REQ, TES, INC; tag `observabilidad` for instrumentation changes |
 
 ---
 

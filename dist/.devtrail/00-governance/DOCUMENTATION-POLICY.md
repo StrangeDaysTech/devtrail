@@ -67,13 +67,19 @@ related:
 
 ### Optional Fields
 
-| Field | Description |
-|-------|-------------|
-| `updated` | Last update date |
-| `tags` | Tags for categorization (see conventions below) |
-| `related` | References to related documents (see conventions below) |
-| `supersedes` | ID of the document this one replaces |
-| `superseded_by` | ID of the document that replaces this one |
+| Field | Description | When to Use |
+|-------|-------------|-------------|
+| `updated` | Last update date | On any update |
+| `tags` | Tags for categorization (see conventions below) | Always recommended |
+| `related` | References to related documents (see conventions below) | When cross-references exist |
+| `supersedes` | ID of the document this one replaces | When replacing a document |
+| `superseded_by` | ID of the document that replaces this one | Set by the replacing document |
+| `eu_ai_act_risk` | EU AI Act risk classification: `unacceptable \| high \| limited \| minimal \| not_applicable` | When the change involves AI systems under EU AI Act |
+| `nist_genai_risks` | NIST AI 600-1 risk categories: `[privacy, bias, confabulation, ...]` | When the change involves generative AI components |
+| `iso_42001_clause` | ISO 42001 clauses: `[4, 5, 6, 7, 8, 9, 10]` | When mapping to ISO 42001 controls |
+| `lines_changed` | Lines changed count (auto-calculable) | In AILOG documents |
+| `files_modified` | List of modified files (auto-calculable) | In AILOG documents |
+| `observability_scope` | OTel instrumentation level: `none \| basic \| full` | When the change involves observability instrumentation |
 
 ### Tags Convention
 
@@ -176,8 +182,27 @@ draft ──────► accepted ──────► deprecated
 │   ├── agent-logs/         # AILOG
 │   ├── decisions/          # AIDEC
 │   └── ethical-reviews/    # ETH
+├── 08-security/            # SEC — Security assessments
+├── 09-ai-models/           # MCARD — Model/System cards
 └── templates/              # Templates
 ```
+
+### Document Types
+
+| Type | Name | Folder | Default Status | Review Required |
+|------|------|--------|---------------|----------------|
+| `AILOG` | AI Action Log | `07-ai-audit/agent-logs/` | `accepted` | No |
+| `AIDEC` | AI Decision | `07-ai-audit/decisions/` | `accepted` | No |
+| `ETH` | Ethical Review | `07-ai-audit/ethical-reviews/` | `draft` | Yes |
+| `ADR` | Architecture Decision Record | `02-design/decisions/` | `draft` | Yes |
+| `REQ` | Requirement | `01-requirements/` | `draft` | Yes |
+| `TES` | Test Plan | `04-testing/` | `draft` | Yes |
+| `INC` | Incident Post-mortem | `05-operations/incidents/` | `draft` | Yes |
+| `TDE` | Technical Debt | `06-evolution/technical-debt/` | `identified` | No |
+| `SEC` | Security Assessment | `08-security/` | `draft` | Yes (always) |
+| `MCARD` | Model/System Card | `09-ai-models/` | `draft` | Yes (always) |
+| `SBOM` | Software Bill of Materials | `07-ai-audit/` | `accepted` | No |
+| `DPIA` | Data Protection Impact Assessment | `07-ai-audit/ethical-reviews/` | `draft` | Yes (always) |
 
 ---
 
@@ -192,4 +217,21 @@ See also [ADR-2025-01-20-001] for architectural context.
 
 ---
 
-*DevTrail v1.0.0 | [Strange Days Tech](https://strangedays.tech)*
+## 8. Referenced Standards
+
+| Standard | Version | Scope in DevTrail |
+|----------|---------|-------------------|
+| ISO/IEC/IEEE 29148:2018 | 2018 | Requirements engineering — TEMPLATE-REQ.md |
+| ISO/IEC 25010:2023 | 2023 | Software quality model — TEMPLATE-REQ.md, TEMPLATE-ADR.md |
+| ISO/IEC/IEEE 29119-3:2021 | 2021 | Software testing documentation — TEMPLATE-TES.md |
+| ISO/IEC 42001:2023 | 2023 | AI Management System — AI-GOVERNANCE-POLICY.md (vertebral standard) |
+| EU AI Act | 2024 (effective Aug 2026) | AI regulation — ETH, INC, AILOG regulatory fields |
+| NIST AI RMF 1.0 | 2023 | AI risk management — ETH, AILOG risk categories |
+| NIST AI 600-1 | 2024 | Generative AI profile — 12 risk categories in ETH/AILOG |
+| ISO/IEC 23894:2023 | 2023 | AI risk management — AI-RISK-CATALOG (Fase 3) |
+| GDPR | 2016/679 | Data protection — ETH (Data Privacy), DPIA (Fase 2) |
+| OpenTelemetry | Current | Observability — OBSERVABILITY-GUIDE (Fase 3), optional |
+
+---
+
+*DevTrail v3.0.0 | [Strange Days Tech](https://strangedays.tech)*

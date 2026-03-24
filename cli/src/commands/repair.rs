@@ -22,6 +22,8 @@ const EXPECTED_DIRS: &[&str] = &[
     ".devtrail/07-ai-audit/agent-logs",
     ".devtrail/07-ai-audit/decisions",
     ".devtrail/07-ai-audit/ethical-reviews",
+    ".devtrail/08-security",
+    ".devtrail/09-ai-models",
 ];
 
 pub fn run(path: &str) -> Result<()> {

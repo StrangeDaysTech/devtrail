@@ -10,6 +10,7 @@ risk_level: low | medium | high
 type: code | architecture | infrastructure | documentation | testing
 impact: low | medium | high
 effort: low | medium | high
+iso_42001_clause: []            # 4 | 5 | 6 | 7 | 8 | 9 | 10
 tags: []
 related: []
 priority: null

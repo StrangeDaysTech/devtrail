@@ -19,6 +19,8 @@ const EXPECTED_DIRS: &[&str] = &[
     "07-ai-audit/agent-logs",
     "07-ai-audit/decisions",
     "07-ai-audit/ethical-reviews",
+    "08-security",
+    "09-ai-models",
     "templates",
 ];
 
@@ -39,6 +41,10 @@ const DOC_TYPES: &[(&str, &str)] = &[
     ("REQ", "Requirements"),
     ("TDE", "Technical Debt"),
     ("TES", "Test Plans"),
+    ("SEC", "Security"),
+    ("MCARD", "Model Cards"),
+    ("SBOM", "Software Bill of Materials"),
+    ("DPIA", "Data Protection Impact"),
 ];
 
 pub fn run(path: &str) -> Result<()> {

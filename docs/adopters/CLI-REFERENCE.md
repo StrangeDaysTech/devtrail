@@ -48,8 +48,8 @@ DevTrail uses **independent version tags** for each component:
 
 | Component | Tag prefix | Example | What it includes |
 |-----------|-----------|---------|------------------|
-| Framework | `fw-` | `fw-2.1.0` | Templates, governance docs, directives, scripts |
-| CLI | `cli-` | `cli-1.0.0` | The `devtrail` binary |
+| Framework | `fw-` | `fw-3.0.0` | Templates (12 types), governance docs, directives, scripts |
+| CLI | `cli-` | `cli-1.3.0` | The `devtrail` binary |
 
 Framework and CLI are released independently. A framework update does not require a CLI update, and vice versa.
 

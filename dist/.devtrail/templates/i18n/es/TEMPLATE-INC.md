@@ -8,6 +8,10 @@ confidence: medium
 review_required: true
 risk_level: high | critical
 severity: SEV1 | SEV2 | SEV3 | SEV4
+eu_ai_act_applicable: false
+incident_report_deadline: null  # YYYY-MM-DD — fecha límite regulatoria si aplica
+iso_42001_clause: []            # 4 | 5 | 6 | 7 | 8 | 9 | 10
+observability_scope: none        # none | basic | full — activar cuando la instrumentación OTel sea relevante
 tags: []
 related: []
 incident_date: YYYY-MM-DD
@@ -42,15 +46,17 @@ resolved_date: null
 
 ## Cronología
 
-| Hora (UTC) | Evento |
-|------------|--------|
-| HH:MM | [Primer síntoma detectado] |
-| HH:MM | [Alerta disparada] |
-| HH:MM | [Equipo notificado] |
-| HH:MM | [Diagnóstico inicial] |
-| HH:MM | [Mitigación aplicada] |
-| HH:MM | [Servicio restaurado] |
-| HH:MM | [Incidente cerrado] |
+> Si su sistema usa OpenTelemetry, incluir trace-id para evidencia correlacionada.
+
+| Hora (UTC) | Evento | Trace ID | Span ID | Enlace a Dashboard |
+|------------|--------|----------|---------|-------------------|
+| HH:MM | [Primer síntoma detectado] | [trace-id si disponible] | [span-id] | [enlace] |
+| HH:MM | [Alerta disparada] | | | |
+| HH:MM | [Equipo notificado] | | | |
+| HH:MM | [Diagnóstico inicial] | | | |
+| HH:MM | [Mitigación aplicada] | | | |
+| HH:MM | [Servicio restaurado] | | | |
+| HH:MM | [Incidente cerrado] | | | |
 
 ## Análisis de Causa Raíz
 
@@ -107,6 +113,23 @@ resolved_date: null
 
 ### Donde tuvimos suerte
 - [Aspecto que pudo haber sido peor]
+
+## Reporte de Incidentes EU AI Act
+
+> Para sistemas de IA de alto riesgo bajo EU AI Act, los incidentes deben reportarse a la autoridad de vigilancia del mercado dentro de:
+> - **15 días** (incidentes estándar)
+> - **10 días** (incidentes que resulten en muerte)
+> - **2 días** (incidentes generalizados o muy graves)
+>
+> Referencia: Artículo 73, EU AI Act.
+>
+> Completar esta sección solo si `eu_ai_act_applicable` es `true`.
+
+| Campo | Valor |
+|-------|-------|
+| Fecha Límite de Reporte | [YYYY-MM-DD] |
+| Autoridad Notificada | [Sí/No/NA] |
+| Referencia del Reporte | [Número de referencia si fue enviado] |
 
 ## Preguntas Abiertas
 
