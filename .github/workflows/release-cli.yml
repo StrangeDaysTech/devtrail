@@ -1,10 +1,6 @@
 name: Release CLI
 
 on:
-  # Trigger on tag push (e.g., git push --tags)
-  push:
-    tags:
-      - 'cli-*'
   # Trigger when a release with cli-* tag is published via GitHub UI or API
   release:
     types: [published]
@@ -38,10 +34,8 @@ jobs:
           # Determine the tag from the trigger source
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             TAG="${{ github.event.inputs.tag }}"
-          elif [ "${{ github.event_name }}" = "release" ]; then
-            TAG="${{ github.event.release.tag_name }}"
           else
-            TAG="${GITHUB_REF_NAME}"
+            TAG="${{ github.event.release.tag_name }}"
           fi
 
           # Only process cli-* tags
