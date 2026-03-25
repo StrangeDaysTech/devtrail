@@ -35,6 +35,7 @@ pub fn is_user_document(path: &Path) -> bool {
     // Check for patterns like AILOG-2025-01-27-001-description.md
     let prefixes = [
         "AILOG-", "AIDEC-", "ETH-", "ADR-", "REQ-", "TES-", "INC-", "TDE-",
+        "SEC-", "MCARD-", "SBOM-", "DPIA-",
     ];
 
     prefixes.iter().any(|p| name.starts_with(p))

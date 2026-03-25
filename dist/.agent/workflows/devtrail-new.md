@@ -14,7 +14,7 @@ When invoked, follow these steps:
 
 If the user specified a document type (e.g., `/devtrail-new ailog`), skip to step 4 using that type.
 
-Valid types: `ailog`, `aidec`, `adr`, `eth`, `req`, `tes`, `inc`, `tde`
+Valid types: `ailog`, `aidec`, `adr`, `eth`, `req`, `tes`, `inc`, `tde`, `sec`, `mcard`, `sbom`, `dpia`
 
 ### 2. Analyze Context
 
@@ -40,7 +40,7 @@ Based on the analysis, suggest a document type:
 
 | Pattern | Suggested Type |
 |---------|---------------|
-| New code in `src/`, `lib/`, `app/` (>10 lines) | AILOG |
+| New code in `src/`, `lib/`, `app/` (>20 lines) | AILOG |
 | Multiple implementation alternatives discussed | AIDEC |
 | Structural/architectural changes, new modules | ADR |
 | Files with `auth`, `user`, `privacy`, `gdpr` | ETH (draft) |
@@ -119,6 +119,10 @@ ID format: `[TYPE]-YYYY-MM-DD-NNN`
 | TES | `.devtrail/04-testing/` |
 | INC | `.devtrail/05-operations/incidents/` |
 | TDE | `.devtrail/06-evolution/technical-debt/` |
+| SEC | `.devtrail/08-security/` |
+| MCARD | `.devtrail/09-ai-models/` |
+| SBOM | `.devtrail/07-ai-audit/` |
+| DPIA | `.devtrail/07-ai-audit/ethical-reviews/` |
 
 ### 8. Report Result
 
@@ -144,6 +148,10 @@ After creation, display:
 | `tes` | Test Plan | Test strategies and plans |
 | `inc` | Incident Post-mortem | Incident analysis |
 | `tde` | Technical Debt | Identified technical debt |
+| `sec` | Security Assessment | Threat modeling and security controls |
+| `mcard` | Model/System Card | AI model documentation |
+| `sbom` | Software Bill of Materials | AI component inventory |
+| `dpia` | Data Protection Impact Assessment | Privacy impact analysis |
 
 ## Edge Cases
 

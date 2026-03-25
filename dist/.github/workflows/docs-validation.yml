@@ -37,7 +37,7 @@ jobs:
       # Checkout
       # =========================================================================
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0  # Required to compare with base branch
 
@@ -45,7 +45,7 @@ jobs:
       # Setup Node.js (for markdownlint)
       # =========================================================================
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '20'
 
@@ -287,6 +287,174 @@ jobs:
           echo "Files validated: ${{ steps.changed-files.outputs.all_changed_files_count }}"
 
   # ===========================================================================
+  # Job: Compliance check
+  # ===========================================================================
+  compliance-check:
+    name: Compliance Check
+    runs-on: ubuntu-latest
+    needs: validate-docs
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v44
+        with:
+          files: |
+            .devtrail/**/*.md
+
+      - name: Verify high-risk documents have ETH reference
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          echo "📋 Checking compliance: high-risk documents must reference an ETH..."
+          ERRORS=0
+
+          EXCLUDED="PRINCIPLES.md|DOCUMENTATION-POLICY.md|AGENT-RULES.md|TEMPLATE-.*\.md|README.md|QUICK-REFERENCE.md|INDEX.md|GIT-BRANCHING-STRATEGY.md"
+
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            filename=$(basename "$file")
+
+            if echo "$filename" | grep -qE "$EXCLUDED"; then
+              continue
+            fi
+
+            FRONTMATTER=$(sed -n '/^---$/,/^---$/p' "$file" | sed '1d;$d')
+            if [ -z "$FRONTMATTER" ]; then
+              continue
+            fi
+
+            RISK_LEVEL=$(echo "$FRONTMATTER" | grep "^risk_level:" | head -1 | sed 's/risk_level: *//' | tr -d '\r' || true)
+
+            if [ "$RISK_LEVEL" = "high" ] || [ "$RISK_LEVEL" = "critical" ]; then
+              RELATED=$(echo "$FRONTMATTER" | grep -A20 "^related:" | grep "^ *-" || true)
+              HAS_ETH=$(echo "$RELATED" | grep -i "ETH-" || true)
+
+              if [ -z "$HAS_ETH" ]; then
+                echo "::warning file=$file::High-risk document ($RISK_LEVEL) has no ETH reference in 'related:'"
+              fi
+            fi
+          done
+
+          echo "✅ Compliance check completed"
+
+      - name: Verify EU AI Act high-risk documents have required section
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          echo "📋 Checking EU AI Act compliance..."
+
+          EXCLUDED="PRINCIPLES.md|DOCUMENTATION-POLICY.md|AGENT-RULES.md|TEMPLATE-.*\.md|README.md|QUICK-REFERENCE.md|INDEX.md|GIT-BRANCHING-STRATEGY.md"
+
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            filename=$(basename "$file")
+
+            if echo "$filename" | grep -qE "$EXCLUDED"; then
+              continue
+            fi
+
+            FRONTMATTER=$(sed -n '/^---$/,/^---$/p' "$file" | sed '1d;$d')
+            if [ -z "$FRONTMATTER" ]; then
+              continue
+            fi
+
+            EU_RISK=$(echo "$FRONTMATTER" | grep "^eu_ai_act_risk:" | head -1 | sed 's/eu_ai_act_risk: *//' | tr -d '\r' || true)
+
+            if [ "$EU_RISK" = "high" ]; then
+              BODY=$(sed -n '/^---$/,/^---$/!p' "$file" | tail -n +2)
+              if ! echo "$BODY" | grep -qi "EU AI Act"; then
+                echo "::warning file=$file::eu_ai_act_risk is 'high' but document lacks 'EU AI Act Considerations' section"
+              fi
+            fi
+          done
+
+          echo "✅ EU AI Act compliance check completed"
+
+  # ===========================================================================
+  # Job: Governance metrics (only on push to main)
+  # ===========================================================================
+  governance-metrics:
+    name: Governance Metrics
+    runs-on: ubuntu-latest
+    needs: validate-docs
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Generate governance metrics report
+        run: |
+          echo "📊 Generating governance metrics..."
+
+          DEVTRAIL_DIR=".devtrail"
+          TYPES=("AILOG" "AIDEC" "ADR" "ETH" "REQ" "TES" "INC" "TDE" "SEC" "MCARD" "SBOM" "DPIA")
+
+          # Header
+          echo "## DevTrail Governance Metrics" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Generated: $(date -u +"%Y-%m-%d %H:%M UTC")" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          # Document counts by type
+          echo "### Documents by Type" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Type | Count |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|------|------:|" >> "$GITHUB_STEP_SUMMARY"
+
+          TOTAL=0
+          for TYPE in "${TYPES[@]}"; do
+            COUNT=$(find "$DEVTRAIL_DIR" -name "${TYPE}-*.md" -not -path "*/templates/*" 2>/dev/null | wc -l)
+            TOTAL=$((TOTAL + COUNT))
+            echo "| $TYPE | $COUNT |" >> "$GITHUB_STEP_SUMMARY"
+          done
+          echo "| **TOTAL** | **$TOTAL** |" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          # Documents from the last 7 days
+          echo "### Recent Documents (last 7 days)" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          WEEK_AGO=$(date -u -d "7 days ago" +%Y-%m-%d 2>/dev/null || date -u -v-7d +%Y-%m-%d 2>/dev/null || echo "0000-00-00")
+          RECENT=$(find "$DEVTRAIL_DIR" -name "*.md" -not -path "*/templates/*" -newer <(date -d "$WEEK_AGO" +%s 2>/dev/null || echo /dev/null) 2>/dev/null | wc -l || echo 0)
+          echo "Documents created/modified in the last 7 days: **$RECENT**" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          # Risk level distribution
+          echo "### Risk Level Distribution" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Risk Level | Count |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|------------|------:|" >> "$GITHUB_STEP_SUMMARY"
+
+          for RISK in low medium high critical; do
+            RISK_COUNT=$(grep -rl "^risk_level: *$RISK" "$DEVTRAIL_DIR" --include="*.md" 2>/dev/null | grep -v templates | wc -l)
+            echo "| $RISK | $RISK_COUNT |" >> "$GITHUB_STEP_SUMMARY"
+          done
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          # Review compliance rate
+          echo "### Review Compliance" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          HIGH_RISK_DOCS=$(grep -rl "^risk_level: *\(high\|critical\)" "$DEVTRAIL_DIR" --include="*.md" 2>/dev/null | grep -v templates || true)
+          HIGH_COUNT=$(echo "$HIGH_RISK_DOCS" | grep -c . 2>/dev/null || echo 0)
+          if [ "$HIGH_COUNT" -gt 0 ]; then
+            REVIEWED=0
+            for doc in $HIGH_RISK_DOCS; do
+              if grep -q "^review_required: *true" "$doc" 2>/dev/null; then
+                REVIEWED=$((REVIEWED + 1))
+              fi
+            done
+            RATE=$((REVIEWED * 100 / HIGH_COUNT))
+            echo "High/critical risk documents with review_required: true: **$REVIEWED / $HIGH_COUNT ($RATE%)**" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No high/critical risk documents found." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "✅ Governance metrics generated"
+
+  # ===========================================================================
   # Job: Generate documentation index (only on main)
   # ===========================================================================
   generate-index:
@@ -297,7 +465,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Generate documentation index
         run: |
