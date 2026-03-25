@@ -336,7 +336,76 @@ done
 echo ""
 
 # =============================================================================
-# 10. Run markdownlint if available
+# 10. Validate related: references exist
+# =============================================================================
+
+echo "📋 Validating related document references..."
+
+for file in $STAGED_DOCS; do
+    filename=$(basename "$file")
+
+    # Skip excluded files
+    if echo "$filename" | grep -qE "$EXCLUDED_FILES"; then
+        continue
+    fi
+
+    FRONTMATTER=$(sed -n '/^---$/,/^---$/p' "$file" | sed '1d;$d')
+
+    if [ -z "$FRONTMATTER" ]; then
+        continue
+    fi
+
+    # Extract related items (lines starting with " - " after "related:")
+    RELATED=$(echo "$FRONTMATTER" | sed -n '/^related:/,/^[a-z]/p' | grep "^ *-" | sed 's/^ *- *//' | tr -d '\r')
+
+    for ref in $RELATED; do
+        # Skip empty refs
+        if [ -z "$ref" ] || [ "$ref" = "[]" ]; then
+            continue
+        fi
+
+        # Search for a file matching this reference
+        FOUND=$(find .devtrail -name "${ref}*" -not -path "*/templates/*" 2>/dev/null | head -1)
+        if [ -z "$FOUND" ]; then
+            echo -e "  ${YELLOW}⚠ $filename: related document '$ref' not found in .devtrail/${NC}"
+            ((WARNINGS++))
+        fi
+    done
+done
+
+echo ""
+
+# =============================================================================
+# 11. Detect code changes without same-day AILOG (warning)
+# =============================================================================
+
+echo "📋 Checking for code changes without AILOG..."
+
+TODAY=$(date +%Y-%m-%d)
+
+# Check if there are staged code files (non-.devtrail, non-.md)
+STAGED_CODE=$(git diff --cached --name-only --diff-filter=ACM | grep -vE "^\.devtrail/|\.md$|\.yml$|\.json$|\.gitkeep$" || true)
+
+if [ -n "$STAGED_CODE" ]; then
+    # Check if there's an AILOG for today
+    TODAY_AILOG=$(find .devtrail -name "AILOG-${TODAY}-*.md" -not -path "*/templates/*" 2>/dev/null | head -1)
+
+    if [ -z "$TODAY_AILOG" ]; then
+        # Also check staged files for an AILOG
+        STAGED_AILOG=$(echo "$STAGED_DOCS" | grep "AILOG-${TODAY}" || true)
+
+        if [ -z "$STAGED_AILOG" ]; then
+            echo -e "  ${YELLOW}⚠ Code changes detected but no AILOG for today ($TODAY)${NC}"
+            echo -e "    Consider creating one with: ./scripts/devtrail-new.sh ailog"
+            ((WARNINGS++))
+        fi
+    fi
+fi
+
+echo ""
+
+# =============================================================================
+# 12. Run markdownlint if available
 # =============================================================================
 
 if command -v markdownlint &> /dev/null; then
@@ -356,7 +425,7 @@ fi
 echo ""
 
 # =============================================================================
-# 11. Summary and result
+# 13. Summary and result
 # =============================================================================
 
 echo "═══════════════════════════════════════════════════════════════════════════"

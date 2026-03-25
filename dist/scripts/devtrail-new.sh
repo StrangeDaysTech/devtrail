@@ -1,7 +1,7 @@
 #!/bin/bash
 # devtrail-new.sh - Create DevTrail documentation manually
 # Usage: ./scripts/devtrail-new.sh [type] [title] [slug]
-# Types: ailog, aidec, adr, eth, req, tes, inc, tde
+# Types: ailog, aidec, adr, eth, req, tes, inc, tde, sec, mcard, sbom, dpia
 #
 # Examples:
 #   ./scripts/devtrail-new.sh                              # fully interactive
@@ -33,6 +33,10 @@ declare -A DOC_PATHS=(
     ["tes"]="$DEVTRAIL_DIR/04-testing"
     ["inc"]="$DEVTRAIL_DIR/05-operations/incidents"
     ["tde"]="$DEVTRAIL_DIR/06-evolution/technical-debt"
+    ["sec"]="$DEVTRAIL_DIR/08-security"
+    ["mcard"]="$DEVTRAIL_DIR/09-ai-models"
+    ["sbom"]="$DEVTRAIL_DIR/07-ai-audit"
+    ["dpia"]="$DEVTRAIL_DIR/07-ai-audit/ethical-reviews"
 )
 
 declare -A DOC_NAMES=(
@@ -44,6 +48,10 @@ declare -A DOC_NAMES=(
     ["tes"]="Test Plan"
     ["inc"]="Incident Post-mortem"
     ["tde"]="Technical Debt"
+    ["sec"]="Security Assessment"
+    ["mcard"]="Model/System Card"
+    ["sbom"]="Software Bill of Materials"
+    ["dpia"]="Data Protection Impact Assessment"
 )
 
 # Check if .devtrail exists
@@ -121,11 +129,15 @@ select_type() {
     echo -e "${BLUE}║     6. tes   - Test Plan                                          ║${NC}"
     echo -e "${BLUE}║     7. inc   - Incident Post-mortem                               ║${NC}"
     echo -e "${BLUE}║     8. tde   - Technical Debt                                     ║${NC}"
+    echo -e "${BLUE}║     9. sec   - Security Assessment                                ║${NC}"
+    echo -e "${BLUE}║    10. mcard - Model/System Card                                  ║${NC}"
+    echo -e "${BLUE}║    11. sbom  - Software Bill of Materials                         ║${NC}"
+    echo -e "${BLUE}║    12. dpia  - Data Protection Impact Assessment                  ║${NC}"
     echo -e "${BLUE}║                                                                   ║${NC}"
     echo -e "${BLUE}╚══════════════════════════════════════════════════════════════════╝${NC}"
     echo ""
-    read -p "Select type (1-8 or name): " type_input
-    
+    read -p "Select type (1-12 or name): " type_input
+
     case $type_input in
         1|ailog) echo "ailog" ;;
         2|aidec) echo "aidec" ;;
@@ -135,6 +147,10 @@ select_type() {
         6|tes) echo "tes" ;;
         7|inc) echo "inc" ;;
         8|tde) echo "tde" ;;
+        9|sec) echo "sec" ;;
+        10|mcard) echo "mcard" ;;
+        11|sbom) echo "sbom" ;;
+        12|dpia) echo "dpia" ;;
         *) echo "" ;;
     esac
 }
@@ -204,7 +220,7 @@ main() {
     # Validate type
     if [ -z "${DOC_PATHS[$type]}" ]; then
         echo -e "${RED}Error: Invalid type '$type'${NC}"
-        echo "Valid types: ailog, aidec, adr, eth, req, tes, inc, tde"
+        echo "Valid types: ailog, aidec, adr, eth, req, tes, inc, tde, sec, mcard, sbom, dpia"
         exit 1
     fi
 

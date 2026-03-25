@@ -379,7 +379,85 @@ foreach ($file in $MarkdownFiles) {
 Write-Host ""
 
 # =============================================================================
-# 12. Summary
+# 12. Validate related document references exist
+# =============================================================================
+
+Write-Host "📋 Validating related document references..." -ForegroundColor Cyan
+
+foreach ($file in $MarkdownFiles) {
+    $fileName = $file.Name
+
+    if (Test-ExcludedFile -FileName $fileName) {
+        continue
+    }
+
+    $content = Get-Content -Path $file.FullName -Raw -ErrorAction SilentlyContinue
+
+    if (-not $content) { continue }
+
+    if ($content -match "(?s)^---\r?\n(.+?)\r?\n---") {
+        $frontmatter = $Matches[1]
+
+        # Extract related references
+        $relatedMatches = [regex]::Matches($frontmatter, "(?m)^\s*-\s+(\S+)")
+        $inRelated = $false
+
+        foreach ($line in $frontmatter -split "`n") {
+            if ($line -match "^related:") {
+                $inRelated = $true
+                continue
+            }
+            if ($inRelated -and $line -match "^\s*-\s+(.+)$") {
+                $ref = $Matches[1].Trim()
+                if ($ref -eq "[]" -or [string]::IsNullOrWhiteSpace($ref)) {
+                    continue
+                }
+
+                $found = Get-ChildItem -Path $Path -Filter "$ref*" -Recurse -ErrorAction SilentlyContinue |
+                    Where-Object { $_.FullName -notlike "*templates*" } |
+                    Select-Object -First 1
+
+                if (-not $found) {
+                    Write-Host "  ⚠ $fileName`: related document '$ref' not found in .devtrail/" -ForegroundColor Yellow
+                    $WarningCount++
+                }
+            } elseif ($inRelated -and $line -match "^[a-z]") {
+                $inRelated = $false
+            }
+        }
+    }
+}
+
+Write-Host ""
+
+# =============================================================================
+# 13. Detect code changes without same-day AILOG (warning)
+# =============================================================================
+
+Write-Host "📋 Checking for code changes without AILOG..." -ForegroundColor Cyan
+
+$today = Get-Date -Format "yyyy-MM-dd"
+
+# Check for staged code files (via git)
+$stagedCode = git diff --cached --name-only --diff-filter=ACM 2>$null |
+    Where-Object { $_ -notmatch "^\.devtrail/" -and $_ -notmatch "\.(md|yml|json)$" -and $_ -ne ".gitkeep" }
+
+if ($stagedCode) {
+    $todayAilog = Get-ChildItem -Path $Path -Filter "AILOG-$today-*.md" -Recurse -ErrorAction SilentlyContinue |
+        Where-Object { $_.FullName -notlike "*templates*" } |
+        Select-Object -First 1
+
+    if (-not $todayAilog) {
+        Write-Host "  ⚠ Code changes detected but no AILOG for today ($today)" -ForegroundColor Yellow
+        Write-Host "    Consider creating one with: .\scripts\devtrail-new.sh ailog" -ForegroundColor Gray
+        $WarningCount++
+    }
+}
+
+Write-Host ""
+
+# =============================================================================
+# 14. Summary
 # =============================================================================
 
 Write-Host "═══════════════════════════════════════════════════════════════════════════" -ForegroundColor Cyan

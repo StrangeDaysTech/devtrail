@@ -19,10 +19,23 @@ Search for DevTrail documents created or modified in the last hour:
 git log --since="1 hour ago" --name-only --pretty=format: -- ".devtrail/**/*.md" | sort -u | grep -v "^$"
 ```
 
-If git is not available or the directory is not a git repo, use file modification times:
-- Check `.devtrail/07-ai-audit/agent-logs/` for recent AILOG files
-- Check `.devtrail/07-ai-audit/decisions/` for recent AIDEC files
-- Check `.devtrail/07-ai-audit/ethical-reviews/` for recent ETH files
+If git is not available or the directory is not a git repo, use file modification times.
+Check these directories for each document type:
+
+| Type | Prefix | Directory |
+|------|--------|-----------|
+| AILOG | `AILOG-` | `.devtrail/07-ai-audit/agent-logs/` |
+| AIDEC | `AIDEC-` | `.devtrail/07-ai-audit/decisions/` |
+| ADR | `ADR-` | `.devtrail/04-architecture/decisions/` |
+| ETH | `ETH-` | `.devtrail/07-ai-audit/ethical-reviews/` |
+| REQ | `REQ-` | `.devtrail/03-requirements/` |
+| TES | `TES-` | `.devtrail/05-testing/` |
+| INC | `INC-` | `.devtrail/06-operations/incidents/` |
+| TDE | `TDE-` | `.devtrail/06-operations/tech-debt/` |
+| SEC | `SEC-` | `.devtrail/08-security/` |
+| MCARD | `MCARD-` | `.devtrail/09-ai-models/` |
+| SBOM | `SBOM-` | `.devtrail/07-ai-audit/` |
+| DPIA | `DPIA-` | `.devtrail/07-ai-audit/ethical-reviews/` |
 
 ### 2. Find Modified Source Files
 
@@ -41,7 +54,13 @@ Filter to show only files that might need documentation:
 
 For each modified source file, check if there's a corresponding DevTrail document:
 - Files with >10 lines of changes in business logic folders should have an AILOG
-- Security-related files should have documentation with `risk_level: high`
+- Security-related files (auth, crypto, secrets) should have a SEC assessment
+- Architecture/structural changes should have an ADR
+- AI/ML model changes should have a MCARD
+- Dependency changes (`package.json`, `Cargo.toml`, `go.mod`, etc.) should have an SBOM
+- Changes involving personal data processing should have a DPIA
+- Test files should have a TES record
+- Bug fixes or incidents should have an INC record
 
 ### 4. Display Results
 

@@ -339,7 +339,7 @@ Se indican como `→ depende de F1.FW.01` tras la subtarea.
 
 ### F2.FW.01 — Crear TEMPLATE-SEC.md (Security Assessment) `P0`
 
-- [ ] **F2.FW.01.01** — Diseñar frontmatter:
+- [x] **F2.FW.01.01** — Diseñar frontmatter:
 ```yaml
   id: SEC-YYYY-MM-DD-NNN
   title: "[System/Component] Security Assessment"
@@ -356,17 +356,17 @@ Se indican como `→ depende de F1.FW.01` tras la subtarea.
   tags: [security]
   related: []
 ```
-- [ ] **F2.FW.01.02** — Crear sección `## Scope and Objectives` con: System Under Assessment, Assessment Type (design review/code review/penetration test/threat model), Assessment Date, Assessor
-- [ ] **F2.FW.01.03** — Crear sección `## Threat Model` con subsecciones según metodología STRIDE: Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege. Cada una con tabla: Threat ID, Description, Likelihood (1-5), Impact (1-5), Risk Score, Mitigation
-- [ ] **F2.FW.01.04** — Crear sección `## OWASP ASVS Compliance` con tabla de verificación de controles ASVS organizados por los 17 capítulos de ASVS 5.0. Campos: Control ID, Description, Level (L1/L2/L3), Status (Pass/Fail/NA), Evidence, Notes
-- [ ] **F2.FW.01.05** — Crear sección `## Vulnerabilities Found` con tabla: Vuln ID, CWE, Severity (CVSS), Description, Affected Component, Remediation, Status (open/mitigated/accepted)
-- [ ] **F2.FW.01.06** — Crear sección `## Security Controls` con tabla basada en OWASP SAMM: Business Function (Governance/Design/Implementation/Verification/Operations), Practice, Maturity Level (1-3), Current Status, Gaps
-- [ ] **F2.FW.01.07** — Crear sección `## Recommendations` con: Priority, Description, Effort, Impact
-- [ ] **F2.FW.01.08** — Crear versión ES del template
+- [x] **F2.FW.01.02** — Crear sección `## Scope and Objectives` con: System Under Assessment, Assessment Type (design review/code review/penetration test/threat model), Assessment Date, Assessor
+- [x] **F2.FW.01.03** — Crear sección `## Threat Model` con subsecciones según metodología STRIDE: Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege. Cada una con tabla: Threat ID, Description, Likelihood (1-5), Impact (1-5), Risk Score, Mitigation
+- [x] **F2.FW.01.04** — Crear sección `## OWASP ASVS Compliance` con tabla de verificación de controles ASVS organizados por los 17 capítulos de ASVS 5.0. Campos: Control ID, Description, Level (L1/L2/L3), Status (Pass/Fail/NA), Evidence, Notes
+- [x] **F2.FW.01.05** — Crear sección `## Vulnerabilities Found` con tabla: Vuln ID, CWE, Severity (CVSS), Description, Affected Component, Remediation, Status (open/mitigated/accepted)
+- [x] **F2.FW.01.06** — Crear sección `## Security Controls` con tabla basada en OWASP SAMM: Business Function (Governance/Design/Implementation/Verification/Operations), Practice, Maturity Level (1-3), Current Status, Gaps
+- [x] **F2.FW.01.07** — Crear sección `## Recommendations` con: Priority, Description, Effort, Impact
+- [x] **F2.FW.01.08** — Crear versión ES del template
 
 ### F2.FW.02 — Crear TEMPLATE-MCARD.md (Model/System Card) `P0`
 
-- [ ] **F2.FW.02.01** — Diseñar frontmatter:
+- [x] **F2.FW.02.01** — Diseñar frontmatter:
 ```yaml
   id: MCARD-YYYY-MM-DD-NNN
   title: "[Model Name] Card"
@@ -387,20 +387,20 @@ Se indican como `→ depende de F1.FW.01` tras la subtarea.
   tags: [ai-model]
   related: []
 ```
-- [ ] **F2.FW.02.02** — Crear sección `## Model Details` (basada en Mitchell et al. 2019): Developer, Model Date, Model Version, Model Type, Training Algorithms, Base Model (if fine-tuned), Paper/Resource, Citation, License
-- [ ] **F2.FW.02.03** — Crear sección `## Intended Use` con: Primary Intended Uses, Primary Intended Users, Out-of-Scope Uses
-- [ ] **F2.FW.02.04** — Crear sección `## Training Data` con: Dataset Name, Source, Size, Collection Methodology, Preprocessing, Known Limitations, PII Assessment, License. Incluir nota sobre CycloneDX modelCard.modelParameters para interoperabilidad con SBOM
-- [ ] **F2.FW.02.05** — Crear sección `## Performance Metrics` con tabla: Metric, Value, Test Dataset, Confidence Interval, Conditions. Separar por disaggregated evaluation si aplica
-- [ ] **F2.FW.02.06** — Crear sección `## Bias and Fairness Evaluation` con tabla: Demographic Group, Metric, Performance, Disparity vs Baseline, Mitigation Applied
-- [ ] **F2.FW.02.07** — Crear sección `## Environmental Impact` con: Training Energy (kWh), CO2 Equivalent, Hardware Used, Training Duration, Inference Cost, Region/Grid Carbon Intensity
-- [ ] **F2.FW.02.08** — Crear sección `## Security Considerations` con: Known Vulnerabilities, Adversarial Robustness Assessment, Prompt Injection Risk (Low/Med/High), Data Poisoning Risk, Model Extraction Risk
-- [ ] **F2.FW.02.09** — Crear sección `## Ethical Considerations` con: Sensitive Data Used, Human Subjects in Training, Dual-Use Potential, Societal Impact Assessment
-- [ ] **F2.FW.02.10** — Crear sección `## Limitations and Recommendations` con: Known Limitations, Failure Modes, Recommendations for Deployers
-- [ ] **F2.FW.02.11** — Crear versión ES del template
+- [x] **F2.FW.02.02** — Crear sección `## Model Details` (basada en Mitchell et al. 2019): Developer, Model Date, Model Version, Model Type, Training Algorithms, Base Model (if fine-tuned), Paper/Resource, Citation, License
+- [x] **F2.FW.02.03** — Crear sección `## Intended Use` con: Primary Intended Uses, Primary Intended Users, Out-of-Scope Uses
+- [x] **F2.FW.02.04** — Crear sección `## Training Data` con: Dataset Name, Source, Size, Collection Methodology, Preprocessing, Known Limitations, PII Assessment, License. Incluir nota sobre CycloneDX modelCard.modelParameters para interoperabilidad con SBOM
+- [x] **F2.FW.02.05** — Crear sección `## Performance Metrics` con tabla: Metric, Value, Test Dataset, Confidence Interval, Conditions. Separar por disaggregated evaluation si aplica
+- [x] **F2.FW.02.06** — Crear sección `## Bias and Fairness Evaluation` con tabla: Demographic Group, Metric, Performance, Disparity vs Baseline, Mitigation Applied
+- [x] **F2.FW.02.07** — Crear sección `## Environmental Impact` con: Training Energy (kWh), CO2 Equivalent, Hardware Used, Training Duration, Inference Cost, Region/Grid Carbon Intensity
+- [x] **F2.FW.02.08** — Crear sección `## Security Considerations` con: Known Vulnerabilities, Adversarial Robustness Assessment, Prompt Injection Risk (Low/Med/High), Data Poisoning Risk, Model Extraction Risk
+- [x] **F2.FW.02.09** — Crear sección `## Ethical Considerations` con: Sensitive Data Used, Human Subjects in Training, Dual-Use Potential, Societal Impact Assessment
+- [x] **F2.FW.02.10** — Crear sección `## Limitations and Recommendations` con: Known Limitations, Failure Modes, Recommendations for Deployers
+- [x] **F2.FW.02.11** — Crear versión ES del template
 
 ### F2.FW.03 — Crear TEMPLATE-SBOM.md (Software Bill of Materials para IA) `P0`
 
-- [ ] **F2.FW.03.01** — Diseñar frontmatter:
+- [x] **F2.FW.03.01** — Diseñar frontmatter:
 ```yaml
   id: SBOM-YYYY-MM-DD-NNN
   title: "[System/Component] AI SBOM"
@@ -416,16 +416,16 @@ Se indican como `→ depende de F1.FW.01` tras la subtarea.
   tags: [sbom, supply-chain]
   related: []
 ```
-- [ ] **F2.FW.03.02** — Crear sección `## AI/ML Components` con tabla: Component Name, Version, Provider, Type (model/library/service/dataset), License, Risk Level, Vulnerability Status, Last Audit Date. Nota: "This section maps to CycloneDX `component` with `type: machine-learning-model`"
-- [ ] **F2.FW.03.03** — Crear sección `## Training Data Sources` con tabla: Dataset, Source, License, PII Included (Yes/No), Bias Assessment Summary, Data Provenance, Retention Policy. Nota: "Aligns with ISO 42001 Annex A.7 (Data for AI Systems)"
-- [ ] **F2.FW.03.04** — Crear sección `## Third-Party AI Services` con tabla: Service, Provider, Purpose, Data Shared, DPA in Place (Yes/No), SLA, Region, Compliance Certifications
-- [ ] **F2.FW.03.05** — Crear sección `## Software Dependencies` con tabla: Package, Version, License, Known Vulnerabilities (CVE list), Last Updated. Nota: "Consider generating this section automatically with tools like `syft` or `trivy`"
-- [ ] **F2.FW.03.06** — Crear sección `## Supply Chain Risk Assessment` con: Overall Risk Level, Key Risks Identified, Mitigations, Monitoring Plan. Nota: "Aligns with NIST AI 600-1 Category 12: Value Chain and Component Integration"
-- [ ] **F2.FW.03.07** — Crear versión ES del template
+- [x] **F2.FW.03.02** — Crear sección `## AI/ML Components` con tabla: Component Name, Version, Provider, Type (model/library/service/dataset), License, Risk Level, Vulnerability Status, Last Audit Date. Nota: "This section maps to CycloneDX `component` with `type: machine-learning-model`"
+- [x] **F2.FW.03.03** — Crear sección `## Training Data Sources` con tabla: Dataset, Source, License, PII Included (Yes/No), Bias Assessment Summary, Data Provenance, Retention Policy. Nota: "Aligns with ISO 42001 Annex A.7 (Data for AI Systems)"
+- [x] **F2.FW.03.04** — Crear sección `## Third-Party AI Services` con tabla: Service, Provider, Purpose, Data Shared, DPA in Place (Yes/No), SLA, Region, Compliance Certifications
+- [x] **F2.FW.03.05** — Crear sección `## Software Dependencies` con tabla: Package, Version, License, Known Vulnerabilities (CVE list), Last Updated. Nota: "Consider generating this section automatically with tools like `syft` or `trivy`"
+- [x] **F2.FW.03.06** — Crear sección `## Supply Chain Risk Assessment` con: Overall Risk Level, Key Risks Identified, Mitigations, Monitoring Plan. Nota: "Aligns with NIST AI 600-1 Category 12: Value Chain and Component Integration"
+- [x] **F2.FW.03.07** — Crear versión ES del template
 
 ### F2.FW.04 — Crear TEMPLATE-DPIA.md (Data Protection Impact Assessment) `P0`
 
-- [ ] **F2.FW.04.01** — Diseñar frontmatter:
+- [x] **F2.FW.04.01** — Diseñar frontmatter:
 ```yaml
   id: DPIA-YYYY-MM-DD-NNN
   title: "[System/Process] Data Protection Impact Assessment"
@@ -443,24 +443,24 @@ Se indican como `→ depende de F1.FW.01` tras la subtarea.
   tags: [privacy, gdpr, dpia]
   related: []
 ```
-- [ ] **F2.FW.04.02** — Crear sección `## Processing Description` con: Nature of Processing, Scope, Context, Purpose, Legal Basis (Art. 6 GDPR), Categories of Data Subjects, Categories of Personal Data, Recipients, International Transfers, Retention Period
-- [ ] **F2.FW.04.03** — Crear sección `## Necessity and Proportionality` con: Necessity Assessment, Purpose Limitation, Data Minimization, Storage Limitation, Data Quality
-- [ ] **F2.FW.04.04** — Crear sección `## Risk Assessment` con tabla: Risk, Likelihood (Low/Med/High), Severity (Low/Med/High), Risk Level, Source of Risk, Nature of Impact (physical/material/non-material). Separar por categorías: Risks to Data Subjects, Risks to Rights and Freedoms
-- [ ] **F2.FW.04.05** — Crear sección `## Measures to Mitigate Risks` con tabla: Risk, Measure, Type (technical/organizational/legal), Residual Risk, Responsible
-- [ ] **F2.FW.04.06** — Crear sección `## Consultation` con: Data Protection Officer Opinion, Data Subjects Consulted (Yes/No, methodology), Supervisory Authority Consulted (Yes/No, reference). Nota: "If residual risk remains high after mitigation, consultation with the supervisory authority is mandatory per Art. 36 GDPR"
-- [ ] **F2.FW.04.07** — Crear sección `## AI-Specific Considerations` (cuando aplique EU AI Act): Automated Decision-Making (Art. 22 GDPR), Right to Explanation, Human Oversight Measures, Transparency to Data Subjects
-- [ ] **F2.FW.04.08** — Crear sección `## Review Schedule` con: Next Review Date, Review Trigger Events, Review Responsible
-- [ ] **F2.FW.04.09** — Crear versión ES del template
+- [x] **F2.FW.04.02** — Crear sección `## Processing Description` con: Nature of Processing, Scope, Context, Purpose, Legal Basis (Art. 6 GDPR), Categories of Data Subjects, Categories of Personal Data, Recipients, International Transfers, Retention Period
+- [x] **F2.FW.04.03** — Crear sección `## Necessity and Proportionality` con: Necessity Assessment, Purpose Limitation, Data Minimization, Storage Limitation, Data Quality
+- [x] **F2.FW.04.04** — Crear sección `## Risk Assessment` con tabla: Risk, Likelihood (Low/Med/High), Severity (Low/Med/High), Risk Level, Source of Risk, Nature of Impact (physical/material/non-material). Separar por categorías: Risks to Data Subjects, Risks to Rights and Freedoms
+- [x] **F2.FW.04.05** — Crear sección `## Measures to Mitigate Risks` con tabla: Risk, Measure, Type (technical/organizational/legal), Residual Risk, Responsible
+- [x] **F2.FW.04.06** — Crear sección `## Consultation` con: Data Protection Officer Opinion, Data Subjects Consulted (Yes/No, methodology), Supervisory Authority Consulted (Yes/No, reference). Nota: "If residual risk remains high after mitigation, consultation with the supervisory authority is mandatory per Art. 36 GDPR"
+- [x] **F2.FW.04.07** — Crear sección `## AI-Specific Considerations` (cuando aplique EU AI Act): Automated Decision-Making (Art. 22 GDPR), Right to Explanation, Human Oversight Measures, Transparency to Data Subjects
+- [x] **F2.FW.04.08** — Crear sección `## Review Schedule` con: Next Review Date, Review Trigger Events, Review Responsible
+- [x] **F2.FW.04.09** — Crear versión ES del template
 
 ### F2.FW.05 — Actualizar estructura de carpetas en dist/ `P1`
 
 > → depende de F2.FW.01 a F2.FW.04
 
-- [ ] **F2.FW.05.01** — Crear `dist/.devtrail/08-security/.gitkeep`
-- [ ] **F2.FW.05.02** — Crear `dist/.devtrail/09-ai-models/.gitkeep`
-- [ ] **F2.FW.05.03** — Agregar los 4 nuevos templates EN a `dist/.devtrail/templates/`
-- [ ] **F2.FW.05.04** — Agregar los 4 nuevos templates ES a `dist/.devtrail/templates/i18n/es/`
-- [ ] **F2.FW.05.05** — Actualizar `dist/dist-manifest.yml` con los nuevos archivos en sección `files`
+- [x] **F2.FW.05.01** — Crear `dist/.devtrail/08-security/.gitkeep`
+- [x] **F2.FW.05.02** — Crear `dist/.devtrail/09-ai-models/.gitkeep`
+- [x] **F2.FW.05.03** — Agregar los 4 nuevos templates EN a `dist/.devtrail/templates/`
+- [x] **F2.FW.05.04** — Agregar los 4 nuevos templates ES a `dist/.devtrail/templates/i18n/es/`
+- [x] **F2.FW.05.05** — Actualizar `dist/dist-manifest.yml` con los nuevos archivos en sección `files`
 
 ---
 
@@ -468,37 +468,37 @@ Se indican como `→ depende de F1.FW.01` tras la subtarea.
 
 ### F2.SK.01 — Crear skill `devtrail-sec` (Security Assessment) `P1`
 
-- [ ] **F2.SK.01.01** — Crear `dist/.claude/skills/devtrail-sec/SKILL.md` con:
+- [x] **F2.SK.01.01** — Crear `dist/.claude/skills/devtrail-sec/SKILL.md` con:
   - Invocación: `/devtrail-sec [component-name]`
   - Flujo interactivo paso a paso: (1) Preguntar alcance del assessment, (2) Preguntar metodología de threat model (STRIDE recomendado), (3) Preguntar nivel OWASP ASVS objetivo (L1/L2/L3), (4) Generar documento con campos pre-llenados basándose en el contexto del código, (5) Marcar como draft con review_required: true
   - Allowed tools: Read, Write, Glob, Bash (git, date)
   - Ejemplo completo de output esperado
-- [ ] **F2.SK.01.02** — Crear `dist/.gemini/skills/devtrail-sec/SKILL.md` adaptado al formato Gemini
-- [ ] **F2.SK.01.03** — Crear `dist/.agent/workflows/devtrail-sec.md` como workflow genérico
+- [x] **F2.SK.01.02** — Crear `dist/.gemini/skills/devtrail-sec/SKILL.md` adaptado al formato Gemini
+- [x] **F2.SK.01.03** — Crear `dist/.agent/workflows/devtrail-sec.md` como workflow genérico
 
 ### F2.SK.02 — Crear skill `devtrail-mcard` (Model Card) `P1`
 
-- [ ] **F2.SK.02.01** — Crear `dist/.claude/skills/devtrail-mcard/SKILL.md` con:
+- [x] **F2.SK.02.01** — Crear `dist/.claude/skills/devtrail-mcard/SKILL.md` con:
   - Invocación: `/devtrail-mcard [model-name]`
   - Flujo interactivo: (1) Preguntar nombre y tipo del modelo, (2) Preguntar proveedor y versión, (3) Preguntar usos previstos, (4) Guiar al usuario por cada sección con preguntas específicas y ejemplos de respuesta, (5) Generar documento con review_required: true
   - Incluir ejemplos de respuestas bien formadas para cada sección
-- [ ] **F2.SK.02.02** — Crear versión Gemini
-- [ ] **F2.SK.02.03** — Crear workflow genérico
+- [x] **F2.SK.02.02** — Crear versión Gemini
+- [x] **F2.SK.02.03** — Crear workflow genérico
 
 ### F2.SK.03 — Actualizar skill `devtrail-new` para 12 tipos `P1`
 
-- [ ] **F2.SK.03.01** — En `dist/.claude/skills/devtrail-new/SKILL.md`: agregar SEC, MCARD, SBOM, DPIA al listado de tipos disponibles con descripciones y carpetas destino
-- [ ] **F2.SK.03.02** — Replicar en `dist/.gemini/skills/devtrail-new/SKILL.md`
-- [ ] **F2.SK.03.03** — Replicar en `dist/.agent/workflows/devtrail-new.md`
+- [x] **F2.SK.03.01** — En `dist/.claude/skills/devtrail-new/SKILL.md`: agregar SEC, MCARD, SBOM, DPIA al listado de tipos disponibles con descripciones y carpetas destino
+- [x] **F2.SK.03.02** — Replicar en `dist/.gemini/skills/devtrail-new/SKILL.md`
+- [x] **F2.SK.03.03** — Replicar en `dist/.agent/workflows/devtrail-new.md`
 
 ### F2.SK.04 — Actualizar skill `devtrail-status` para 12 tipos `P1`
 
-- [ ] **F2.SK.04.01** — Actualizar skills de status en las 3 plataformas para buscar y contar los 12 tipos
+- [x] **F2.SK.04.01** — Actualizar skills de status en las 3 plataformas para buscar y contar los 12 tipos
 
 ### F2.SK.05 — Actualizar script `devtrail-new.sh` `P2`
 
-- [ ] **F2.SK.05.01** — Agregar los 4 nuevos tipos al menú interactivo del script bash
-- [ ] **F2.SK.05.02** — Agregar las carpetas destino correctas para cada nuevo tipo
+- [x] **F2.SK.05.01** — Agregar los 4 nuevos tipos al menú interactivo del script bash
+- [x] **F2.SK.05.02** — Agregar las carpetas destino correctas para cada nuevo tipo
 
 ---
 
@@ -508,7 +508,7 @@ Se indican como `→ depende de F1.FW.01` tras la subtarea.
 
 > Este módulo será compartido por validate, compliance, metrics y audit.
 
-- [ ] **F2.CLI.01.01** — Crear `cli/src/document.rs` con struct `DevTrailDocument`:
+- [x] **F2.CLI.01.01** — Crear `cli/src/document.rs` con struct `DevTrailDocument`:
 ```rust
   pub struct DevTrailDocument {
       pub path: PathBuf,
@@ -518,8 +518,8 @@ Se indican como `→ depende de F1.FW.01` tras la subtarea.
       pub body: String,
   }
 ```
-- [ ] **F2.CLI.01.02** — Crear enum `DocType` con los 12 tipos: AILOG, AIDEC, ADR, ETH, REQ, TES, INC, TDE, SEC, MCARD, SBOM, DPIA
-- [ ] **F2.CLI.01.03** — Crear struct `Frontmatter` con todos los campos (obligatorios como `Option<T>` para que el validador reporte cuáles faltan):
+- [x] **F2.CLI.01.02** — Crear enum `DocType` con los 12 tipos: AILOG, AIDEC, ADR, ETH, REQ, TES, INC, TDE, SEC, MCARD, SBOM, DPIA
+- [x] **F2.CLI.01.03** — Crear struct `Frontmatter` con todos los campos (obligatorios como `Option<T>` para que el validador reporte cuáles faltan):
 ```rust
   pub struct Frontmatter {
       pub id: Option<String>,
@@ -538,15 +538,15 @@ Se indican como `→ depende de F1.FW.01` tras la subtarea.
       // ... campos adicionales por tipo
   }
 ```
-- [ ] **F2.CLI.01.04** — Implementar función `parse_document(path: &Path) -> Result<DevTrailDocument>` que: lea el archivo, extraiga frontmatter YAML entre `---`, parsee con serde_yaml, determine DocType por prefijo del filename
-- [ ] **F2.CLI.01.05** — Implementar función `discover_documents(root: &Path) -> Vec<PathBuf>` que recorra `.devtrail/` recursivamente y retorne archivos que matcheen el patrón de naming `TYPE-YYYY-MM-DD-NNN-*.md`, excluyendo templates y archivos de gobernanza
-- [ ] **F2.CLI.01.06** — Agregar `pub mod document;` a `cli/src/main.rs`
+- [x] **F2.CLI.01.04** — Implementar función `parse_document(path: &Path) -> Result<DevTrailDocument>` que: lea el archivo, extraiga frontmatter YAML entre `---`, parsee con serde_yaml, determine DocType por prefijo del filename
+- [x] **F2.CLI.01.05** — Implementar función `discover_documents(root: &Path) -> Vec<PathBuf>` que recorra `.devtrail/` recursivamente y retorne archivos que matcheen el patrón de naming `TYPE-YYYY-MM-DD-NNN-*.md`, excluyendo templates y archivos de gobernanza
+- [x] **F2.CLI.01.06** — Agregar `pub mod document;` a `cli/src/main.rs`
 
 ### F2.CLI.02 — Implementar motor de validación `P0`
 
 > → depende de F2.CLI.01
 
-- [ ] **F2.CLI.02.01** — Crear `cli/src/validation.rs` con struct `ValidationResult`:
+- [x] **F2.CLI.02.01** — Crear `cli/src/validation.rs` con struct `ValidationResult`:
 ```rust
   pub struct ValidationResult {
       pub errors: Vec<ValidationIssue>,
@@ -560,49 +560,49 @@ Se indican como `→ depende de F1.FW.01` tras la subtarea.
       pub fix_hint: Option<String>,
   }
 ```
-- [ ] **F2.CLI.02.02** — Implementar regla `NAMING-001`: verificar que el nombre del archivo sigue el patrón `TYPE-YYYY-MM-DD-NNN-description.md` con TYPE en los 12 tipos válidos
-- [ ] **F2.CLI.02.03** — Implementar regla `META-001`: verificar presencia de campos obligatorios: id, title, status, created, agent, confidence, review_required, risk_level
-- [ ] **F2.CLI.02.04** — Implementar regla `META-002`: verificar que el campo `id` del frontmatter coincida con el prefijo del nombre de archivo
-- [ ] **F2.CLI.02.05** — Implementar regla `META-003`: verificar que `status` tenga un valor válido según DOCUMENTATION-POLICY.md
-- [ ] **F2.CLI.02.06** — Implementar regla `CROSS-001`: si `risk_level` es `high` o `critical`, `review_required` DEBE ser `true`
-- [ ] **F2.CLI.02.07** — Implementar regla `CROSS-002`: si `eu_ai_act_risk` es `high`, `review_required` DEBE ser `true`
-- [ ] **F2.CLI.02.08** — Implementar regla `CROSS-003`: para tipos SEC, MCARD, DPIA, `review_required` DEBE ser `true`
-- [ ] **F2.CLI.02.09** — Implementar regla `TYPE-001`: INC debe tener campo `severity`
-- [ ] **F2.CLI.02.10** — Implementar regla `TYPE-002`: ETH debe tener campo `gdpr_legal_basis` si contiene la sección "Data Privacy"
-- [ ] **F2.CLI.02.11** — Implementar regla `REF-001`: verificar que todos los documentos listados en `related:` existan en `.devtrail/`. Emitir warning si no se encuentran
-- [ ] **F2.CLI.02.12** — Implementar regla `SEC-001`: buscar patrones de información sensible (password, api_key, secret, token, private_key, credentials, Bearer) en todo el documento. Emitir error si se encuentran
-- [ ] **F2.CLI.02.13** — Implementar regla `OBS-001` (warning): si el documento tiene tag `observabilidad`, verificar que contenga al menos una sección de alcance de instrumentación o riesgos de observabilidad. Emitir warning si no se encuentra
-- [ ] **F2.CLI.02.14** — Implementar función `validate_all(root: &Path) -> ValidationResult` que aplique todas las reglas a todos los documentos descubiertos
+- [x] **F2.CLI.02.02** — Implementar regla `NAMING-001`: verificar que el nombre del archivo sigue el patrón `TYPE-YYYY-MM-DD-NNN-description.md` con TYPE en los 12 tipos válidos
+- [x] **F2.CLI.02.03** — Implementar regla `META-001`: verificar presencia de campos obligatorios: id, title, status, created, agent, confidence, review_required, risk_level
+- [x] **F2.CLI.02.04** — Implementar regla `META-002`: verificar que el campo `id` del frontmatter coincida con el prefijo del nombre de archivo
+- [x] **F2.CLI.02.05** — Implementar regla `META-003`: verificar que `status` tenga un valor válido según DOCUMENTATION-POLICY.md
+- [x] **F2.CLI.02.06** — Implementar regla `CROSS-001`: si `risk_level` es `high` o `critical`, `review_required` DEBE ser `true`
+- [x] **F2.CLI.02.07** — Implementar regla `CROSS-002`: si `eu_ai_act_risk` es `high`, `review_required` DEBE ser `true`
+- [x] **F2.CLI.02.08** — Implementar regla `CROSS-003`: para tipos SEC, MCARD, DPIA, `review_required` DEBE ser `true`
+- [x] **F2.CLI.02.09** — Implementar regla `TYPE-001`: INC debe tener campo `severity`
+- [x] **F2.CLI.02.10** — Implementar regla `TYPE-002`: ETH debe tener campo `gdpr_legal_basis` si contiene la sección "Data Privacy"
+- [x] **F2.CLI.02.11** — Implementar regla `REF-001`: verificar que todos los documentos listados en `related:` existan en `.devtrail/`. Emitir warning si no se encuentran
+- [x] **F2.CLI.02.12** — Implementar regla `SEC-001`: buscar patrones de información sensible (password, api_key, secret, token, private_key, credentials, Bearer) en todo el documento. Emitir error si se encuentran
+- [x] **F2.CLI.02.13** — Implementar regla `OBS-001` (warning): si el documento tiene tag `observabilidad`, verificar que contenga al menos una sección de alcance de instrumentación o riesgos de observabilidad. Emitir warning si no se encuentra
+- [x] **F2.CLI.02.14** — Implementar función `validate_all(root: &Path) -> ValidationResult` que aplique todas las reglas a todos los documentos descubiertos
 
 ### F2.CLI.03 — Implementar comando `devtrail validate` `P0`
 
 > → depende de F2.CLI.02
 
-- [ ] **F2.CLI.03.01** — Crear `cli/src/commands/validate.rs` con función `pub fn run(path: &str, fix: bool) -> Result<()>`
-- [ ] **F2.CLI.03.02** — Agregar variante `Validate` al enum `Commands` en main.rs con args: `path` (default "."), `--fix` (flag booleano)
-- [ ] **F2.CLI.03.03** — Agregar `pub mod validate;` en `commands/mod.rs`
-- [ ] **F2.CLI.03.04** — Implementar output formateado: header con ruta, luego errores agrupados por archivo (rojo), luego warnings (amarillo), luego resumen final: "X errors, Y warnings in Z documents"
-- [ ] **F2.CLI.03.05** — Implementar `--fix` para correcciones automáticas simples: agregar `review_required: true` a documentos de alto riesgo que no lo tengan, corregir `id` si no coincide con filename
-- [ ] **F2.CLI.03.06** — Exit code: 0 si no hay errores (warnings OK), 1 si hay errores
-- [ ] **F2.CLI.03.07** — Agregar al routing en main.rs match statement
+- [x] **F2.CLI.03.01** — Crear `cli/src/commands/validate.rs` con función `pub fn run(path: &str, fix: bool) -> Result<()>`
+- [x] **F2.CLI.03.02** — Agregar variante `Validate` al enum `Commands` en main.rs con args: `path` (default "."), `--fix` (flag booleano)
+- [x] **F2.CLI.03.03** — Agregar `pub mod validate;` en `commands/mod.rs`
+- [x] **F2.CLI.03.04** — Implementar output formateado: header con ruta, luego errores agrupados por archivo (rojo), luego warnings (amarillo), luego resumen final: "X errors, Y warnings in Z documents"
+- [x] **F2.CLI.03.05** — Implementar `--fix` para correcciones automáticas simples: agregar `review_required: true` a documentos de alto riesgo que no lo tengan, corregir `id` si no coincide con filename
+- [x] **F2.CLI.03.06** — Exit code: 0 si no hay errores (warnings OK), 1 si hay errores
+- [x] **F2.CLI.03.07** — Agregar al routing en main.rs match statement
 
 ### F2.CLI.04 — Integración de Lizard para complejidad ciclomática `P2`
 
-- [ ] **F2.CLI.04.01** — Crear `cli/src/complexity.rs` con función `pub fn analyze_complexity(paths: &[PathBuf]) -> Result<ComplexityReport>`
-- [ ] **F2.CLI.04.02** — Implementar detección de `lizard` en el PATH del sistema
-- [ ] **F2.CLI.04.03** — Implementar ejecución de `lizard --csv <paths>` y parseo del output CSV (lizard no soporta JSON nativo; CSV es el formato más portable). Campos a parsear: NLOC, CCN (cyclomatic complexity number), token, param, length, filename, function name
-- [ ] **F2.CLI.04.04** — Crear struct `ComplexityReport` con: functions analizadas, delta CCN vs baseline, funciones que exceden umbral (CCN > 5 delta)
-- [ ] **F2.CLI.04.05** — Implementar output JSON del reporte para que los skills de agentes puedan consumirlo: `devtrail analyze-complexity --json <paths>`
-- [ ] **F2.CLI.04.06** — Implementar fallback cuando lizard no está disponible: emitir warning con instrucciones de instalación (`pip install lizard`) y sugerir usar criterios cualitativos
+- [x] **F2.CLI.04.01** — Crear `cli/src/complexity.rs` con función `pub fn analyze_complexity(paths: &[PathBuf]) -> Result<ComplexityReport>`
+- [x] **F2.CLI.04.02** — Implementar detección de `lizard` en el PATH del sistema
+- [x] **F2.CLI.04.03** — Implementar ejecución de `lizard --csv <paths>` y parseo del output CSV (lizard no soporta JSON nativo; CSV es el formato más portable). Campos a parsear: NLOC, CCN (cyclomatic complexity number), token, param, length, filename, function name
+- [x] **F2.CLI.04.04** — Crear struct `ComplexityReport` con: functions analizadas, delta CCN vs baseline, funciones que exceden umbral (CCN > 5 delta)
+- [x] **F2.CLI.04.05** — Implementar output JSON del reporte para que los skills de agentes puedan consumirlo: `devtrail analyze-complexity --json <paths>`
+- [x] **F2.CLI.04.06** — Implementar fallback cuando lizard no está disponible: emitir warning con instrucciones de instalación (`pip install lizard`) y sugerir usar criterios cualitativos
 
 ### F2.CLI.05 — Bump de versiones Fase 2 `P0`
 
 > → depende de F2.CLI.01 a F2.CLI.04
 
-- [ ] **F2.CLI.05.01** — Editar `cli/Cargo.toml`: cambiar version a `"1.4.0"`
-- [ ] **F2.CLI.05.02** — Ejecutar `cargo check`
-- [ ] **F2.CLI.05.03** — Editar `dist/dist-manifest.yml`: cambiar version a `"3.1.0"`
-- [ ] **F2.CLI.05.04** — Actualizar `dist-manifest.yml` sección files con todos los archivos nuevos
+- [x] **F2.CLI.05.01** — Editar `cli/Cargo.toml`: cambiar version a `"1.4.0"`
+- [x] **F2.CLI.05.02** — Ejecutar `cargo check`
+- [x] **F2.CLI.05.03** — Editar `dist/dist-manifest.yml`: cambiar version a `"3.1.0"`
+- [x] **F2.CLI.05.04** — Actualizar `dist-manifest.yml` sección files con todos los archivos nuevos
 
 ---
 
@@ -610,14 +610,14 @@ Se indican como `→ depende de F1.FW.01` tras la subtarea.
 
 ### F2.CI.01 — Agregar jobs de compliance a `docs-validation.yml` `P1`
 
-- [ ] **F2.CI.01.01** — Agregar job `compliance-check` que verifique: documentos de alto riesgo (`risk_level: high|critical`) tienen ETH asociado en `related:`, documentos con `eu_ai_act_risk: high` tienen sección "EU AI Act Considerations"
-- [ ] **F2.CI.01.02** — Agregar job `governance-metrics` (solo en push a main) que genere reporte en `$GITHUB_STEP_SUMMARY`: conteo de documentos por tipo, documentos de la semana, distribución de risk_level, tasa de review compliance
+- [x] **F2.CI.01.01** — Agregar job `compliance-check` que verifique: documentos de alto riesgo (`risk_level: high|critical`) tienen ETH asociado en `related:`, documentos con `eu_ai_act_risk: high` tienen sección "EU AI Act Considerations"
+- [x] **F2.CI.01.02** — Agregar job `governance-metrics` (solo en push a main) que genere reporte en `$GITHUB_STEP_SUMMARY`: conteo de documentos por tipo, documentos de la semana, distribución de risk_level, tasa de review compliance
 
 ### F2.CI.02 — Agregar validación de referencias cruzadas `P2`
 
-- [ ] **F2.CI.02.01** — En `pre-commit-docs.sh`: agregar validación de que documentos en `related:` existen en `.devtrail/`
-- [ ] **F2.CI.02.02** — En `pre-commit-docs.sh`: agregar detección de cambios de código sin AILOG del mismo día (warning, no error)
-- [ ] **F2.CI.02.03** — Replicar ambas validaciones en `validate-docs.ps1`
+- [x] **F2.CI.02.01** — En `pre-commit-docs.sh`: agregar validación de que documentos en `related:` existen en `.devtrail/`
+- [x] **F2.CI.02.02** — En `pre-commit-docs.sh`: agregar detección de cambios de código sin AILOG del mismo día (warning, no error)
+- [x] **F2.CI.02.03** — Replicar ambas validaciones en `validate-docs.ps1`
 
 ---
 
@@ -625,7 +625,7 @@ Se indican como `→ depende de F1.FW.01` tras la subtarea.
 
 ### F2.QA.01 — Tests para `devtrail validate` `P0`
 
-- [ ] **F2.QA.01.01** — Crear `cli/tests/validate_test.rs` con tests:
+- [x] **F2.QA.01.01** — Crear `cli/tests/validate_test.rs` con tests:
   - Test con directorio sin DevTrail → mensaje de error apropiado
   - Test con documentos válidos → exit code 0, "0 errors"
   - Test con naming incorrecto → error NAMING-001
@@ -636,14 +636,14 @@ Se indican como `→ depende de F1.FW.01` tras la subtarea.
   - Test con related inexistente → warning REF-001
   - Test con --fix corrigiendo review_required → archivo modificado correctamente
   - Test con tag `observabilidad` sin sección de alcance → warning OBS-001
-- [ ] **F2.QA.01.02** — Ejecutar `cargo test` completo
-- [ ] **F2.QA.01.03** — Verificar `cargo clippy` sin warnings
+- [x] **F2.QA.01.02** — Ejecutar `cargo test` completo
+- [x] **F2.QA.01.03** — Verificar `cargo clippy` sin warnings
 
 ### F2.QA.02 — Verificación de templates nuevos `P1`
 
-- [ ] **F2.QA.02.01** — Crear un documento de prueba para cada nuevo tipo (SEC, MCARD, SBOM, DPIA) y validar con `devtrail validate`
-- [ ] **F2.QA.02.02** — Verificar que `devtrail-new.sh` crea correctamente documentos de los 4 nuevos tipos
-- [ ] **F2.QA.02.03** — Verificar que `devtrail init` en directorio vacío incluye los 4 nuevos templates y las nuevas carpetas
+- [x] **F2.QA.02.01** — Crear un documento de prueba para cada nuevo tipo (SEC, MCARD, SBOM, DPIA) y validar con `devtrail validate`
+- [x] **F2.QA.02.02** — Verificar que `devtrail-new.sh` crea correctamente documentos de los 4 nuevos tipos
+- [x] **F2.QA.02.03** — Verificar que `devtrail init` en directorio vacío incluye los 4 nuevos templates y las nuevas carpetas
 
 ---
 

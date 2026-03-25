@@ -2,7 +2,9 @@ use clap::{Parser, Subcommand};
 use colored::Colorize;
 
 mod commands;
+mod complexity;
 mod config;
+mod document;
 mod download;
 mod inject;
 mod manifest;
@@ -11,6 +13,7 @@ mod self_update;
 #[cfg(feature = "tui")]
 mod tui;
 mod utils;
+mod validation;
 
 /// DevTrail CLI - Documentation Governance for AI-Assisted Development
 #[derive(Parser)]
@@ -53,6 +56,15 @@ enum Commands {
         #[arg(default_value = ".")]
         path: String,
     },
+    /// Validate DevTrail documents for compliance and correctness
+    Validate {
+        /// Target directory (default: current directory)
+        #[arg(default_value = ".")]
+        path: String,
+        /// Automatically fix simple issues
+        #[arg(long)]
+        fix: bool,
+    },
     /// Show version, author, and license information
     About,
     /// Explore DevTrail documentation interactively
@@ -76,6 +88,7 @@ fn main() {
         Commands::UpdateFramework => commands::update_framework::run(),
         Commands::UpdateCli => commands::update_cli::run(),
         Commands::Remove { full } => commands::remove::run(full),
+        Commands::Validate { path, fix } => commands::validate::run(&path, fix),
         Commands::Status { path } => commands::status::run(&path),
         Commands::Repair { path } => commands::repair::run(&path),
         Commands::About => commands::about::run(),
