@@ -1,7 +1,9 @@
 pub mod about;
+pub mod compliance;
 #[cfg(feature = "tui")]
 pub mod explore;
 pub mod init;
+pub mod metrics;
 pub mod remove;
 pub mod repair;
 pub mod status;

@@ -321,7 +321,7 @@ Se indican como `→ depende de F1.FW.01` tras la subtarea.
 - [x] **F1.QA.02.01** — Verificar que todos los templates EN tienen frontmatter YAML válido (parseable sin errores)
 - [x] **F1.QA.02.02** — Verificar que todos los templates ES tienen frontmatter YAML válido
 - [x] **F1.QA.02.03** — Verificar que los campos nuevos opcionales no causan errores en scripts de validación existentes (pre-commit, PS1, CI)
-- [ ] **F1.QA.02.04** — Verificar que `devtrail init` en un directorio vacío genera la estructura completa correctamente, incluyendo nuevas carpetas y AI-GOVERNANCE-POLICY.md
+- [x] **F1.QA.02.04** — Verificar que `devtrail init` en un directorio vacío genera la estructura completa correctamente, incluyendo nuevas carpetas y AI-GOVERNANCE-POLICY.md
 
 ---
 
@@ -663,53 +663,53 @@ Se indican como `→ depende de F1.FW.01` tras la subtarea.
 
 > → depende de F2.CLI.01 (document.rs) y F2.CLI.02 (validation.rs)
 
-- [ ] **F3.CLI.01.01** — Crear `cli/src/commands/compliance.rs` con función `pub fn run(path: &str, standard: Option<&str>, all: bool, output: &str) -> Result<()>`
-- [ ] **F3.CLI.01.02** — Agregar variante `Compliance` al enum `Commands` con args: `path` (default "."), `--standard` (eu-ai-act | iso-42001 | nist-ai-rmf), `--all`, `--output` (text | markdown | json, default text)
-- [ ] **F3.CLI.01.03** — Implementar checker `eu-ai-act`:
+- [x] **F3.CLI.01.01** — Crear `cli/src/commands/compliance.rs` con función `pub fn run(path: &str, standard: Option<&str>, all: bool, output: &str) -> Result<()>`
+- [x] **F3.CLI.01.02** — Agregar variante `Compliance` al enum `Commands` con args: `path` (default "."), `--standard` (eu-ai-act | iso-42001 | nist-ai-rmf), `--all`, `--output` (text | markdown | json, default text)
+- [x] **F3.CLI.01.03** — Implementar checker `eu-ai-act`:
   - Verificar que al menos 1 documento con `eu_ai_act_risk: high` existe SI hay documentos con `risk_level: high|critical` → "Risk Classification: X systems classified"
   - Verificar que documentos con `eu_ai_act_risk: high` tienen ETH asociado en `related:` → "Technical Documentation (Annex IV): X complete"
   - Verificar existencia de al menos 1 DPIA si hay ETH con `gdpr_article_35: true` → "FRIA/DPIA: X assessments"
   - Verificar que INC tiene campo de deadline regulatorio si `eu_ai_act_applicable: true` → "Incident Reporting: X compliant"
   - Calcular porcentaje de compliance general
-- [ ] **F3.CLI.01.04** — Implementar checker `iso-42001`:
+- [x] **F3.CLI.01.04** — Implementar checker `iso-42001`:
   - Verificar existencia de `AI-GOVERNANCE-POLICY.md` en `00-governance/` → "Clause 4-5: Policy exists"
   - Verificar que hay al menos 1 ETH → "Clause 6: Risk planning exists"
   - Verificar que hay documentación de lifecycle (AILOG, AIDEC) → "Clause 8: Operations documented"
   - Verificar cobertura de Annex A controls a través de documentos existentes: A.5 → ETH/DPIA, A.6 → AILOG/MCARD, A.7 → SBOM (Data), A.9 → AGENT-RULES exists
   - Calcular porcentaje de cobertura
-- [ ] **F3.CLI.01.05** — Implementar checker `nist-ai-rmf`:
+- [x] **F3.CLI.01.05** — Implementar checker `nist-ai-rmf`:
   - MAP: verificar AILOG con contexto → "MAP coverage: X documents"
   - MEASURE: verificar TES existentes → "MEASURE coverage: X test plans"
   - MANAGE: verificar ETH/INC existentes → "MANAGE coverage: X risk documents"
   - GOVERN: verificar AI-GOVERNANCE-POLICY y ADR → "GOVERN coverage: X governance documents"
   - Verificar mapeo de 12 categorías GenAI (NIST 600-1) en ETH → "GenAI Risk Coverage: X/12 categories"
-- [ ] **F3.CLI.01.06** — Implementar `--all`: ejecutar los 3 checkers y mostrar resumen consolidado
-- [ ] **F3.CLI.01.07** — Implementar output JSON con struct serializable para integración con herramientas externas
-- [ ] **F3.CLI.01.08** — Implementar output Markdown para uso en PRs y reportes
+- [x] **F3.CLI.01.06** — Implementar `--all`: ejecutar los 3 checkers y mostrar resumen consolidado
+- [x] **F3.CLI.01.07** — Implementar output JSON con struct serializable para integración con herramientas externas
+- [x] **F3.CLI.01.08** — Implementar output Markdown para uso en PRs y reportes
 
 ### F3.CLI.02 — Implementar `devtrail metrics` `P1`
 
 > → depende de F2.CLI.01 (document.rs)
 
-- [ ] **F3.CLI.02.01** — Crear `cli/src/commands/metrics.rs` con función `pub fn run(path: &str, period: &str, output: &str) -> Result<()>`
-- [ ] **F3.CLI.02.02** — Agregar variante `Metrics` al enum `Commands` con args: `path`, `--period` (last-7-days | last-30-days | last-90-days | all, default last-30-days), `--output` (text | markdown | json)
-- [ ] **F3.CLI.02.03** — Agregar dependencia `chrono` a Cargo.toml para parseo y cálculo de fechas
-- [ ] **F3.CLI.02.04** — Implementar conteo de documentos por tipo y periodo: parsear campo `created` de cada documento, filtrar por rango de fechas, agrupar por DocType
-- [ ] **F3.CLI.02.05** — Implementar tasa de cumplimiento de reviews: contar documentos con `review_required: true`, de esos cuántos tienen `status: accepted|approved` (completed) vs `status: draft` (pending)
-- [ ] **F3.CLI.02.06** — Implementar distribución de niveles de riesgo: contar por risk_level (low/medium/high/critical), calcular porcentajes
-- [ ] **F3.CLI.02.07** — Implementar actividad por agente: agrupar por campo `agent`, contar documentos por agente
-- [ ] **F3.CLI.02.08** — Implementar tendencias: comparar período actual vs período anterior del mismo tamaño, calcular delta porcentual, mostrar ↑/↓/→
-- [ ] **F3.CLI.02.09** — Implementar output formateado con tablas coloreadas (reutilizar patrones de status.rs)
-- [ ] **F3.CLI.02.10** — Implementar output JSON y Markdown
+- [x] **F3.CLI.02.01** — Crear `cli/src/commands/metrics.rs` con función `pub fn run(path: &str, period: &str, output: &str) -> Result<()>`
+- [x] **F3.CLI.02.02** — Agregar variante `Metrics` al enum `Commands` con args: `path`, `--period` (last-7-days | last-30-days | last-90-days | all, default last-30-days), `--output` (text | markdown | json)
+- [x] **F3.CLI.02.03** — Agregar dependencia `chrono` a Cargo.toml para parseo y cálculo de fechas
+- [x] **F3.CLI.02.04** — Implementar conteo de documentos por tipo y periodo: parsear campo `created` de cada documento, filtrar por rango de fechas, agrupar por DocType
+- [x] **F3.CLI.02.05** — Implementar tasa de cumplimiento de reviews: contar documentos con `review_required: true`, de esos cuántos tienen `status: accepted|approved` (completed) vs `status: draft` (pending)
+- [x] **F3.CLI.02.06** — Implementar distribución de niveles de riesgo: contar por risk_level (low/medium/high/critical), calcular porcentajes
+- [x] **F3.CLI.02.07** — Implementar actividad por agente: agrupar por campo `agent`, contar documentos por agente
+- [x] **F3.CLI.02.08** — Implementar tendencias: comparar período actual vs período anterior del mismo tamaño, calcular delta porcentual, mostrar ↑/↓/→
+- [x] **F3.CLI.02.09** — Implementar output formateado con tablas coloreadas (reutilizar patrones de status.rs)
+- [x] **F3.CLI.02.10** — Implementar output JSON y Markdown
 
 ### F3.CLI.03 — Bump de versión CLI a 2.0.0 `P0`
 
 > → depende de F3.CLI.01 y F3.CLI.02
 
-- [ ] **F3.CLI.03.01** — Editar `cli/Cargo.toml`: cambiar version a `"2.0.0"`. Justificación: 2 nuevos comandos significativos con nuevas dependencias
-- [ ] **F3.CLI.03.02** — Agregar `chrono = "0.4"` a Cargo.toml si no existe
-- [ ] **F3.CLI.03.03** — Ejecutar `cargo check` y `cargo build --release`
-- [ ] **F3.CLI.03.04** — Actualizar CLI-REFERENCE.md con documentación de compliance y metrics
+- [x] **F3.CLI.03.01** — Editar `cli/Cargo.toml`: cambiar version a `"2.0.0"`. Justificación: 2 nuevos comandos significativos con nuevas dependencias
+- [x] **F3.CLI.03.02** — Agregar `chrono = "0.4"` a Cargo.toml si no existe
+- [x] **F3.CLI.03.03** — Ejecutar `cargo check` y `cargo build --release`
+- [x] **F3.CLI.03.04** — Actualizar CLI-REFERENCE.md con documentación de compliance y metrics
 
 ---
 
@@ -717,46 +717,46 @@ Se indican como `→ depende de F1.FW.01` tras la subtarea.
 
 ### F3.FW.01 — Crear documentos de gobernanza ISO 42001 `P0`
 
-- [ ] **F3.FW.01.01** — Crear `dist/.devtrail/00-governance/AI-RISK-CATALOG.md` como template con:
+- [x] **F3.FW.01.01** — Crear `dist/.devtrail/00-governance/AI-RISK-CATALOG.md` como template con:
   - Estructura de catálogo mapeada a las 12 categorías NIST AI 600-1 + riesgos adicionales de Annex C de ISO 42001
   - Tabla por categoría: Risk ID, Category, Description, Likelihood, Impact, Current Controls, Residual Risk, Owner, Review Date
   - Ejemplo pre-llenado para 3-4 riesgos comunes (bias en clasificador, leak de datos de entrenamiento, hallucination en generador, supply chain dependency)
   - Notas de mapeo a ISO 42001 Annex A.5 (Assessing Impacts) y proceso de ISO 23894 (4 fases: identificación → evaluación → tratamiento → monitoreo)
-- [ ] **F3.FW.01.02** — Crear `dist/.devtrail/00-governance/AI-LIFECYCLE-TRACKER.md` como template con:
+- [x] **F3.FW.01.02** — Crear `dist/.devtrail/00-governance/AI-LIFECYCLE-TRACKER.md` como template con:
   - Tabla de sistemas IA: System Name, Type, Current Phase (design/development/testing/deployment/monitoring/retirement), Version, Owner, Last Review
   - Mapeo a ISO 42001 Annex A.6 (AI System Lifecycle) con sus 10 controles
   - Fase de lifecycle con checkboxes: Design (A.6.2.2), Training/Testing (A.6.2.3), Verification/Validation (A.6.2.4), Deployment (A.6.2.5), Operation/Monitoring (A.6.2.6), Retirement (A.6.2.7)
-- [ ] **F3.FW.01.03** — Crear `dist/.devtrail/00-governance/AI-KPIS.md` como template con:
+- [x] **F3.FW.01.03** — Crear `dist/.devtrail/00-governance/AI-KPIS.md` como template con:
   - KPIs de gobernanza propuestos: Documentation Coverage (% de cambios documentados), Review Compliance Rate (% reviews completadas), Mean Time to Document, Risk Distribution, Agent Activity Distribution, Incident Response Time
   - Tabla: KPI, Target, Current Value, Measurement Method, Frequency, Owner
   - Notas de mapeo a ISO 42001 Clause 9 (Performance Evaluation)
-- [ ] **F3.FW.01.04** — Crear `dist/.devtrail/00-governance/MANAGEMENT-REVIEW-TEMPLATE.md` con:
+- [x] **F3.FW.01.04** — Crear `dist/.devtrail/00-governance/MANAGEMENT-REVIEW-TEMPLATE.md` con:
   - Agenda de revisión alineada con ISO 42001 Clause 9.3: status of actions from previous reviews, changes in external/internal issues, audit results, objectives achievement, nonconformities, improvement opportunities
   - Decisiones requeridas: changes to AI policy, resource allocation, improvement actions
   - Tabla de acciones: Action, Owner, Deadline, Status
 
 ### F3.FW.02 — Crear guías de implementación NIST AI RMF `P1`
 
-- [ ] **F3.FW.02.01** — Crear `dist/.devtrail/03-implementation/NIST-AI-RMF-MAP-GUIDE.md` con:
+- [x] **F3.FW.02.01** — Crear `dist/.devtrail/03-implementation/NIST-AI-RMF-MAP-GUIDE.md` con:
   - Explicación de la función MAP y sus 5 categorías (MP-1 a MP-5)
   - Mapeo a documentos DevTrail: MP-1 (Context) → AILOG context section, MP-2 (Categorization) → ETH risk classification, MP-3 (Capabilities) → MCARD intended use, MP-4 (Risk Mapping) → AI-RISK-CATALOG, MP-5 (Impact) → DPIA/ETH
   - Checklist de implementación por subcategoría
-- [ ] **F3.FW.02.02** — Crear `dist/.devtrail/03-implementation/NIST-AI-RMF-MEASURE-GUIDE.md` con:
+- [x] **F3.FW.02.02** — Crear `dist/.devtrail/03-implementation/NIST-AI-RMF-MEASURE-GUIDE.md` con:
   - Explicación de MEASURE y sus 4 categorías (MS-1 a MS-4)
   - Mapeo: MS-1 (Metrics) → AI-KPIS, TES, MS-2 (Trustworthiness) → ETH bias section + MCARD performance, MS-3 (Risk Tracking) → AI-RISK-CATALOG review, MS-4 (Feedback) → INC + management review
-- [ ] **F3.FW.02.03** — Crear `dist/.devtrail/03-implementation/NIST-AI-RMF-MANAGE-GUIDE.md` con:
+- [x] **F3.FW.02.03** — Crear `dist/.devtrail/03-implementation/NIST-AI-RMF-MANAGE-GUIDE.md` con:
   - Explicación de MANAGE y sus 4 categorías (MG-1 a MG-4)
   - Mapeo: MG-1 (Response) → ETH recommendations + ADR, MG-2 (Mitigation) → SEC mitigations + DPIA measures, MG-3 (Third-party) → SBOM, MG-4 (Post-deployment) → INC + AI-LIFECYCLE-TRACKER
-- [ ] **F3.FW.02.04** — Crear `dist/.devtrail/03-implementation/NIST-AI-RMF-GOVERN-GUIDE.md` con:
+- [x] **F3.FW.02.04** — Crear `dist/.devtrail/03-implementation/NIST-AI-RMF-GOVERN-GUIDE.md` con:
   - Explicación de GOVERN y sus 6 categorías (GV-1 a GV-6)
   - Mapeo: GV-1 (Policies) → AI-GOVERNANCE-POLICY + DOCUMENTATION-POLICY, GV-2 (Accountability) → AGENT-RULES + AI-GOVERNANCE-POLICY §2, GV-3 (Workforce Diversity) → AI-GOVERNANCE-POLICY §4, GV-4 (Culture) → PRINCIPLES.md, GV-5 (Stakeholder Engagement) → MANAGEMENT-REVIEW-TEMPLATE, GV-6 (Supply Chain) → SBOM
-- [ ] **F3.FW.02.05** — Crear `dist/.devtrail/03-implementation/NIST-AI-600-1-GENAI-RISKS.md` con: las 12 categorías detalladas, cada una con: descripción, ejemplos, mapeo a templates DevTrail, subcategorías NIST específicas, mitigaciones recomendadas
+- [x] **F3.FW.02.05** — Crear `dist/.devtrail/03-implementation/NIST-AI-600-1-GENAI-RISKS.md` con: las 12 categorías detalladas, cada una con: descripción, ejemplos, mapeo a templates DevTrail, subcategorías NIST específicas, mitigaciones recomendadas
 
 ### F3.FW.03 — Crear OBSERVABILITY-GUIDE.md (OpenTelemetry) `P2`
 
 > Basado en la propuesta evaluada en `evolution/recomendaciones/propuesta-opentelemetry.md`. Documento opcional.
 
-- [ ] **F3.FW.03.01** — Crear `dist/.devtrail/00-governance/OBSERVABILITY-GUIDE.md` con:
+- [x] **F3.FW.03.01** — Crear `dist/.devtrail/00-governance/OBSERVABILITY-GUIDE.md` con:
   - Sección 1: "Scope and Purpose" — Explicar que esta guía es para proyectos que adoptan OpenTelemetry. No es obligatoria. Se activa cuando el equipo decide instrumentar su sistema
   - Sección 2: "Signals and Correlation" — Trazas (spans con nombres consistentes y atributos de negocio), Métricas (latencia, tasa de error, saturación, throughput), Logs (asociar `trace_id` y `span_id`). Tabla de correlación entre señales
   - Sección 3: "Minimum Resource Attributes" — Tabla con atributos recomendados: `service.name`, `service.version`, `deployment.environment`, `service.instance.id` (cuando aplique). Alineados con OTel Semantic Conventions
@@ -767,17 +767,17 @@ Se indican como `→ depende de F1.FW.01` tras la subtarea.
   - Sección 8: "DevTrail Integration" — Tabla de mapeo: cambios de instrumentación → AILOG, decisión de backend → AIDEC/ADR, requisitos de observabilidad → REQ, pruebas de propagación → TES, evidencia en incidentes → INC, deuda de instrumentación → TDE, privacidad de telemetría → ETH
   - Sección 9: "Adoption Roadmap" — Fase 0: AIDEC/ADR de adopción y decisión de backend. Fase 1: Instrumentación mínima en endpoints críticos. Fase 2: Cobertura completa y pruebas de correlación. Fase 3: Integración en INC, REQ y TES con automatización
   - Sección 10: "Checklist" — Lista de verificación para proyectos: AIDEC/ADR documentando adopción, REQ con requisitos de observabilidad, TES validando propagación, INC usando trazas como evidencia, ETH cubriendo privacidad, AILOG registrando cambios de instrumentación
-- [ ] **F3.FW.03.02** — Agregar mapeos a controles ISO 42001: A.6.2.6 (Operation and Monitoring — evidencia continua), A.5.2 (Risk Assessment — datos operativos como insumo), A.9 (Performance Evaluation — métricas OTel como KPIs operativos)
-- [ ] **F3.FW.03.03** — Agregar tabla de alineación con estándares regulatorios: EU AI Act Art. 72 (post-market monitoring), NIST AI RMF MEASURE (métricas operativas), GDPR (minimización de datos en telemetría), ISO 25010:2023 (fiabilidad, eficiencia)
-- [ ] **F3.FW.03.04** — Crear versión ES: `dist/.devtrail/00-governance/i18n/es/OBSERVABILITY-GUIDE.md`
+- [x] **F3.FW.03.02** — Agregar mapeos a controles ISO 42001: A.6.2.6 (Operation and Monitoring — evidencia continua), A.5.2 (Risk Assessment — datos operativos como insumo), A.9 (Performance Evaluation — métricas OTel como KPIs operativos)
+- [x] **F3.FW.03.03** — Agregar tabla de alineación con estándares regulatorios: EU AI Act Art. 72 (post-market monitoring), NIST AI RMF MEASURE (métricas operativas), GDPR (minimización de datos en telemetría), ISO 25010:2023 (fiabilidad, eficiencia)
+- [x] **F3.FW.03.04** — Crear versión ES: `dist/.devtrail/00-governance/i18n/es/OBSERVABILITY-GUIDE.md`
 
 ### F3.FW.04 — Bump de versión Framework `P0`
 
 > → depende de F3.FW.01, F3.FW.02 y F3.FW.03
 
-- [ ] **F3.FW.04.01** — Editar `dist/dist-manifest.yml`: cambiar version a `"3.2.0"`
-- [ ] **F3.FW.04.02** — Agregar todos los archivos nuevos de F3.FW.01, F3.FW.02 y F3.FW.03 a la sección files del manifest (incluir OBSERVABILITY-GUIDE.md)
-- [ ] **F3.FW.04.03** — Actualizar QUICK-REFERENCE.md si es necesario (incluir referencia a guía de observabilidad)
+- [x] **F3.FW.04.01** — Editar `dist/dist-manifest.yml`: cambiar version a `"3.2.0"`
+- [x] **F3.FW.04.02** — Agregar todos los archivos nuevos de F3.FW.01, F3.FW.02 y F3.FW.03 a la sección files del manifest (incluir OBSERVABILITY-GUIDE.md)
+- [x] **F3.FW.04.03** — Actualizar QUICK-REFERENCE.md si es necesario (incluir referencia a guía de observabilidad)
 
 ---
 
@@ -785,7 +785,7 @@ Se indican como `→ depende de F1.FW.01` tras la subtarea.
 
 ### F3.QA.01 — Tests para `devtrail compliance` `P0`
 
-- [ ] **F3.QA.01.01** — Crear `cli/tests/compliance_test.rs` con tests:
+- [x] **F3.QA.01.01** — Crear `cli/tests/compliance_test.rs` con tests:
   - Test sin documentos → 0% compliance
   - Test con documentos completos → porcentaje correcto
   - Test con --standard eu-ai-act → solo checker EU AI Act
@@ -793,16 +793,16 @@ Se indican como `→ depende de F1.FW.01` tras la subtarea.
   - Test con --all → todos los checkers
   - Test con --output json → JSON válido
   - Test con --output markdown → Markdown válido
-- [ ] **F3.QA.01.02** — Crear `cli/tests/metrics_test.rs` con tests similares
+- [x] **F3.QA.01.02** — Crear `cli/tests/metrics_test.rs` con tests similares
 
 ### F3.QA.02 — Verificación de documentos de gobernanza `P1`
 
-- [ ] **F3.QA.02.01** — Verificar que AI-RISK-CATALOG.md tiene mapeo correcto de las 12 categorías NIST 600-1
-- [ ] **F3.QA.02.02** — Verificar que AI-LIFECYCLE-TRACKER.md cubre los 10 controles de Annex A.6
-- [ ] **F3.QA.02.03** — Verificar que las guías NIST mapean correctamente a documentos DevTrail
-- [ ] **F3.QA.02.04** — Ejecutar `devtrail compliance --all` en un proyecto de prueba con documentos de ejemplo y verificar que el reporte es coherente
-- [ ] **F3.QA.02.05** — Verificar que OBSERVABILITY-GUIDE.md incluye: mapeo completo a documentos DevTrail (8 tipos), baseline técnico con atributos mínimos, políticas de no-PII, checklist de adopción, y roadmap de fases
-- [ ] **F3.QA.02.06** — Verificar que la versión ES de OBSERVABILITY-GUIDE.md es completa y coherente con la versión EN
+- [x] **F3.QA.02.01** — Verificar que AI-RISK-CATALOG.md tiene mapeo correcto de las 12 categorías NIST 600-1
+- [x] **F3.QA.02.02** — Verificar que AI-LIFECYCLE-TRACKER.md cubre los 10 controles de Annex A.6
+- [x] **F3.QA.02.03** — Verificar que las guías NIST mapean correctamente a documentos DevTrail
+- [x] **F3.QA.02.04** — Ejecutar `devtrail compliance --all` en un proyecto de prueba con documentos de ejemplo y verificar que el reporte es coherente
+- [x] **F3.QA.02.05** — Verificar que OBSERVABILITY-GUIDE.md incluye: mapeo completo a documentos DevTrail (8 tipos), baseline técnico con atributos mínimos, políticas de no-PII, checklist de adopción, y roadmap de fases
+- [x] **F3.QA.02.06** — Verificar que la versión ES de OBSERVABILITY-GUIDE.md es completa y coherente con la versión EN
 
 ---
 

@@ -12,7 +12,7 @@
 
 1. [Installation](#installation)
 2. [Versioning](#versioning)
-3. [Commands](#commands) — init, update, remove, status, repair, explore, about
+3. [Commands](#commands) — init, update, remove, status, repair, validate, compliance, metrics, explore, about
 4. [Environment Variables](#environment-variables)
 5. [Exit Codes](#exit-codes)
 
@@ -49,7 +49,7 @@ DevTrail uses **independent version tags** for each component:
 | Component | Tag prefix | Example | What it includes |
 |-----------|-----------|---------|------------------|
 | Framework | `fw-` | `fw-3.0.0` | Templates (12 types), governance docs, directives, scripts |
-| CLI | `cli-` | `cli-1.3.0` | The `devtrail` binary |
+| CLI | `cli-` | `cli-2.0.0` | The `devtrail` binary |
 
 Framework and CLI are released independently. A framework update does not require a CLI update, and vice versa.
 
@@ -263,6 +263,153 @@ Repairing DevTrail in /home/user/my-project
 → Updating checksums...
 
 ✓ DevTrail repaired successfully!
+```
+
+---
+
+### `devtrail validate [path] [--fix]`
+
+Validate DevTrail documents for compliance and correctness.
+
+**Arguments and flags:**
+
+| Argument/Flag | Default | Description |
+|---------------|---------|-------------|
+| `path` | `.` (current directory) | Target project directory |
+| `--fix` | — | Automatically fix simple issues (e.g., missing `review_required: true` for high-risk docs) |
+
+**What it checks:**
+
+- Naming conventions (`TYPE-YYYY-MM-DD-NNN-description.md`)
+- Required metadata fields (id, title, status, created, agent, confidence, review_required, risk_level, tags, related)
+- Cross-field consistency (e.g., high risk must have review_required)
+- Type-specific fields (e.g., INC needs severity, SEC needs threat_model_methodology)
+- Sensitive information detection (API keys, passwords)
+- Related document existence
+
+**Example:**
+
+```bash
+$ devtrail validate
+  DevTrail Validate
+  All 15 document(s) passed validation
+  0 error(s), 0 warning(s) in 15 document(s)
+
+$ devtrail validate --fix
+  DevTrail Validate
+  Auto-fixing 2 issue(s)...
+  ✓ Fixed 2 issue(s)
+```
+
+---
+
+### `devtrail compliance [path] [--standard <name>] [--all] [--output <format>]`
+
+Check regulatory compliance against EU AI Act, ISO/IEC 42001, and NIST AI RMF.
+
+**Arguments and flags:**
+
+| Argument/Flag | Default | Description |
+|---------------|---------|-------------|
+| `path` | `.` (current directory) | Target project directory |
+| `--standard` | — | Check a specific standard: `eu-ai-act`, `iso-42001`, or `nist-ai-rmf` |
+| `--all` | — | Check all three standards |
+| `--output` | `text` | Output format: `text`, `markdown`, or `json` |
+
+If neither `--standard` nor `--all` is specified, defaults to `--all`.
+
+**What it checks:**
+
+- **EU AI Act**: Risk classification, ethical review linkage, DPIA existence, incident reporting
+- **ISO/IEC 42001**: Governance policy, risk planning (ETH), operations documentation (AILOG/AIDEC), Annex A coverage
+- **NIST AI RMF**: MAP (AILOG), MEASURE (TES), MANAGE (ETH/INC), GOVERN (policy + ADR), GenAI risk coverage (12 NIST 600-1 categories)
+
+**Example:**
+
+```bash
+$ devtrail compliance --all
+  DevTrail Compliance
+  /home/user/my-project
+  12 document(s) analyzed
+
+  ■ EU AI Act 75%
+    ✓ [EU-001] AI systems have EU AI Act risk classification
+    ~ [EU-002] High-risk AI systems have ethical review (ETH) linked
+    ✓ [EU-003] Data Protection Impact Assessment (DPIA) exists where required
+    ✓ [EU-004] Incident reporting compliant with EU AI Act Art. 73
+
+  ■ ISO/IEC 42001 100%
+    ✓ [ISO-001] AI Governance Policy exists (Clauses 4-5)
+    ✓ [ISO-002] Risk planning documented — ETH reviews exist (Clause 6)
+    ✓ [ISO-003] AI lifecycle operations documented — AILOG + AIDEC (Clause 8)
+    ✓ [ISO-004] Annex A control coverage (6/6 groups)
+
+  ■ NIST AI RMF 60%
+    ✓ [NIST-MAP-001] MAP function — AI actions documented (AILOG)
+    ✓ [NIST-MEASURE-001] MEASURE function — Test plans exist (TES)
+    ✓ [NIST-MANAGE-001] MANAGE function — Risk management documented (ETH + INC)
+    ✓ [NIST-GOVERN-001] GOVERN function — Governance policy and decisions documented
+    ~ [NIST-GENAI-001] GenAI risk coverage — NIST AI 600-1 (4/12 categories)
+
+  Overall compliance: 78%
+
+$ devtrail compliance --standard eu-ai-act --output json
+[{"standard":"EuAiAct","checks":[...],"score":75.0}]
+```
+
+---
+
+### `devtrail metrics [path] [--period <period>] [--output <format>]`
+
+Show governance metrics and documentation statistics.
+
+**Arguments and flags:**
+
+| Argument/Flag | Default | Description |
+|---------------|---------|-------------|
+| `path` | `.` (current directory) | Target project directory |
+| `--period` | `last-30-days` | Time period: `last-7-days`, `last-30-days`, `last-90-days`, or `all` |
+| `--output` | `text` | Output format: `text`, `markdown`, or `json` |
+
+**Metrics included:**
+
+- Document count by type within the period
+- Review compliance rate (% of review_required docs that reached accepted/superseded status)
+- Risk distribution (low/medium/high/critical)
+- Agent activity (documents per agent)
+- Trends vs previous period (↑/↓/→)
+
+**Example:**
+
+```bash
+$ devtrail metrics --period last-30-days
+  DevTrail Metrics
+  /home/user/my-project
+  Period: Last 30 days — 2026-02-25 to 2026-03-27
+
+  Documents by Type
+     AILOG   8 ████████
+       ETH   3 ███
+       ADR   2 ██
+       INC   1 █
+
+  Summary
+    → Total documents: 14
+    → Review compliance: 80% (4/5 reviewed)
+
+  Risk Distribution
+          low 8
+       medium 4
+         high 2
+
+  Agent Activity
+    claude-code 10
+    gemini-cli 4
+
+  Trends
+    ↑ Total documents 14 (was 9)
+    ↑ Reviews completed 4 (was 2)
+    → High/critical risk 2 (was 2)
 ```
 
 ---

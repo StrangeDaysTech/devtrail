@@ -2,12 +2,14 @@ use clap::{Parser, Subcommand};
 use colored::Colorize;
 
 mod commands;
+mod compliance;
 mod complexity;
 mod config;
 mod document;
 mod download;
 mod inject;
 mod manifest;
+mod metrics_engine;
 mod platform;
 mod self_update;
 #[cfg(feature = "tui")]
@@ -65,6 +67,33 @@ enum Commands {
         #[arg(long)]
         fix: bool,
     },
+    /// Check regulatory compliance (EU AI Act, ISO 42001, NIST AI RMF)
+    Compliance {
+        /// Target directory (default: current directory)
+        #[arg(default_value = ".")]
+        path: String,
+        /// Check a specific standard
+        #[arg(long, value_parser = ["eu-ai-act", "iso-42001", "nist-ai-rmf"])]
+        standard: Option<String>,
+        /// Check all standards
+        #[arg(long)]
+        all: bool,
+        /// Output format
+        #[arg(long, default_value = "text", value_parser = ["text", "markdown", "json"])]
+        output: String,
+    },
+    /// Show governance metrics and documentation statistics
+    Metrics {
+        /// Target directory (default: current directory)
+        #[arg(default_value = ".")]
+        path: String,
+        /// Time period for metrics
+        #[arg(long, default_value = "last-30-days", value_parser = ["last-7-days", "last-30-days", "last-90-days", "all"])]
+        period: String,
+        /// Output format
+        #[arg(long, default_value = "text", value_parser = ["text", "markdown", "json"])]
+        output: String,
+    },
     /// Show version, author, and license information
     About,
     /// Explore DevTrail documentation interactively
@@ -89,6 +118,17 @@ fn main() {
         Commands::UpdateCli => commands::update_cli::run(),
         Commands::Remove { full } => commands::remove::run(full),
         Commands::Validate { path, fix } => commands::validate::run(&path, fix),
+        Commands::Compliance {
+            path,
+            standard,
+            all,
+            output,
+        } => commands::compliance::run(&path, standard.as_deref(), all, &output),
+        Commands::Metrics {
+            path,
+            period,
+            output,
+        } => commands::metrics::run(&path, &period, &output),
         Commands::Status { path } => commands::status::run(&path),
         Commands::Repair { path } => commands::repair::run(&path),
         Commands::About => commands::about::run(),
