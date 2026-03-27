@@ -1,6 +1,7 @@
 use clap::{Parser, Subcommand};
 use colored::Colorize;
 
+mod audit_engine;
 mod commands;
 mod compliance;
 mod complexity;
@@ -82,6 +83,24 @@ enum Commands {
         #[arg(long, default_value = "text", value_parser = ["text", "markdown", "json"])]
         output: String,
     },
+    /// Generate audit trail reports with timeline and traceability
+    Audit {
+        /// Target directory (default: current directory)
+        #[arg(default_value = ".")]
+        path: String,
+        /// Start date for audit period (YYYY-MM-DD)
+        #[arg(long)]
+        from: Option<String>,
+        /// End date for audit period (YYYY-MM-DD)
+        #[arg(long)]
+        to: Option<String>,
+        /// Filter by system/component name
+        #[arg(long)]
+        system: Option<String>,
+        /// Output format
+        #[arg(long, default_value = "text", value_parser = ["text", "markdown", "json", "html"])]
+        output: String,
+    },
     /// Show governance metrics and documentation statistics
     Metrics {
         /// Target directory (default: current directory)
@@ -118,6 +137,13 @@ fn main() {
         Commands::UpdateCli => commands::update_cli::run(),
         Commands::Remove { full } => commands::remove::run(full),
         Commands::Validate { path, fix } => commands::validate::run(&path, fix),
+        Commands::Audit {
+            path,
+            from,
+            to,
+            system,
+            output,
+        } => commands::audit::run(&path, from.as_deref(), to.as_deref(), system.as_deref(), &output),
         Commands::Compliance {
             path,
             standard,

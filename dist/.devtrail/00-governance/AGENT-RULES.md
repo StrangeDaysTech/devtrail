@@ -246,4 +246,28 @@ When working on projects that use OpenTelemetry:
 
 ---
 
-*DevTrail v3.0.0 | [Strange Days Tech](https://strangedays.tech)*
+## 10. Architecture Diagrams (C4 Model)
+
+When creating ADR documents that involve architectural changes:
+
+- **Include** a Mermaid C4 diagram at the appropriate level
+- **Use** `C4Context` for system-level decisions (who uses the system, external dependencies)
+- **Use** `C4Container` for service/container-level decisions (applications, databases, message queues)
+- **Use** `C4Component` for internal module decisions (components within a service)
+- **See** `00-governance/C4-DIAGRAM-GUIDE.md` for syntax reference and examples
+
+> Diagrams are optional for minor decisions. Use them when the decision changes system boundaries, introduces new services, or modifies inter-service communication.
+
+---
+
+## 11. API Specification Tracking
+
+When a change modifies API endpoints:
+
+- **Verify** that the corresponding OpenAPI or AsyncAPI specification is updated
+- **Reference** the spec path in the AILOG or ADR using the `api_spec_path` field (in REQ) or `api_changes` field (in ADR)
+- **Document** breaking API changes in an ADR with `risk_level: high`
+
+---
+
+*DevTrail v4.0.0 | [Strange Days Tech](https://strangedays.tech)*

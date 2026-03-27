@@ -89,3 +89,5 @@ DevTrail: Created AILOG-YYYY-MM-DD-NNN-description.md
 | Business logic changes | medium |
 | Auth, security, payments | high |
 | Database schema, migrations | critical |
+
+> **Terminal compatibility**: If the terminal does not support box-drawing characters (Unicode), use plain-text formatting with dashes and pipes instead (e.g., `+--+` instead of `╔══╗`).

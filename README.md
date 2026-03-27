@@ -146,8 +146,8 @@ DevTrail uses independent version tags for each component:
 
 | Component | Tag prefix | Example | Includes |
 |-----------|-----------|---------|----------|
-| Framework | `fw-` | `fw-2.1.0` | Templates, governance, directives, scripts |
-| CLI | `cli-` | `cli-1.0.0` | The `devtrail` binary |
+| Framework | `fw-` | `fw-4.0.0` | Templates (12 types), governance, directives, scripts |
+| CLI | `cli-` | `cli-2.1.0` | The `devtrail` binary |
 
 Check installed versions with `devtrail status` or `devtrail about`.
 
@@ -162,6 +162,10 @@ Check installed versions with `devtrail status` or `devtrail about`.
 | `devtrail remove [--full]` | Remove DevTrail from project |
 | `devtrail status [path]` | Show installation health and doc stats |
 | `devtrail repair [path]` | Restore missing directories and framework files |
+| `devtrail validate [path]` | Validate documents for compliance and correctness |
+| `devtrail compliance [path]` | Check regulatory compliance (EU AI Act, ISO 42001, NIST) |
+| `devtrail metrics [path]` | Show governance metrics and documentation statistics |
+| `devtrail audit [path]` | Generate audit trail reports with timeline and traceability |
 | `devtrail explore [path]` | Browse documentation interactively in a TUI |
 | `devtrail about` | Show version and license info |
 

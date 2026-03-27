@@ -161,3 +161,5 @@ After creation, display:
 2. **No changes detected**: Ask user to describe what to document
 3. **User declines**: Acknowledge and exit gracefully
 4. **Invalid type parameter**: Show valid types and ask again
+
+> **Terminal compatibility**: If the terminal does not support box-drawing characters (Unicode), use plain-text formatting with dashes and pipes instead (e.g., `+--+` instead of `╔══╗`).

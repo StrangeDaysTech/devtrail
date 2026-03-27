@@ -11,6 +11,7 @@ risk_level: medium | high | critical
 eu_ai_act_risk: not_applicable  # unacceptable | high | limited | minimal | not_applicable
 iso_42001_clause: []            # 4 | 5 | 6 | 7 | 8 | 9 | 10
 alternatives_documented: []     # Enlace a documentos AIDEC-* relacionados
+api_changes: []                 # Endpoints de API afectados por esta decisión (ej. "POST /api/v2/users")
 tags: []
 related: []
 supersedes: []
@@ -108,6 +109,23 @@ supersedes: []
 
 - [Cómo sabremos que la decisión fue correcta]
 - [Qué métricas monitorear]
+
+## Diagrama de Arquitectura
+
+> Incluir un diagrama C4 al nivel apropiado cuando esta decisión involucre cambios arquitectónicos.
+> Ver `00-governance/C4-DIAGRAM-GUIDE.md` para referencia de sintaxis.
+
+```mermaid
+C4Context
+    title Contexto del Sistema — [Título de la Decisión]
+
+    Person(user, "Usuario", "Descripción")
+    System(system, "Sistema", "Descripción")
+
+    Rel(user, system, "Usa")
+```
+
+> **Guía**: Usar `C4Context` para decisiones a nivel de sistema, `C4Container` para decisiones a nivel de servicio/contenedor, `C4Component` para decisiones de módulos internos. Eliminar esta sección si no se necesita diagrama arquitectónico.
 
 ## Referencias
 

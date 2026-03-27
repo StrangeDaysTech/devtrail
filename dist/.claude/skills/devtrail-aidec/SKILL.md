@@ -89,3 +89,5 @@ DevTrail: Created AIDEC-YYYY-MM-DD-NNN-description.md
 - Decided on a data structure
 - Made a performance vs. readability trade-off
 - Selected between design patterns
+
+> **Terminal compatibility**: If the terminal does not support box-drawing characters (Unicode), use plain-text formatting with dashes and pipes instead (e.g., `+--+` instead of `╔══╗`).

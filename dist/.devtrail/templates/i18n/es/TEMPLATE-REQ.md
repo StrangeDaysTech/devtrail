@@ -11,6 +11,7 @@ type: functional | non-functional | constraint
 priority: must | should | could | wont
 stakeholder_type: end_user | operator | acquirer | regulator | maintainer | developer
 observability_scope: none        # none | basic | full — activar cuando la instrumentación OTel sea relevante
+api_spec_path: ""               # Ruta al archivo de spec OpenAPI/AsyncAPI si este requisito involucra APIs
 tags: []
 related: []
 validated_by: null

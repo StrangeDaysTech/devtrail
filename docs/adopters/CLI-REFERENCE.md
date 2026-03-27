@@ -12,7 +12,7 @@
 
 1. [Installation](#installation)
 2. [Versioning](#versioning)
-3. [Commands](#commands) — init, update, remove, status, repair, validate, compliance, metrics, explore, about
+3. [Commands](#commands) — init, update, remove, status, repair, validate, compliance, metrics, audit, explore, about
 4. [Environment Variables](#environment-variables)
 5. [Exit Codes](#exit-codes)
 
@@ -48,8 +48,8 @@ DevTrail uses **independent version tags** for each component:
 
 | Component | Tag prefix | Example | What it includes |
 |-----------|-----------|---------|------------------|
-| Framework | `fw-` | `fw-3.0.0` | Templates (12 types), governance docs, directives, scripts |
-| CLI | `cli-` | `cli-2.0.0` | The `devtrail` binary |
+| Framework | `fw-` | `fw-4.0.0` | Templates (12 types), governance docs, directives, scripts |
+| CLI | `cli-` | `cli-2.1.0` | The `devtrail` binary |
 
 Framework and CLI are released independently. A framework update does not require a CLI update, and vice versa.
 
@@ -410,6 +410,57 @@ $ devtrail metrics --period last-30-days
     ↑ Total documents 14 (was 9)
     ↑ Reviews completed 4 (was 2)
     → High/critical risk 2 (was 2)
+```
+
+---
+
+### `devtrail audit [path] [--from <date>] [--to <date>] [--system <name>] [--output <format>]`
+
+Generate audit trail reports with timeline, traceability map, and compliance summary.
+
+**Arguments and flags:**
+
+| Argument/Flag | Default | Description |
+|---------------|---------|-------------|
+| `path` | `.` (current directory) | Target project directory |
+| `--from` | — | Start date for audit period (YYYY-MM-DD) |
+| `--to` | — | End date for audit period (YYYY-MM-DD) |
+| `--system` | — | Filter by system/component name (matches tags and title) |
+| `--output` | `text` | Output format: `text`, `markdown`, `json`, or `html` |
+
+**Report includes:**
+
+- Chronological timeline of all documents with type, title, agent, and risk level
+- Traceability map showing document relationship chains (e.g., REQ → ADR → AILOG → TES)
+- Risk distribution (low/medium/high/critical)
+- Compliance summary (EU AI Act, ISO 42001, NIST AI RMF scores)
+
+**Output formats:**
+
+| Format | Use case |
+|--------|----------|
+| `text` | Terminal review (colored, formatted) |
+| `markdown` | Include in PRs, wikis, or reports |
+| `json` | Integration with external tools |
+| `html` | Standalone reports with styled tables and SVG risk chart |
+
+**Examples:**
+
+```bash
+# Full audit report
+$ devtrail audit
+
+# Audit for Q1 2026
+$ devtrail audit --from 2026-01-01 --to 2026-03-31
+
+# Audit filtered by system
+$ devtrail audit --system auth-service
+
+# Generate HTML report
+$ devtrail audit --from 2026-01-01 --to 2026-03-31 --output html > audit-q1.html
+
+# Generate Markdown for a PR
+$ devtrail audit --output markdown
 ```
 
 ---

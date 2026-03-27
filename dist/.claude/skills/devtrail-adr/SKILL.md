@@ -110,3 +110,5 @@ DevTrail: Created ADR-YYYY-MM-DD-NNN-description.md (review required)
 - Select authentication strategy (JWT, OAuth, etc.)
 - Define module boundaries and dependencies
 - Establish caching strategy
+
+> **Terminal compatibility**: If the terminal does not support box-drawing characters (Unicode), use plain-text formatting with dashes and pipes instead (e.g., `+--+` instead of `╔══╗`).

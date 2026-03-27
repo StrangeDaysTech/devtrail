@@ -1,4 +1,5 @@
 pub mod about;
+pub mod audit;
 pub mod compliance;
 #[cfg(feature = "tui")]
 pub mod explore;

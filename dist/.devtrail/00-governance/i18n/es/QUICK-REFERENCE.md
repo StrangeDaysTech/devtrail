@@ -175,7 +175,8 @@ Marcar `review_required: true` cuando:
 | NIST AI RMF / 600-1 | ETH (12 categorías de riesgo GenAI), AILOG |
 | GDPR | ETH (Privacidad de Datos), DPIA |
 | ISO/IEC 25010:2023 | REQ (calidad), ADR (impacto en calidad) |
-| OpenTelemetry | Opcional — ver OBSERVABILITY-GUIDE (Fase 3) |
+| OpenTelemetry | Opcional — ver OBSERVABILITY-GUIDE |
+| Modelo C4 | Diagramas en ADR — ver C4-DIAGRAM-GUIDE |
 
 ---
 
@@ -187,4 +188,4 @@ Marcar `review_required: true` cuando:
 
 ---
 
-*DevTrail v3.0.0 | [Strange Days Tech](https://strangedays.tech)*
+*DevTrail v4.0.0 | [Strange Days Tech](https://strangedays.tech)*

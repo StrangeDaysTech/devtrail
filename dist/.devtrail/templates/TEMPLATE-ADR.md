@@ -11,6 +11,7 @@ risk_level: medium | high | critical
 eu_ai_act_risk: not_applicable  # unacceptable | high | limited | minimal | not_applicable
 iso_42001_clause: []            # 4 | 5 | 6 | 7 | 8 | 9 | 10
 alternatives_documented: []     # Link to related AIDEC-* documents
+api_changes: []                 # API endpoints affected by this decision (e.g., "POST /api/v2/users")
 tags: []
 related: []
 supersedes: []
@@ -108,6 +109,23 @@ supersedes: []
 |--------|-------------|-------------------|----------|
 | [e.g., Response time] | [e.g., < 200ms] | [e.g., Load test at p95] | [e.g., 30 days post-deployment] |
 | [Metric 2] | [Target] | [Method] | [Timeline] |
+
+## Architecture Diagram
+
+> Include a C4 diagram at the appropriate level when this decision involves architectural changes.
+> See `00-governance/C4-DIAGRAM-GUIDE.md` for syntax reference.
+
+```mermaid
+C4Context
+    title System Context — [Decision Title]
+
+    Person(user, "User", "Description")
+    System(system, "System", "Description")
+
+    Rel(user, system, "Uses")
+```
+
+> **Guidance**: Use `C4Context` for system-level decisions, `C4Container` for service/container-level decisions, `C4Component` for internal module decisions. Remove this section if no architectural diagram is needed.
 
 ## References
 

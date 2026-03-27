@@ -12,7 +12,7 @@
 
 1. [Instalación](#instalación)
 2. [Versionado](#versionado)
-3. [Comandos](#comandos) — init, update, remove, status, repair, explore, about
+3. [Comandos](#comandos) — init, update, remove, status, repair, validate, compliance, metrics, audit, explore, about
 4. [Variables de Entorno](#variables-de-entorno)
 5. [Códigos de Salida](#códigos-de-salida)
 
@@ -48,8 +48,8 @@ DevTrail usa **tags de versión independientes** para cada componente:
 
 | Componente | Prefijo de tag | Ejemplo | Qué incluye |
 |------------|---------------|---------|-------------|
-| Framework | `fw-` | `fw-2.1.0` | Plantillas, docs de gobernanza, directivas, scripts |
-| CLI | `cli-` | `cli-1.0.0` | El binario `devtrail` |
+| Framework | `fw-` | `fw-4.0.0` | Plantillas (12 tipos), docs de gobernanza, directivas, scripts |
+| CLI | `cli-` | `cli-2.1.0` | El binario `devtrail` |
 
 Framework y CLI se publican de forma independiente. Una actualización del framework no requiere actualización del CLI, y viceversa.
 
@@ -246,6 +246,102 @@ Repairing DevTrail in /home/user/mi-proyecto
 
 ✓ DevTrail repaired successfully!
 ```
+
+---
+
+### `devtrail validate [path] [--fix]`
+
+Valida documentos DevTrail verificando cumplimiento y corrección.
+
+**Argumentos y flags:**
+
+| Argumento/Flag | Default | Descripción |
+|----------------|---------|-------------|
+| `path` | `.` (directorio actual) | Directorio del proyecto |
+| `--fix` | — | Corregir automáticamente problemas simples |
+
+**Reglas de validación:**
+
+- `NAMING-001`: Convención de nombres de archivo
+- `META-001/002/003`: Campos obligatorios, id vs nombre de archivo, valores válidos
+- `CROSS-001/002/003`: Riesgo alto requiere revisión, EU AI Act, tipos SEC/MCARD/DPIA
+- `TYPE-001/002`: INC necesita severidad, ETH necesita base legal GDPR
+- `REF-001`: Documentos referenciados existen
+- `SEC-001`: No contiene información sensible
+- `OBS-001`: Tag observabilidad requiere sección de alcance
+
+**Código de salida:** 0 si no hay errores (warnings OK), 1 si hay errores.
+
+---
+
+### `devtrail compliance [path] [--standard <nombre>] [--all] [--output <formato>]`
+
+Verifica cumplimiento regulatorio contra EU AI Act, ISO/IEC 42001 y NIST AI RMF.
+
+**Argumentos y flags:**
+
+| Argumento/Flag | Default | Descripción |
+|----------------|---------|-------------|
+| `path` | `.` (directorio actual) | Directorio del proyecto |
+| `--standard` | — | Verificar estándar específico: `eu-ai-act`, `iso-42001`, o `nist-ai-rmf` |
+| `--all` | — | Verificar los tres estándares |
+| `--output` | `text` | Formato de salida: `text`, `markdown`, o `json` |
+
+Si no se especifica `--standard` ni `--all`, por defecto ejecuta `--all`.
+
+---
+
+### `devtrail metrics [path] [--period <periodo>] [--output <formato>]`
+
+Muestra métricas de gobernanza y estadísticas de documentación.
+
+**Argumentos y flags:**
+
+| Argumento/Flag | Default | Descripción |
+|----------------|---------|-------------|
+| `path` | `.` (directorio actual) | Directorio del proyecto |
+| `--period` | `last-30-days` | Período: `last-7-days`, `last-30-days`, `last-90-days`, o `all` |
+| `--output` | `text` | Formato de salida: `text`, `markdown`, o `json` |
+
+**Métricas incluidas:**
+
+- Conteo de documentos por tipo dentro del período
+- Tasa de cumplimiento de revisiones
+- Distribución de niveles de riesgo
+- Actividad por agente
+- Tendencias vs período anterior (↑/↓/→)
+
+---
+
+### `devtrail audit [path] [--from <fecha>] [--to <fecha>] [--system <nombre>] [--output <formato>]`
+
+Genera reportes de trazas de auditoría con línea temporal, mapa de trazabilidad y resumen de cumplimiento.
+
+**Argumentos y flags:**
+
+| Argumento/Flag | Default | Descripción |
+|----------------|---------|-------------|
+| `path` | `.` (directorio actual) | Directorio del proyecto |
+| `--from` | — | Fecha de inicio del período (YYYY-MM-DD) |
+| `--to` | — | Fecha de fin del período (YYYY-MM-DD) |
+| `--system` | — | Filtrar por nombre de sistema/componente (busca en tags y título) |
+| `--output` | `text` | Formato de salida: `text`, `markdown`, `json`, o `html` |
+
+**El reporte incluye:**
+
+- Línea temporal cronológica de todos los documentos
+- Mapa de trazabilidad mostrando cadenas de relaciones (ej. REQ → ADR → AILOG → TES)
+- Distribución de riesgo
+- Resumen de cumplimiento (EU AI Act, ISO 42001, NIST AI RMF)
+
+**Formatos de salida:**
+
+| Formato | Caso de uso |
+|---------|------------|
+| `text` | Revisión en terminal (coloreado, formateado) |
+| `markdown` | Incluir en PRs, wikis o reportes |
+| `json` | Integración con herramientas externas |
+| `html` | Reportes independientes con tablas estilizadas y gráfico SVG de riesgo |
 
 ---
 

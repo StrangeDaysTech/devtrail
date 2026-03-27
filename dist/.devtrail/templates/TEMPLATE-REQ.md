@@ -11,6 +11,7 @@ type: functional | non-functional | constraint
 priority: must | should | could | wont
 stakeholder_type: end_user | operator | acquirer | regulator | maintainer | developer
 observability_scope: none        # none | basic | full — set when OTel instrumentation is relevant
+api_spec_path: ""               # Path to OpenAPI/AsyncAPI spec file if this requirement involves APIs
 tags: []
 related: []
 validated_by: null

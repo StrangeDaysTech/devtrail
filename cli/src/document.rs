@@ -109,6 +109,10 @@ pub struct Frontmatter {
     pub gdpr_article_35: Option<bool>,
     pub dpo_consulted: Option<bool>,
     pub supervisory_authority_consulted: Option<bool>,
+    // ADR-specific
+    pub api_changes: Option<Vec<String>>,
+    // REQ-specific (OpenAPI/AsyncAPI)
+    pub api_spec_path: Option<String>,
 }
 
 /// A parsed DevTrail document

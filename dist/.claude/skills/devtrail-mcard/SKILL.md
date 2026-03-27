@@ -319,3 +319,5 @@ DevTrail MCARD created:
 3. **User declines confirmation**: Acknowledge and exit gracefully
 4. **Third-party model with limited info**: Mark unknown sections with `[Information not publicly available]` and note in limitations
 5. **No `.devtrail/config.yml`**: Default to English (`en`)
+
+> **Terminal compatibility**: If the terminal does not support box-drawing characters (Unicode), use plain-text formatting with dashes and pipes instead (e.g., `+--+` instead of `╔══╗`).

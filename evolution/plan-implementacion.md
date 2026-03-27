@@ -822,19 +822,19 @@ Se indican como `→ depende de F1.FW.01` tras la subtarea.
 
 > → depende de F2.CLI.01 (document.rs)
 
-- [ ] **F4.CLI.01.01** — Crear `cli/src/commands/audit.rs` con función `pub fn run(path: &str, from: Option<&str>, to: Option<&str>, system: Option<&str>, output: &str) -> Result<()>`
-- [ ] **F4.CLI.01.02** — Agregar variante `Audit` al enum `Commands` con args: `path`, `--from` (YYYY-MM-DD), `--to` (YYYY-MM-DD), `--system` (nombre de sistema), `--output` (text | markdown | html, default text)
-- [ ] **F4.CLI.01.03** — Implementar timeline cronológica: ordenar todos los documentos del período por campo `created`, mostrar en formato timeline con tipo, título, agente, risk_level
-- [ ] **F4.CLI.01.04** — Implementar filtrado por sistema/componente: filtrar documentos cuyo campo `tags` o `title` contenga el nombre del sistema
-- [ ] **F4.CLI.01.05** — Implementar mapa de trazabilidad: construir grafo de relaciones usando campo `related:` de cada documento. Mostrar cadenas como: REQ → ADR → AILOG → TES → INC
-- [ ] **F4.CLI.01.06** — Implementar output Markdown con secciones: Executive Summary (período, totales), Timeline, Traceability Map, Risk Distribution, Compliance Summary (reutilizar compliance checkers)
-- [ ] **F4.CLI.01.07** — Implementar output HTML básico: header con logo/título, tablas estilizadas, timeline visual, pie chart de risk distribution (SVG inline simple). Para uso en presentaciones y auditorías externas
-- [ ] **F4.CLI.01.08** — Agregar al routing en main.rs
+- [x] **F4.CLI.01.01** — Crear `cli/src/commands/audit.rs` con función `pub fn run(path: &str, from: Option<&str>, to: Option<&str>, system: Option<&str>, output: &str) -> Result<()>`
+- [x] **F4.CLI.01.02** — Agregar variante `Audit` al enum `Commands` con args: `path`, `--from` (YYYY-MM-DD), `--to` (YYYY-MM-DD), `--system` (nombre de sistema), `--output` (text | markdown | html, default text)
+- [x] **F4.CLI.01.03** — Implementar timeline cronológica: ordenar todos los documentos del período por campo `created`, mostrar en formato timeline con tipo, título, agente, risk_level
+- [x] **F4.CLI.01.04** — Implementar filtrado por sistema/componente: filtrar documentos cuyo campo `tags` o `title` contenga el nombre del sistema
+- [x] **F4.CLI.01.05** — Implementar mapa de trazabilidad: construir grafo de relaciones usando campo `related:` de cada documento. Mostrar cadenas como: REQ → ADR → AILOG → TES → INC
+- [x] **F4.CLI.01.06** — Implementar output Markdown con secciones: Executive Summary (período, totales), Timeline, Traceability Map, Risk Distribution, Compliance Summary (reutilizar compliance checkers)
+- [x] **F4.CLI.01.07** — Implementar output HTML básico: header con logo/título, tablas estilizadas, timeline visual, pie chart de risk distribution (SVG inline simple). Para uso en presentaciones y auditorías externas
+- [x] **F4.CLI.01.08** — Agregar al routing en main.rs
 
 ### F4.CLI.02 — Bump de versión CLI `P0`
 
-- [ ] **F4.CLI.02.01** — Editar `cli/Cargo.toml`: cambiar version a `"2.1.0"`
-- [ ] **F4.CLI.02.02** — Ejecutar `cargo check` y `cargo build --release`
+- [x] **F4.CLI.02.01** — Editar `cli/Cargo.toml`: cambiar version a `"2.1.0"`
+- [x] **F4.CLI.02.02** — Ejecutar `cargo check` y `cargo build --release`
 
 ---
 
@@ -842,32 +842,32 @@ Se indican como `→ depende de F1.FW.01` tras la subtarea.
 
 ### F4.FW.01 — Crear guía de C4 Model con Mermaid `P1`
 
-- [ ] **F4.FW.01.01** — Crear `dist/.devtrail/00-governance/C4-DIAGRAM-GUIDE.md` con:
+- [x] **F4.FW.01.01** — Crear `dist/.devtrail/00-governance/C4-DIAGRAM-GUIDE.md` con:
   - Explicación de los 4 niveles C4: Context (quién usa el sistema), Container (aplicaciones y stores), Component (componentes dentro de un container), Code (clases/funciones)
   - Sintaxis Mermaid para cada nivel usando `C4Context`, `C4Container`, `C4Component` (nota: soporte experimental en Mermaid)
   - Ejemplo completo para cada nivel con código Mermaid renderizable
   - Cuándo usar cada nivel: Context en REQ/ADR de alto nivel, Container en ADR de arquitectura, Component en ADR/AILOG de módulo, Code solo si es necesario
   - Alternativa PlantUML: sintaxis básica para cada nivel para equipos que prefieran PlantUML
-- [ ] **F4.FW.01.02** — Actualizar AGENT-RULES.md: agregar regla "When creating ADR documents that involve architectural changes, include a Mermaid C4 diagram at the appropriate level. Use C4Context for system-level decisions, C4Container for service-level decisions"
-- [ ] **F4.FW.01.03** — Actualizar TEMPLATE-ADR.md: agregar sección opcional `## Architecture Diagram` con placeholder de Mermaid C4 y nota "Include a C4 diagram at the appropriate level. See C4-DIAGRAM-GUIDE.md for syntax reference"
+- [x] **F4.FW.01.02** — Actualizar AGENT-RULES.md: agregar regla "When creating ADR documents that involve architectural changes, include a Mermaid C4 diagram at the appropriate level. Use C4Context for system-level decisions, C4Container for service-level decisions"
+- [x] **F4.FW.01.03** — Actualizar TEMPLATE-ADR.md: agregar sección opcional `## Architecture Diagram` con placeholder de Mermaid C4 y nota "Include a C4 diagram at the appropriate level. See C4-DIAGRAM-GUIDE.md for syntax reference"
 
 ### F4.FW.02 — Integración OpenAPI/AsyncAPI `P1`
 
-- [ ] **F4.FW.02.01** — Actualizar TEMPLATE-REQ.md: en sección "External Interfaces > Software Interfaces", agregar campo `api_spec_path: ""` al frontmatter para referenciar la ubicación del archivo OpenAPI/AsyncAPI spec
-- [ ] **F4.FW.02.02** — Actualizar TEMPLATE-ADR.md: agregar campo `api_changes: []` al frontmatter para documentar endpoints afectados por la decisión
-- [ ] **F4.FW.02.03** — Agregar nota en AGENT-RULES.md: "When a change modifies API endpoints, verify that the corresponding OpenAPI/AsyncAPI specification is updated. Reference the spec path in the AILOG or ADR using `api_spec_path` or `api_changes` fields"
+- [x] **F4.FW.02.01** — Actualizar TEMPLATE-REQ.md: en sección "External Interfaces > Software Interfaces", agregar campo `api_spec_path: ""` al frontmatter para referenciar la ubicación del archivo OpenAPI/AsyncAPI spec
+- [x] **F4.FW.02.02** — Actualizar TEMPLATE-ADR.md: agregar campo `api_changes: []` al frontmatter para documentar endpoints afectados por la decisión
+- [x] **F4.FW.02.03** — Agregar nota en AGENT-RULES.md: "When a change modifies API endpoints, verify that the corresponding OpenAPI/AsyncAPI specification is updated. Reference the spec path in the AILOG or ADR using `api_spec_path` or `api_changes` fields"
 
 ### F4.FW.03 — Mejoras de ecosistema `P2`
 
-- [ ] **F4.FW.03.01** — Actualizar regex de tipos en todas las validaciones (scripts, CI, CLI) para usar una única fuente de verdad. Crear constante o archivo de configuración con los 12 tipos oficiales
-- [ ] **F4.FW.03.02** — Agregar detección de terminal en skills: si el terminal no soporta box-drawing, usar formato texto plano alternativo. Implementar en los SKILL.md como nota condicional
-- [ ] **F4.FW.03.03** — Documentar relación entre QUICK-REFERENCE.md y DOCUMENTATION-POLICY.md: agregar nota al inicio de QUICK-REFERENCE indicando que es un derivado de DOCUMENTATION-POLICY y que esta última es la fuente autoritativa
+- [x] **F4.FW.03.01** — Actualizar regex de tipos en todas las validaciones (scripts, CI, CLI) para usar una única fuente de verdad. Crear constante o archivo de configuración con los 12 tipos oficiales
+- [x] **F4.FW.03.02** — Agregar detección de terminal en skills: si el terminal no soporta box-drawing, usar formato texto plano alternativo. Implementar en los SKILL.md como nota condicional
+- [x] **F4.FW.03.03** — Documentar relación entre QUICK-REFERENCE.md y DOCUMENTATION-POLICY.md: agregar nota al inicio de QUICK-REFERENCE indicando que es un derivado de DOCUMENTATION-POLICY y que esta última es la fuente autoritativa
 
 ### F4.FW.04 — Bump de versión Framework `P0`
 
-- [ ] **F4.FW.04.01** — Editar `dist/dist-manifest.yml`: cambiar version a `"4.0.0"`. Justificación: C4 Model, OpenAPI integration, ecosistema consolidado, 4 nuevos comandos CLI
-- [ ] **F4.FW.04.02** — Agregar todos los archivos nuevos de F4 al manifest
-- [ ] **F4.FW.04.03** — Actualizar QUICK-REFERENCE.md con referencia a C4-DIAGRAM-GUIDE.md
+- [x] **F4.FW.04.01** — Editar `dist/dist-manifest.yml`: cambiar version a `"4.0.0"`. Justificación: C4 Model, OpenAPI integration, ecosistema consolidado, 4 nuevos comandos CLI
+- [x] **F4.FW.04.02** — Agregar todos los archivos nuevos de F4 al manifest
+- [x] **F4.FW.04.03** — Actualizar QUICK-REFERENCE.md con referencia a C4-DIAGRAM-GUIDE.md
 
 ---
 
@@ -875,21 +875,21 @@ Se indican como `→ depende de F1.FW.01` tras la subtarea.
 
 ### F4.QA.01 — Tests para `devtrail audit` `P0`
 
-- [ ] **F4.QA.01.01** — Crear `cli/tests/audit_test.rs` con tests:
+- [x] **F4.QA.01.01** — Crear `cli/tests/audit_test.rs` con tests:
   - Test con rango de fechas → solo documentos en rango
   - Test con --system → solo documentos del sistema
   - Test de trazabilidad → cadena REQ → ADR → AILOG correcta
   - Test con --output markdown → Markdown válido
   - Test con --output html → HTML válido con estructura esperada
-- [ ] **F4.QA.01.02** — Ejecutar suite completa: `cargo test`
-- [ ] **F4.QA.01.03** — Ejecutar `cargo clippy` sin warnings
+- [x] **F4.QA.01.02** — Ejecutar suite completa: `cargo test`
+- [x] **F4.QA.01.03** — Ejecutar `cargo clippy` sin warnings
 
 ### F4.QA.02 — Verificación integral del ecosistema `P1`
 
-- [ ] **F4.QA.02.01** — Test end-to-end: `devtrail init` → crear documentos de cada tipo → `devtrail validate` → `devtrail compliance --all` → `devtrail metrics` → `devtrail audit --output markdown`
-- [ ] **F4.QA.02.02** — Verificar que `devtrail status` muestra los 12 tipos y 13 comandos
-- [ ] **F4.QA.02.03** — Verificar que `devtrail explore` navega correctamente todas las carpetas incluyendo 08-security y 09-ai-models
-- [ ] **F4.QA.02.04** — Verificar que el proceso `devtrail update-framework` de fw-2.2.0 a fw-4.0.0 funciona sin romper documentos existentes del usuario
+- [x] **F4.QA.02.01** — Test end-to-end: `devtrail init` → crear documentos de cada tipo → `devtrail validate` → `devtrail compliance --all` → `devtrail metrics` → `devtrail audit --output markdown`
+- [x] **F4.QA.02.02** — Verificar que `devtrail status` muestra los 12 tipos y 13 comandos
+- [x] **F4.QA.02.03** — Verificar que `devtrail explore` navega correctamente todas las carpetas incluyendo 08-security y 09-ai-models
+- [x] **F4.QA.02.04** — Verificar que el proceso `devtrail update-framework` de fw-2.2.0 a fw-4.0.0 funciona sin romper documentos existentes del usuario
 
 ---
 
@@ -897,14 +897,14 @@ Se indican como `→ depende de F1.FW.01` tras la subtarea.
 
 ### F4.DOC.01 — Actualización completa de docs/ `P1`
 
-- [ ] **F4.DOC.01.01** — `CLI-REFERENCE.md`: documentar los 4 nuevos comandos (validate, compliance, metrics, audit) con ejemplos de uso y output esperado
-- [ ] **F4.DOC.01.02** — `ADOPTION-GUIDE.md`: actualizar con la nueva estructura de 12 tipos, gobernanza ISO 42001, y nuevos comandos
-- [ ] **F4.DOC.01.03** — `DOCUMENTATION-STANDARDS-REVIEW.md`: actualizar con las decisiones tomadas y los estándares adoptados
-- [ ] **F4.DOC.01.04** — README.md: actualización final con todos los cambios, 12 tipos, 13 comandos, estándares actualizados
+- [x] **F4.DOC.01.01** — `CLI-REFERENCE.md`: documentar los 4 nuevos comandos (validate, compliance, metrics, audit) con ejemplos de uso y output esperado
+- [x] **F4.DOC.01.02** — `ADOPTION-GUIDE.md`: actualizar con la nueva estructura de 12 tipos, gobernanza ISO 42001, y nuevos comandos
+- [x] **F4.DOC.01.03** — `DOCUMENTATION-STANDARDS-REVIEW.md`: actualizar con las decisiones tomadas y los estándares adoptados
+- [x] **F4.DOC.01.04** — README.md: actualización final con todos los cambios, 12 tipos, 13 comandos, estándares actualizados
 
 ### F4.DOC.02 — CHANGELOG `P0`
 
-- [ ] **F4.DOC.02.01** — Crear o actualizar CHANGELOG.md con entradas para fw-3.0.0, fw-3.1.0, fw-3.2.0, fw-4.0.0 y cli-1.3.0, cli-1.4.0, cli-2.0.0, cli-2.1.0
+- [x] **F4.DOC.02.01** — Crear o actualizar CHANGELOG.md con entradas para fw-3.0.0, fw-3.1.0, fw-3.2.0, fw-4.0.0 y cli-1.3.0, cli-1.4.0, cli-2.0.0, cli-2.1.0
 
 ---
 
