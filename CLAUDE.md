@@ -60,8 +60,11 @@ version = "X.Y.Z"
 
 Run `cargo check` in `cli/` to update `Cargo.lock`.
 
-Update version references in docs if they mention the CLI version:
-- `docs/adopters/CLI-REFERENCE.md` (status example output)
+Update version references in all docs that mention version numbers:
+- `docs/adopters/CLI-REFERENCE.md` (EN — versioning table + example outputs)
+- `docs/i18n/es/adopters/CLI-REFERENCE.md` (ES — same)
+- `README.md` (versioning table)
+- `docs/i18n/es/README.md` (ES — versioning table)
 
 ### Step 2: Commit and merge
 
@@ -116,16 +119,50 @@ Users can now run `devtrail update-cli` to get the new version.
 
 ## Release Workflow — Framework
 
-Framework releases are simpler (no binaries to compile):
+Framework releases are automated via `release-framework.yml`. The workflow triggers on tag push (`fw-*`), packages `dist/` as a ZIP, and creates the GitHub release with the asset.
+
+### Step 1: Bump version
+
+Edit `dist/dist-manifest.yml`:
+```yaml
+version: "X.Y.Z"
+```
+
+Update version references in docs:
+- `docs/adopters/CLI-REFERENCE.md` (EN — versioning table)
+- `docs/i18n/es/adopters/CLI-REFERENCE.md` (ES — versioning table)
+- `README.md` and `docs/i18n/es/README.md` (versioning tables)
+- `dist/.devtrail/00-governance/QUICK-REFERENCE.md` (EN + ES footer)
+- `dist/.devtrail/00-governance/AGENT-RULES.md` (EN + ES footer)
+
+### Step 2: Commit and merge
 
 ```bash
-# 1. Update dist/dist-manifest.yml version
-# 2. Commit, merge to main
-# 3. Create release:
-gh release create fw-X.Y.Z \
-  --title "DevTrail Framework X.Y.Z" \
-  --notes "Release notes..."
+git checkout -b chore/bump-fw-X.Y.Z
+git add dist/ docs/ README.md
+git commit -m "chore: bump Framework version to X.Y.Z"
+# Push, create PR, merge to main
 ```
+
+### Step 3: Create and push tag
+
+```bash
+git tag fw-X.Y.Z
+git push origin fw-X.Y.Z
+```
+
+The `release-framework.yml` workflow triggers automatically:
+1. Packages `dist/` contents into `devtrail-fw-X.Y.Z.zip`
+2. Creates the GitHub release with the ZIP as asset
+
+### Step 4: Verify
+
+```bash
+gh release view fw-X.Y.Z --json assets --jq '.assets[].name'
+# Should show: devtrail-fw-X.Y.Z.zip
+```
+
+Users can now run `devtrail update-framework` to get the new version.
 
 ## CLI Commands Reference
 
@@ -138,6 +175,10 @@ gh release create fw-X.Y.Z \
 | `devtrail remove [--full]` | Remove DevTrail from project |
 | `devtrail status [path]` | Show installation health and doc stats |
 | `devtrail repair [path]` | Restore missing directories and framework files |
+| `devtrail validate [path]` | Validate documents for compliance and correctness |
+| `devtrail compliance [path]` | Check regulatory compliance (EU AI Act, ISO 42001, NIST) |
+| `devtrail metrics [path]` | Show governance metrics and documentation statistics |
+| `devtrail audit [path]` | Generate audit trail reports with timeline and traceability |
 | `devtrail explore [path]` | Interactive TUI documentation browser |
 | `devtrail about` | Show version and license info |
 
@@ -155,7 +196,7 @@ cargo build --no-default-features  # Without TUI
 ### Test
 
 ```bash
-cargo test    # All 26 tests
+cargo test    # All 95 tests
 ```
 
 ### Feature Flags
@@ -175,4 +216,5 @@ cargo test    # All 26 tests
 | `pulldown-cmark` | Markdown parser (optional) |
 | `reqwest` | HTTP client for downloads |
 | `serde_yaml` | YAML parsing |
+| `chrono` | Date parsing (metrics, audit) |
 | `anyhow` | Error handling |
