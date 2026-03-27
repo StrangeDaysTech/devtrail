@@ -1,6 +1,9 @@
 # DevTrail - Quick Reference
 
 > One-page reference for AI agents and developers.
+>
+> **This is a simplified reference** — see `00-governance/QUICK-REFERENCE.md` for the complete version,
+> or `00-governance/DOCUMENTATION-POLICY.md` for the authoritative source.
 
 ---
 
@@ -157,7 +160,7 @@ Mark `review_required: true` when:
 
 | I just... | Create |
 |-----------|--------|
-| Implemented >10 lines | AILOG |
+| Implemented >20 lines | AILOG |
 | Chose between options | AIDEC |
 | Fixed security issue | AILOG + `risk_level: high` |
 | Found tech debt | TDE |
@@ -165,4 +168,4 @@ Mark `review_required: true` when:
 
 ---
 
-*DevTrail | [GitHub](https://github.com/StrangeDaysTech/devtrail) | [Strange Days Tech](https://strangedays.tech)*
+*DevTrail v4.0.0 | [GitHub](https://github.com/StrangeDaysTech/devtrail) | [Strange Days Tech](https://strangedays.tech)*

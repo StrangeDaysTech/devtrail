@@ -12,7 +12,7 @@ devtrail/
 ├── cli/                    # Rust CLI source code
 │   ├── src/
 │   │   ├── main.rs         # Entry point, command routing
-│   │   ├── commands/       # Subcommands: init, update, remove, status, repair, explore, about
+│   │   ├── commands/       # Subcommands: init, update, remove, status, repair, validate, compliance, metrics, audit, explore, about
 │   │   ├── tui/            # Terminal UI for `explore` (ratatui + crossterm)
 │   │   ├── config.rs       # DevTrailConfig, Checksums
 │   │   ├── download.rs     # GitHub API, ZIP downloads
@@ -41,8 +41,8 @@ DevTrail uses **independent versions** for framework and CLI:
 
 | Component | Tag format | Current | Example |
 |-----------|-----------|---------|---------|
-| Framework | `fw-X.Y.Z` | fw-2.1.0 | `fw-2.1.0` |
-| CLI | `cli-X.Y.Z` | cli-1.1.0 | `cli-1.1.0` |
+| Framework | `fw-X.Y.Z` | fw-4.0.0 | `fw-4.0.0` |
+| CLI | `cli-X.Y.Z` | cli-2.1.0 | `cli-2.1.0` |
 
 Follow [semver](https://semver.org/):
 - **Major**: breaking changes

@@ -6,6 +6,18 @@
 
 ---
 
+## Governance Context
+
+These rules operationalize **ISO/IEC 42001:2023** (AI Management System) — DevTrail's vertebral standard. Following them produces documented evidence compatible with:
+
+- **EU AI Act** (Regulation 2024/1689) — risk classification, transparency, incident reporting
+- **NIST AI RMF 1.0 + 600-1** — risk management functions and generative AI risk profiles
+- **GDPR** — data protection impact assessments and privacy safeguards
+
+> See `AI-GOVERNANCE-POLICY.md` for the full ISO 42001 Annex A control mapping.
+
+---
+
 ## 1. Fundamental Principle
 
 > **"No significant change without a documented trace."**
@@ -317,6 +329,7 @@ DevTrail is aligned with the following standards and regulations:
 | **ISO/IEC/IEEE 29119-3:2021** | Software testing documentation | TES |
 | **GDPR** | Data protection and privacy | ETH (Data Privacy) |
 | **OpenTelemetry** | Observability (optional, complementary) | Tag `observabilidad` |
+| **C4 Model** | Architecture visualization in ADR documents | ADR (Mermaid diagrams) |
 
 > **Reference**: See `AI-GOVERNANCE-POLICY.md` for the full ISO 42001 Annex A mapping to DevTrail documents.
 

@@ -2,6 +2,17 @@
 
 **Idiomas**: [English](../../DOCUMENTATION-POLICY.md) | Español
 
+## Marco de Gobernanza
+
+Esta política alinea la documentación de DevTrail con **ISO/IEC 42001:2023** (estándar vertebral para Sistemas de Gestión de IA) y operacionaliza:
+
+- **EU AI Act** (efectivo agosto 2026) — clasificación de riesgo, transparencia, reporte de incidentes
+- **NIST AI RMF 1.0 + AI 600-1** — funciones de gestión de riesgos de IA y perfiles de IA generativa
+- **ISO/IEC 23894:2023** — marco de gestión de riesgos de IA
+- **GDPR** — evaluaciones de impacto en protección de datos y privacidad
+
+Todos los tipos de documentos, campos de metadatos y reglas de gobernanza contribuyen a evidencia que satisface estos marcos regulatorios. Ver Sección 8 para la referencia completa de estándares.
+
 ---
 
 ## 1. Convención de Nomenclatura de Archivos
@@ -82,6 +93,8 @@ related:
 | `lines_changed` | Conteo de líneas cambiadas (auto-calculable) | En documentos AILOG |
 | `files_modified` | Lista de archivos modificados (auto-calculable) | En documentos AILOG |
 | `observability_scope` | Nivel de instrumentación OTel: `none \| basic \| full` | Cuando el cambio involucra instrumentación de observabilidad |
+| `api_spec_path` | Ruta al archivo de especificación OpenAPI/AsyncAPI | En documentos REQ cuando el requisito involucra interfaces de API |
+| `api_changes` | Lista de endpoints de API afectados | En documentos ADR cuando la decisión modifica APIs públicas |
 
 ### Convención de Tags
 
@@ -236,4 +249,4 @@ Ver también [ADR-2025-01-20-001] para contexto arquitectónico.
 
 ---
 
-*DevTrail v3.0.0 | [Strange Days Tech](https://strangedays.tech)*
+*DevTrail v4.0.0 | [Strange Days Tech](https://strangedays.tech)*

@@ -24,25 +24,30 @@
 
 ## ¿Qué es DevTrail?
 
-DevTrail es un **sistema de gobernanza de documentación** diseñado para proyectos de desarrollo de software que utilizan asistentes de codificación con IA. Proporciona:
+DevTrail es una **plataforma de gobernanza de IA alineada con ISO 42001** para equipos de desarrollo de software. Proporciona:
 
-- **Documentación estructurada** para decisiones, acciones y cambios
-- **Responsabilidad de agentes IA** mediante identificación obligatoria y seguimiento de confianza
-- **Supervisión humana** a través de flujos de trabajo de revisión requeridos para cambios críticos
-- **Trazabilidad** conectando requisitos → diseño → implementación → pruebas
+- **12 tipos de documentos estructurados** cubriendo el ciclo de vida completo del desarrollo y la IA
+- **Automatización de cumplimiento regulatorio** — EU AI Act, ISO 42001, NIST AI RMF con scoring y trazas de auditoría
+- **Responsabilidad de agentes IA** mediante identificación obligatoria, seguimiento de confianza y límites de autonomía
+- **Supervisión humana** a través de flujos de trabajo de revisión requeridos para cambios críticos y de alto riesgo
+- **Trazabilidad** conectando requisitos → diseño → implementación → pruebas → incidentes
 
 ### Principio Fundamental
 
-> **"Ningún cambio significativo sin un rastro documentado."**
+> **"Ningún cambio significativo sin un rastro documentado — y prueba de gobernanza."**
 
-DevTrail asegura que cada cambio significativo en tu código base esté documentado, atribuido y sea revisable—ya sea hecho por un desarrollador humano o un asistente de IA.
+DevTrail asegura que cada cambio significativo — ya sea hecho por humano o IA — esté documentado, atribuido y sea auditable. Los equipos que adoptan DevTrail producen evidencia compatible con **certificación ISO/IEC 42001** y **cumplimiento del EU AI Act**.
+
+### ¿Por Qué Ahora?
+
+El **EU AI Act es obligatorio desde agosto 2026**. ISO/IEC 42001 es el estándar internacional para Sistemas de Gestión de IA. Las organizaciones que usan IA en desarrollo necesitan gobernanza documentada — no como un nice-to-have, sino como requisito regulatorio. DevTrail operacionaliza estos requisitos desde el primer día.
 
 ### Lo que DevTrail NO Es
 
-- No es un generador de documentación (proporciona estructura, no generación de contenido)
+- No es un generador de documentación — proporciona estructura, plantillas y reglas de gobernanza
 - No es un reemplazo para comentarios de código o documentación de API
-- No es una herramienta de gestión de proyectos
-- No es un sistema de control de versiones
+- No es una herramienta de gestión de proyectos o sistema de control de versiones
+- No es una implementación completa de ISO 42001 — produce evidencia compatible dentro de su alcance
 
 ---
 
@@ -50,11 +55,13 @@ DevTrail asegura que cada cambio significativo en tu código base esté document
 
 ### Usuarios Objetivo
 
-| Tipo de Usuario | Caso de Uso |
-|-----------------|-------------|
-| **Desarrolladores Individuales** | Rastrear tus propias decisiones y cambios asistidos por IA |
-| **Equipos Pequeños** | Mantener consistencia entre miembros del equipo y herramientas de IA |
-| **Equipos Empresariales** | Pistas de auditoría, cumplimiento, gobernanza a escala |
+| Tipo de Usuario | Razones de Adopción |
+|-----------------|---------------------|
+| **Equipos usando asistentes de codificación IA** | Demostrar gobernanza para auditorías regulatorias y aseguramiento de calidad |
+| **Sistemas de IA de alto riesgo** | El EU AI Act exige gestión de riesgos documentada y transparencia |
+| **Organizaciones buscando ISO 42001** | DevTrail produce evidencia lista para certificación |
+| **Industrias reguladas** (finanzas, salud, UE) | Cumplimiento regulatorio obligatorio desde agosto 2026 |
+| **Desarrolladores Individuales** | Rastrear decisiones y cambios asistidos por IA con estructura |
 | **Mantenedores Open Source** | Documentar decisiones de contribución de forma transparente |
 
 ### Entornos de Desarrollo Compatibles
@@ -85,6 +92,16 @@ DevTrail funciona con cualquier metodología de desarrollo:
 
 ## Beneficios
 
+### Para Cumplimiento Regulatorio
+
+| Beneficio | Descripción |
+|-----------|-------------|
+| **Listo para EU AI Act** | Plantillas de clasificación de riesgo, reporte de incidentes y transparencia integradas |
+| **Compatible con ISO 42001** | La estructura de documentación se alinea con requisitos de auditoría de certificación |
+| **Mapeado a NIST AI RMF** | 12 categorías de riesgo GenAI y funciones de gobernanza cubiertas explícitamente |
+| **Trazas de Auditoría Completas** | `devtrail audit` genera reportes exportables de línea temporal y trazabilidad |
+| **Scoring de Cumplimiento** | `devtrail compliance` proporciona análisis de brechas regulatorias basado en porcentajes |
+
 ### Para Equipos de Desarrollo
 
 | Beneficio | Descripción |
@@ -100,17 +117,8 @@ DevTrail funciona con cualquier metodología de desarrollo:
 |-----------|-------------|
 | **Transparencia de IA** | Cada acción de IA se registra con niveles de confianza |
 | **Supervisión Humana** | Decisiones críticas requieren aprobación humana |
-| **Salvaguardas Éticas** | Documentos ETH aseguran uso responsable de IA |
-| **Pista de Auditoría** | Historial completo de contribuciones de IA |
-
-### Para Organizaciones
-
-| Beneficio | Descripción |
-|-----------|-------------|
-| **Listo para Cumplimiento** | La estructura de documentación soporta requisitos regulatorios |
-| **Gestión de Riesgos** | Los niveles de riesgo marcan cambios de alto impacto |
-| **Retención de Conocimiento** | La documentación sobrevive a cambios de personal |
-| **Aseguramiento de Calidad** | Procesos de revisión estructurados |
+| **Salvaguardas Éticas** | Documentos ETH y DPIA aseguran uso responsable de IA |
+| **Métricas de Gobernanza** | `devtrail metrics` rastrea tasas de revisión, distribución de riesgo y tendencias |
 
 ---
 

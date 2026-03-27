@@ -86,7 +86,7 @@ Initialize DevTrail in a project directory.
 
 ```bash
 $ devtrail init .
-✔ Downloaded DevTrail fw-2.1.0
+✔ Downloaded DevTrail fw-4.0.0
 ✔ Created .devtrail/ directory structure
 ✔ Created DEVTRAIL.md
 ✔ Configured AI agent directives
@@ -109,9 +109,9 @@ If `.devtrail/` does not exist in the current directory, the framework update is
 ```bash
 $ devtrail update
 Updating framework...
-✔ Framework updated to fw-2.1.0
+✔ Framework updated to fw-4.0.0
 Updating CLI...
-✔ CLI updated to cli-1.0.0
+✔ CLI updated to cli-2.1.0
 ```
 
 ---
@@ -126,7 +126,7 @@ Update only the framework files. Looks for the latest `fw-*` release on GitHub.
 
 ```bash
 $ devtrail update-framework
-✔ Framework updated to fw-2.1.0
+✔ Framework updated to fw-4.0.0
 ```
 
 ---
@@ -139,7 +139,7 @@ Auto-update the `devtrail` binary itself. Looks for the latest `cli-*` release o
 
 ```bash
 $ devtrail update-cli
-✔ CLI updated to cli-1.0.0
+✔ CLI updated to cli-2.1.0
 ```
 
 ---
@@ -201,8 +201,8 @@ $ devtrail status
   Project
   ┌───────────┬──────────────────────────┐
   │ Path      │ /home/user/my-project    │
-  │ Framework │ fw-2.1.0                 │
-  │ CLI       │ cli-1.2.0                │
+  │ Framework │ fw-4.0.0                 │
+  │ CLI       │ cli-2.1.0                │
   │ Language  │ en                       │
   └───────────┴──────────────────────────┘
 
@@ -258,7 +258,7 @@ Repairing DevTrail in /home/user/my-project
 → Restoring 1 missing directory...
 ✓ Restored .devtrail/templates/
 → Downloading framework to restore missing files...
-  Using version: fw-2.1.0
+  Using version: fw-4.0.0
 ✓ Restored 16 file(s) from framework
 → Updating checksums...
 
@@ -516,8 +516,8 @@ Show version, authorship, and license information.
 ```bash
 $ devtrail about
 DevTrail CLI
-  CLI version:       cli-1.0.0
-  Framework version: fw-2.1.0
+  CLI version:       cli-2.1.0
+  Framework version: fw-4.0.0
   Author:            Strange Days Tech, S.A.S.
   License:           MIT
   Repository:        https://github.com/StrangeDaysTech/devtrail

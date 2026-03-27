@@ -1,5 +1,16 @@
 # Documentation Policy - DevTrail
 
+## Governance Framework
+
+This policy aligns DevTrail documentation with **ISO/IEC 42001:2023** (vertebral standard for AI Management Systems) and operationalizes:
+
+- **EU AI Act** (effective August 2026) — risk classification, transparency, incident reporting
+- **NIST AI RMF 1.0 + AI 600-1** — AI risk management functions and generative AI profiles
+- **ISO/IEC 23894:2023** — AI risk management framework
+- **GDPR** — data protection and privacy impact assessments
+
+All document types, metadata fields, and governance rules contribute to evidence that satisfies these regulatory frameworks. See Section 8 for the complete standards reference.
+
 ---
 
 ## 1. File Naming Convention
@@ -80,6 +91,8 @@ related:
 | `lines_changed` | Lines changed count (auto-calculable) | In AILOG documents |
 | `files_modified` | List of modified files (auto-calculable) | In AILOG documents |
 | `observability_scope` | OTel instrumentation level: `none \| basic \| full` | When the change involves observability instrumentation |
+| `api_spec_path` | Path to OpenAPI/AsyncAPI specification file | In REQ documents when the requirement involves API interfaces |
+| `api_changes` | List of API endpoints affected | In ADR documents when the decision modifies public APIs |
 
 ### Tags Convention
 
@@ -234,4 +247,4 @@ See also [ADR-2025-01-20-001] for architectural context.
 
 ---
 
-*DevTrail v3.0.0 | [Strange Days Tech](https://strangedays.tech)*
+*DevTrail v4.0.0 | [Strange Days Tech](https://strangedays.tech)*

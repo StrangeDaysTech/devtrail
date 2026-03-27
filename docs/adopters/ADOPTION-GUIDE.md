@@ -24,25 +24,30 @@
 
 ## What is DevTrail?
 
-DevTrail is a **documentation governance system** designed for software development projects that utilize AI coding assistants. It provides:
+DevTrail is an **ISO 42001-aligned AI governance platform** for software development teams. It provides:
 
-- **Structured documentation** for decisions, actions, and changes
-- **AI agent accountability** through mandatory identification and confidence tracking
-- **Human oversight** via required review workflows for critical changes
-- **Traceability** connecting requirements → design → implementation → testing
+- **12 structured document types** covering the full development and AI lifecycle
+- **Regulatory compliance automation** — EU AI Act, ISO 42001, NIST AI RMF scoring and audit trails
+- **AI agent accountability** through mandatory identification, confidence tracking, and autonomy limits
+- **Human oversight** via required review workflows for critical and high-risk changes
+- **Traceability** connecting requirements → design → implementation → testing → incidents
 
 ### Core Principle
 
-> **"No significant change without a documented trace."**
+> **"No significant change without a documented trace — and proof of governance."**
 
-DevTrail ensures that every meaningful change in your codebase is documented, attributed, and reviewable—whether made by a human developer or an AI assistant.
+DevTrail ensures that every meaningful change — whether by human or AI — is documented, attributed, and auditable. Teams that adopt DevTrail produce evidence compatible with **ISO/IEC 42001 certification** and **EU AI Act compliance**.
+
+### Why Now?
+
+The **EU AI Act becomes mandatory in August 2026**. ISO/IEC 42001 is the international standard for AI Management Systems. Organizations using AI in development need documented governance — not as a nice-to-have, but as a regulatory requirement. DevTrail operationalizes these requirements from day one.
 
 ### What DevTrail is NOT
 
-- ❌ A documentation generator (it provides structure, not content generation)
-- ❌ A replacement for code comments or API docs
-- ❌ A project management tool
-- ❌ A version control system
+- It is not a documentation generator — it provides structure, templates, and governance rules
+- It is not a replacement for code comments or API docs
+- It is not a project management tool or version control system
+- It is not a full ISO 42001 implementation — it produces compatible evidence within its scope
 
 ---
 
@@ -50,11 +55,13 @@ DevTrail ensures that every meaningful change in your codebase is documented, at
 
 ### Target Users
 
-| User Type | Use Case |
-|-----------|----------|
-| **Solo Developers** | Track your own decisions and AI-assisted changes |
-| **Small Teams** | Maintain consistency across team members and AI tools |
-| **Enterprise Teams** | Audit trails, compliance, governance at scale |
+| User Type | Adoption Drivers |
+|-----------|-----------------|
+| **Teams using AI coding assistants** | Prove governance for regulatory audits and quality assurance |
+| **High-risk AI systems** | EU AI Act mandates documented risk management and transparency |
+| **Organizations seeking ISO 42001** | DevTrail produces certification-ready evidence |
+| **Regulated industries** (finance, healthcare, EU-based) | Regulatory compliance mandatory by August 2026 |
+| **Solo Developers** | Track decisions and AI-assisted changes with structure |
 | **Open Source Maintainers** | Document contribution decisions transparently |
 
 ### Compatible Development Environments
@@ -85,6 +92,16 @@ DevTrail works with any development methodology:
 
 ## Benefits
 
+### For Regulatory Compliance
+
+| Benefit | Description |
+|---------|-------------|
+| **EU AI Act Ready** | Risk classification, incident reporting, and transparency templates built in |
+| **ISO 42001 Compatible** | Documentation structure aligns with certification audit requirements |
+| **NIST AI RMF Mapped** | 12 GenAI risk categories and governance functions explicitly covered |
+| **Audit Trail Complete** | `devtrail audit` generates exportable timeline and traceability reports |
+| **Compliance Scoring** | `devtrail compliance` provides percentage-based regulatory gap analysis |
+
 ### For Development Teams
 
 | Benefit | Description |
@@ -100,17 +117,8 @@ DevTrail works with any development methodology:
 |---------|-------------|
 | **AI Transparency** | Every AI action is logged with confidence levels |
 | **Human Oversight** | Critical decisions require human approval |
-| **Ethical Safeguards** | ETH documents ensure responsible AI use |
-| **Audit Trail** | Complete history of AI contributions |
-
-### For Organizations
-
-| Benefit | Description |
-|---------|-------------|
-| **Compliance Ready** | Documentation structure supports regulatory requirements |
-| **Risk Management** | Risk levels flag high-impact changes |
-| **Knowledge Retention** | Documentation survives personnel changes |
-| **Quality Assurance** | Structured review processes |
+| **Ethical Safeguards** | ETH and DPIA documents ensure responsible AI use |
+| **Governance Metrics** | `devtrail metrics` tracks review rates, risk distribution, and trends |
 
 ---
 

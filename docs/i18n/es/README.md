@@ -2,7 +2,7 @@
 
 # DevTrail
 
-**Gobernanza de Documentación para Desarrollo de Software Asistido por IA**
+**Plataforma de Gobernanza de IA para Desarrollo de Software Responsable**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](../../../LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -22,22 +22,19 @@
 
 ## El Problema
 
-A medida que los asistentes de codificación con IA se vuelven parte integral del desarrollo de software, surge una brecha crítica:
+A medida que la IA se vuelve parte integral del desarrollo de software, las organizaciones enfrentan tres presiones convergentes:
 
-- **¿Quién hizo este cambio?** ¿Fue un desarrollador o un asistente de IA?
-- **¿Por qué se tomó esta decisión?** ¿Qué alternativas se consideraron?
-- **¿Debería haberse revisado esto?** ¿Fue apropiada la supervisión humana?
-- **¿Cuál es el impacto?** ¿Qué tan riesgoso es este cambio?
-
-Sin documentación estructurada, el desarrollo asistido por IA se convierte en una caja negra.
+- **Cumplimiento regulatorio**: El EU AI Act es obligatorio desde agosto 2026. ISO/IEC 42001 es el estándar internacional para gobernanza de IA. Los equipos necesitan evidencia documentada.
+- **Brecha de gobernanza**: No hay forma estructurada de demostrar que las decisiones de IA están gobernadas, auditables y en cumplimiento — cada cambio de IA sin documentar es una responsabilidad.
+- **Riesgo operacional**: ¿Quién hizo este cambio? ¿Qué alternativas se consideraron? ¿Fue apropiada la supervisión humana? Sin respuestas, el desarrollo asistido por IA es una caja negra.
 
 ## La Solución
 
-DevTrail proporciona un **sistema de gobernanza de documentación** que asegura:
+DevTrail es una **plataforma de gobernanza de IA alineada con ISO 42001** que asegura que cada cambio significativo — ya sea hecho por humano o IA — esté documentado, atribuido y sea auditable.
 
-> **"Ningún cambio significativo sin un rastro documentado."**
+> **"Ningún cambio significativo sin un rastro documentado — y prueba de gobernanza."**
 
-Cada cambio significativo—ya sea hecho por un humano o una IA—está documentado, atribuido y puede ser revisado.
+Los equipos que adoptan DevTrail producen evidencia compatible con **certificación ISO/IEC 42001**, **cumplimiento del EU AI Act** y gestión de riesgos **NIST AI RMF** — mientras mejoran la calidad y trazabilidad del desarrollo.
 
 ---
 
@@ -45,7 +42,7 @@ Cada cambio significativo—ya sea hecho por un humano o una IA—está document
 
 ### 📋 Documentación Estructurada
 
-Ocho tipos de documentos que cubren todo el ciclo de vida del desarrollo:
+Doce tipos de documentos que cubren el ciclo de vida completo del desarrollo:
 
 | Tipo | Propósito | Ejemplo |
 |------|-----------|---------|
@@ -57,6 +54,23 @@ Ocho tipos de documentos que cubren todo el ciclo de vida del desarrollo:
 | **AILOG** | Logs de Acciones de IA | Qué hicieron los asistentes de IA y por qué |
 | **AIDEC** | Decisiones de IA | Elecciones hechas por IA con alternativas |
 | **ETH** | Revisiones Éticas | Privacidad, sesgo, IA responsable |
+| **SEC** | Evaluaciones de Seguridad | Modelado de amenazas, análisis de vulnerabilidades |
+| **MCARD** | Tarjetas de Modelo/Sistema | Documentación de modelos de IA |
+| **SBOM** | Lista de Materiales de Software | Inventario de componentes de IA |
+| **DPIA** | Evaluación de Impacto en Protección de Datos | Análisis de impacto en privacidad |
+
+### 📐 Alineación con Estándares
+
+| Estándar | Integración con DevTrail |
+|----------|--------------------------|
+| **ISO/IEC 42001:2023** | Estándar vertebral — gobernanza de Sistemas de Gestión de IA |
+| **EU AI Act** | Clasificación de riesgo, reporte de incidentes, transparencia |
+| **NIST AI RMF / 600-1** | 12 categorías de riesgo GenAI en ETH/AILOG |
+| **ISO/IEC 25010:2023** | Modelo de calidad de software en REQ/ADR |
+| **ISO/IEC/IEEE 29148:2018** | Ingeniería de requisitos en REQ |
+| **ISO/IEC/IEEE 29119-3:2021** | Documentación de pruebas en TES |
+| **GDPR** | Protección de datos en ETH/DPIA |
+| **OpenTelemetry** | Observabilidad (opcional) |
 
 ### 🤖 Soporte para Agentes IA
 
@@ -82,13 +96,15 @@ Salvaguardas incorporadas que aseguran que los humanos mantengan el control:
 - **Disparadores de revisión**: Baja confianza o alto riesgo → revisión obligatoria
 - **Revisiones éticas**: Preocupaciones de privacidad y sesgo marcadas para decisión humana
 
-### ✅ Validación y CI/CD
+### ✅ Automatización de Compliance
 
-Herramientas de validación automatizadas:
+Herramientas CLI integradas para gobernanza:
 
-- **Hooks pre-commit** (Bash) - Validar antes de commit
-- **Script PowerShell** - Validación compatible con Windows
-- **GitHub Actions** - Flujo de trabajo de validación de PR
+- **`devtrail validate`** — 13 reglas de validación para corrección documental
+- **`devtrail compliance`** — Puntuación de cumplimiento regulatorio (EU AI Act, ISO 42001, NIST AI RMF)
+- **`devtrail metrics`** — KPIs de gobernanza, tasas de revisión, distribución de riesgo, tendencias
+- **`devtrail audit`** — Reportes de auditoría con línea temporal, mapas de trazabilidad y exportación HTML
+- **Hooks pre-commit** + **GitHub Actions** para validación CI/CD
 
 ---
 

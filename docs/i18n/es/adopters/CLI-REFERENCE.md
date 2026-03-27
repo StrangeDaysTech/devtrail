@@ -86,7 +86,7 @@ Inicializa DevTrail en un directorio de proyecto.
 
 ```bash
 $ devtrail init .
-✔ Downloaded DevTrail fw-2.1.0
+✔ Downloaded DevTrail fw-4.0.0
 ✔ Created .devtrail/ directory structure
 ✔ Created DEVTRAIL.md
 ✔ Configured AI agent directives
@@ -109,9 +109,9 @@ Si `.devtrail/` no existe en el directorio actual, la actualización del framewo
 ```bash
 $ devtrail update
 Updating framework...
-✔ Framework updated to fw-2.1.0
+✔ Framework updated to fw-4.0.0
 Updating CLI...
-✔ CLI updated to cli-1.0.0
+✔ CLI updated to cli-2.1.0
 ```
 
 ---
@@ -126,7 +126,7 @@ Actualiza solo los archivos del framework. Busca el último release `fw-*` en Gi
 
 ```bash
 $ devtrail update-framework
-✔ Framework updated to fw-2.1.0
+✔ Framework updated to fw-4.0.0
 ```
 
 ---
@@ -139,7 +139,7 @@ Auto-actualiza el binario `devtrail`. Busca el último release `cli-*` en GitHub
 
 ```bash
 $ devtrail update-cli
-✔ CLI updated to cli-1.0.0
+✔ CLI updated to cli-2.1.0
 ```
 
 ---
@@ -196,8 +196,8 @@ $ devtrail status
 DevTrail Status
 ───────────────
 Path:              /home/user/my-project
-Framework version: fw-2.1.0
-CLI version:       cli-1.0.0
+Framework version: fw-4.0.0
+CLI version:       cli-2.1.0
 Language:          en
 Structure:         ✔ Complete
 
@@ -396,8 +396,8 @@ Muestra información de versión, autoría y licencia.
 ```bash
 $ devtrail about
 DevTrail CLI
-  CLI version:       cli-1.0.0
-  Framework version: fw-2.1.0
+  CLI version:       cli-2.1.0
+  Framework version: fw-4.0.0
   Author:            Strange Days Tech, S.A.S.
   License:           MIT
   Repository:        https://github.com/StrangeDaysTech/devtrail

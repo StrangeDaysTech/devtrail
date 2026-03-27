@@ -2,7 +2,7 @@
 
 # DevTrail
 
-**Documentation Governance for AI-Assisted Software Development**
+**AI Governance Platform for Responsible Software Development**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -22,22 +22,19 @@
 
 ## The Problem
 
-As AI coding assistants become integral to software development, a critical gap emerges:
+As AI becomes integral to software development, organizations face three converging pressures:
 
-- **Who made this change?** Was it a developer or an AI assistant?
-- **Why was this decision made?** What alternatives were considered?
-- **Should this have been reviewed?** Was human oversight appropriate?
-- **What's the impact?** How risky is this change?
-
-Without structured documentation, AI-assisted development becomes a black box.
+- **Regulatory compliance**: The EU AI Act becomes mandatory in August 2026. ISO/IEC 42001 is now the international standard for AI governance. Teams need documented evidence.
+- **Governance gap**: No structured way to prove that AI decisions are governed, auditable, and compliant — every undocumented AI change is a liability.
+- **Operational risk**: Who made this change? What alternatives were considered? Was human oversight appropriate? Without answers, AI-assisted development is a black box.
 
 ## The Solution
 
-DevTrail provides a **documentation governance system** that ensures:
+DevTrail is an **ISO 42001-aligned AI governance platform** that ensures every meaningful change — whether by human or AI — is documented, attributed, and auditable.
 
-> **"No significant change without a documented trace."**
+> **"No significant change without a documented trace — and proof of governance."**
 
-Every meaningful change—whether by human or AI—is documented, attributed, and reviewable.
+Teams that adopt DevTrail produce evidence compatible with **ISO/IEC 42001 certification**, **EU AI Act compliance**, and **NIST AI RMF** risk management — while improving development quality and traceability.
 
 ---
 
@@ -99,13 +96,15 @@ Built-in safeguards ensure humans stay in control:
 - **Review triggers**: Low confidence or high risk → mandatory review
 - **Ethical reviews**: Privacy and bias concerns flagged for human decision
 
-### ✅ Validation & CI/CD
+### ✅ Compliance Automation
 
-Automated validation tools:
+Built-in CLI tools for governance:
 
-- **Pre-commit hooks** (Bash) - Validate before commit
-- **PowerShell script** - Windows-friendly validation
-- **GitHub Actions** - PR validation workflow
+- **`devtrail validate`** — 13 validation rules for document correctness
+- **`devtrail compliance`** — Regulatory compliance scoring (EU AI Act, ISO 42001, NIST AI RMF)
+- **`devtrail metrics`** — Governance KPIs, review rates, risk distribution, trends
+- **`devtrail audit`** — Audit trail reports with timeline, traceability maps, and HTML export
+- **Pre-commit hooks** + **GitHub Actions** for CI/CD validation
 
 ---
 
@@ -176,7 +175,7 @@ See [CLI Reference](docs/adopters/CLI-REFERENCE.md) for detailed usage.
 ```bash
 # Download the latest framework release ZIP from GitHub
 # Go to https://github.com/StrangeDaysTech/devtrail/releases
-# and download the latest fw-* release (e.g., fw-2.1.0)
+# and download the latest fw-* release (e.g., fw-4.0.0)
 
 # Extract and copy to your project
 unzip devtrail-fw-*.zip -d your-project/
@@ -230,7 +229,9 @@ Once adopted, DevTrail creates a `.devtrail/` directory in your project for deve
 ├── 07-ai-audit/
 │   ├── agent-logs/          # AILOG documents
 │   ├── decisions/           # AIDEC documents
-│   └── ethical-reviews/     # ETH documents
+│   └── ethical-reviews/     # ETH, DPIA documents
+├── 08-security/             # SEC documents
+├── 09-ai-models/            # MCARD documents
 └── templates/               # Document templates
 ```
 
@@ -356,6 +357,8 @@ DevTrail includes skills for AI agents that enable **active documentation creati
 | `/devtrail-ailog` | Quick AILOG creation | ✅ | ✅ |
 | `/devtrail-aidec` | Quick AIDEC creation | ✅ | ✅ |
 | `/devtrail-adr` | Quick ADR creation | ✅ | ✅ |
+| `/devtrail-sec` | Security Assessment creation | ✅ | ✅ |
+| `/devtrail-mcard` | Model/System Card creation | ✅ | ✅ |
 
 ### Usage Examples
 
@@ -398,7 +401,7 @@ AI agents report documentation status at the end of each task:
 | Status | Meaning |
 |--------|---------|
 | `DevTrail: Created AILOG-...` | Documentation was created |
-| `DevTrail: No documentation required` | Change was minor (<10 lines) |
+| `DevTrail: No documentation required` | Change was minor |
 | `DevTrail: Documentation pending` | May need manual review |
 
 ### Multi-Agent Architecture
@@ -460,17 +463,6 @@ All skill implementations are **functionally identical**—only the format diffe
 
 ---
 
-## Standards Alignment
-
-DevTrail aligns with:
-
-- **ADR** (Architecture Decision Records) - Native support
-- **IEEE 830** - Requirements documentation structure
-- **ISO/IEC 25010** - Quality attributes in ADRs
-- **GDPR** - Privacy impact documentation (ETH)
-- **EU AI Act** - AI transparency and human oversight
-- **NIST AI RMF** - Risk documentation
-
 ---
 
 ## Contributing
@@ -507,7 +499,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-**DevTrail** — Because every change tells a story.
+**DevTrail** — AI governance, documented.
 
 [⬆ Back to top](#devtrail)
 
