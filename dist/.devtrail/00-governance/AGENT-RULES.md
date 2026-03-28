@@ -38,8 +38,6 @@ confidence: high | medium | low
 | Changes affecting AI system lifecycle (deployment, retirement) | AILOG + ADR | Human review required |
 | Changes to OTel instrumentation (spans, attributes, pipeline) | AILOG | Tag `observabilidad`, see §9 |
 
-> **Complexity-based threshold (when available):** If the DevTrail CLI and `lizard` are installed, agents may invoke `devtrail analyze-complexity` to measure cyclomatic complexity delta. Document if delta CCN > 5. Fallback to the >20 lines rule when tools are unavailable.
-
 ### PROHIBITED - Do not document
 
 - Credentials, tokens, API keys

@@ -105,7 +105,7 @@ ID format: `[TYPE]-YYYY-MM-DD-NNN`
 2. Replace placeholders:
    - `YYYY-MM-DD` → Current date
    - `NNN` → Sequence number (001, 002, etc.)
-   - `[agent-name-v1.0]` → `gemini-cli-v1.0`
+   - `[agent-name-v1.0]` → Your agent identifier (e.g., `cursor-v1.0`, `copilot-v1.0`, `windsurf-v1.0`)
 3. Fill in context from git analysis
 4. Save to correct location:
 
@@ -123,6 +123,16 @@ ID format: `[TYPE]-YYYY-MM-DD-NNN`
 | MCARD | `.devtrail/09-ai-models/` |
 | SBOM | `.devtrail/07-ai-audit/` |
 | DPIA | `.devtrail/07-ai-audit/ethical-reviews/` |
+
+### 7.5. Apply Automatic Review Rules
+
+Before saving, apply these validation rules to the frontmatter:
+
+- If `risk_level` is `high` or `critical`: set `review_required: true`
+- If `eu_ai_act_risk` is `high`: set `review_required: true`
+- If document type is SEC, MCARD, or DPIA: set `review_required: true`
+
+These rules align with the CLI validation rules CROSS-001, CROSS-002, and CROSS-003.
 
 ### 8. Report Result
 

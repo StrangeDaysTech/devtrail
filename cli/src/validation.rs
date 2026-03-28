@@ -78,7 +78,72 @@ pub fn validate_all(devtrail_dir: &Path) -> (ValidationResult, usize) {
         }
     }
 
+    // REF-002: Detect orphan documents (no traceability links)
+    check_orphan_documents(&mut result, &paths, devtrail_dir);
+
     (result, doc_count)
+}
+
+/// REF-002: Check for documents with no traceability links.
+/// A document is orphan if it has no `related` field AND is not referenced
+/// by any other document's `related` field.
+fn check_orphan_documents(result: &mut ValidationResult, paths: &[PathBuf], _devtrail_dir: &Path) {
+    let parsed: Vec<DevTrailDocument> = paths
+        .iter()
+        .filter_map(|p| document::parse_document(p).ok())
+        .collect();
+
+    // Build a set of all filenames referenced in any document's `related` field
+    let mut referenced: std::collections::HashSet<String> = std::collections::HashSet::new();
+    for doc in &parsed {
+        if let Some(related) = &doc.frontmatter.related {
+            for rel_id in related {
+                if !rel_id.is_empty() {
+                    referenced.insert(rel_id.clone());
+                }
+            }
+        }
+    }
+
+    // Skip orphan check when there are very few documents (not meaningful)
+    if parsed.len() <= 2 {
+        return;
+    }
+
+    // Types that are naturally standalone (don't require traceability)
+    let standalone_types = [
+        DocType::Eth,
+        DocType::Inc,
+        DocType::Tde,
+        DocType::Sec,
+        DocType::Mcard,
+        DocType::Dpia,
+        DocType::Sbom,
+    ];
+
+    for doc in &parsed {
+        if standalone_types.contains(&doc.doc_type) {
+            continue;
+        }
+
+        let has_related = doc
+            .frontmatter
+            .related
+            .as_ref()
+            .is_some_and(|r| r.iter().any(|s| !s.is_empty()));
+
+        let is_referenced = referenced.iter().any(|r| doc.filename.starts_with(r.as_str()));
+
+        if !has_related && !is_referenced {
+            result.add(ValidationIssue {
+                file: doc.path.clone(),
+                rule: "REF-002".to_string(),
+                message: "Document has no traceability links (not in any related field and has no related of its own)".to_string(),
+                severity: Severity::Warning,
+                fix_hint: Some("Add a 'related' field linking to relevant documents for audit traceability".to_string()),
+            });
+        }
+    }
 }
 
 /// Validate a single parsed document
@@ -91,6 +156,7 @@ fn validate_document(doc: &DevTrailDocument, devtrail_dir: &Path) -> ValidationR
     check_valid_status(&mut result, doc);
     check_cross_rules(&mut result, doc);
     check_type_specific(&mut result, doc);
+    check_date_consistency(&mut result, doc);
     check_related_exist(&mut result, doc, devtrail_dir);
     check_sensitive_info(&mut result, doc);
     check_observability(&mut result, doc);
@@ -158,6 +224,49 @@ fn check_naming(result: &mut ValidationResult, doc: &DevTrailDocument) {
             severity: Severity::Error,
             fix_hint: None,
         });
+        return;
+    }
+
+    // NAMING-002: Validate sequence number is exactly 3 digits
+    let after_dash = &after_date[1..]; // skip the leading '-'
+    let seq_end = after_dash.find('-').unwrap_or(after_dash.len());
+    let seq_part = &after_dash[..seq_end];
+    if seq_part.len() != 3 || !seq_part.chars().all(|c| c.is_ascii_digit()) {
+        result.add(ValidationIssue {
+            file: doc.path.clone(),
+            rule: "NAMING-002".to_string(),
+            message: format!(
+                "Sequence number should be exactly 3 digits (e.g., 001), found '{}'",
+                seq_part
+            ),
+            severity: Severity::Warning,
+            fix_hint: Some(format!(
+                "Rename with zero-padded sequence: {:0>3}",
+                seq_part
+            )),
+        });
+    }
+
+    // NAMING-003: Validate description is kebab-case
+    if seq_end < after_dash.len() {
+        let desc_with_ext = &after_dash[seq_end + 1..]; // skip the '-' after sequence
+        let desc = desc_with_ext.strip_suffix(".md").unwrap_or(desc_with_ext);
+        if !desc.is_empty()
+            && !desc
+                .chars()
+                .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-')
+        {
+            result.add(ValidationIssue {
+                file: doc.path.clone(),
+                rule: "NAMING-003".to_string(),
+                message: format!(
+                    "Description should be kebab-case (lowercase, digits, hyphens only), found '{}'",
+                    desc
+                ),
+                severity: Severity::Warning,
+                fix_hint: None,
+            });
+        }
     }
 }
 
@@ -359,6 +468,42 @@ fn check_related_exist(result: &mut ValidationResult, doc: &DevTrailDocument, de
                 });
             }
         }
+    }
+}
+
+/// META-004: Check that filename date matches created field
+fn check_date_consistency(result: &mut ValidationResult, doc: &DevTrailDocument) {
+    let Some(created) = &doc.frontmatter.created else {
+        return;
+    };
+
+    // Extract date from filename: after prefix dash, take 10 chars (YYYY-MM-DD)
+    let prefix = doc.doc_type.prefix();
+    let after_prefix = match doc.filename.strip_prefix(&format!("{}-", prefix)) {
+        Some(rest) if rest.len() >= 10 => rest,
+        _ => return,
+    };
+
+    let filename_date = &after_prefix[..10];
+
+    // The created field may be a full datetime or just a date — compare the first 10 chars
+    let created_date = if created.len() >= 10 {
+        &created[..10]
+    } else {
+        created.as_str()
+    };
+
+    if filename_date != created_date {
+        result.add(ValidationIssue {
+            file: doc.path.clone(),
+            rule: "META-004".to_string(),
+            message: format!(
+                "Filename date '{}' does not match created field '{}'",
+                filename_date, created_date
+            ),
+            severity: Severity::Warning,
+            fix_hint: None,
+        });
     }
 }
 

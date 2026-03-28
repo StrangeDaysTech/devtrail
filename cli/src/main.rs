@@ -4,7 +4,6 @@ use colored::Colorize;
 mod audit_engine;
 mod commands;
 mod compliance;
-mod complexity;
 mod config;
 mod document;
 mod download;

@@ -335,5 +335,21 @@ DevTrail is aligned with the following standards and regulations:
 
 ---
 
+## Directive Injection Markers
+
+DevTrail uses HTML comment markers to manage injected content in agent configuration files (CLAUDE.md, GEMINI.md, .cursorrules, etc.):
+
+```html
+<!-- devtrail:begin -->
+... managed content ...
+<!-- devtrail:end -->
+```
+
+- Content between these markers is managed by `devtrail init`, `update`, and `repair`
+- Do not remove or modify these markers manually — they are required for safe updates
+- If markers are missing from a target file, DevTrail appends the content block at the end
+
+---
+
 *DevTrail | [GitHub](https://github.com/StrangeDaysTech/devtrail)*
 *[Strange Days Tech](https://strangedays.tech) — Because every change tells a story.*
