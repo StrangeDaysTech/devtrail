@@ -468,7 +468,7 @@ Analyze code complexity using cognitive and cyclomatic metrics powered by [arbor
 | `--output` | `text` | Output format: `text`, `json`, or `markdown` |
 | `--top` | — | Show only top N most complex functions |
 
-**Supported languages:** Rust, Python, JavaScript, TypeScript, Java, Go
+**Supported languages:** Rust, Python, JavaScript, TypeScript, Java, Go, C, C++, C#, PHP, Kotlin, Swift
 
 **Threshold resolution:** CLI flag → `.devtrail/config.yml` → default (8)
 

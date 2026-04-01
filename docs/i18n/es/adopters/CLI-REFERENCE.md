@@ -366,7 +366,7 @@ Analiza la complejidad del código fuente usando métricas cognitivas y ciclomá
 | `--output` | `text` | Formato de salida: `text`, `json` o `markdown` |
 | `--top` | — | Mostrar solo las N funciones más complejas |
 
-**Lenguajes soportados:** Rust, Python, JavaScript, TypeScript, Java, Go
+**Lenguajes soportados:** Rust, Python, JavaScript, TypeScript, Java, Go, C, C++, C#, PHP, Kotlin, Swift
 
 **Resolución de umbral:** flag CLI → `.devtrail/config.yml` → predeterminado (8)
 
