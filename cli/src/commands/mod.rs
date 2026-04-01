@@ -1,4 +1,6 @@
 pub mod about;
+#[cfg(feature = "analyze")]
+pub mod analyze;
 pub mod audit;
 pub mod compliance;
 #[cfg(feature = "tui")]

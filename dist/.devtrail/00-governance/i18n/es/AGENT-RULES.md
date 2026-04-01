@@ -39,8 +39,7 @@ confidence: high | medium | low
 | Adición/eliminación/actualización de dependencias críticas de seguridad | AILOG | Revisión humana requerida |
 | Cambios que afectan el ciclo de vida del sistema de IA (despliegue, retirada) | AILOG + ADR | Revisión humana requerida |
 | Cambios en instrumentación OTel (spans, atributos, pipeline) | AILOG | Tag `observabilidad`, ver §9 |
-
-> **Umbral basado en complejidad (cuando está disponible):** Si el CLI de DevTrail y `lizard` están instalados, los agentes pueden invocar `devtrail analyze-complexity` para medir el delta de complejidad ciclomática. Documentar si delta CCN > 5. Recurrir a la regla de >20 líneas cuando las herramientas no están disponibles.
+| Función con complejidad cognitiva > umbral | AILOG | Ejecutar `devtrail analyze` para identificar; umbral por defecto: 8 |
 
 ### PROHIBIDO - No documentar
 

@@ -1,10 +1,11 @@
 use clap::{Parser, Subcommand};
 use colored::Colorize;
 
+#[cfg(feature = "analyze")]
+mod analysis_engine;
 mod audit_engine;
 mod commands;
 mod compliance;
-mod complexity;
 mod config;
 mod document;
 mod download;
@@ -115,6 +116,22 @@ enum Commands {
     },
     /// Show version, author, and license information
     About,
+    /// Analyze code complexity using cognitive and cyclomatic metrics
+    #[cfg(feature = "analyze")]
+    Analyze {
+        /// Target directory or file (default: current directory)
+        #[arg(default_value = ".")]
+        path: String,
+        /// Cognitive complexity threshold (default: from config or 8)
+        #[arg(long)]
+        threshold: Option<u32>,
+        /// Output format
+        #[arg(long, default_value = "text", value_parser = ["text", "json", "markdown"])]
+        output: String,
+        /// Show only top N most complex functions
+        #[arg(long)]
+        top: Option<usize>,
+    },
     /// Explore DevTrail documentation interactively
     #[cfg(feature = "tui")]
     Explore {
@@ -158,6 +175,13 @@ fn main() {
         Commands::Status { path } => commands::status::run(&path),
         Commands::Repair { path } => commands::repair::run(&path),
         Commands::About => commands::about::run(),
+        #[cfg(feature = "analyze")]
+        Commands::Analyze {
+            path,
+            threshold,
+            output,
+            top,
+        } => commands::analyze::run(&path, threshold, &output, top),
         #[cfg(feature = "tui")]
         Commands::Explore { path } => commands::explore::run(&path),
     };

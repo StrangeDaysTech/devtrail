@@ -103,6 +103,7 @@ Built-in CLI tools for governance:
 - **`devtrail validate`** — 13 validation rules for document correctness
 - **`devtrail compliance`** — Regulatory compliance scoring (EU AI Act, ISO 42001, NIST AI RMF)
 - **`devtrail metrics`** — Governance KPIs, review rates, risk distribution, trends
+- **`devtrail analyze`** — Code complexity analysis (cognitive + cyclomatic) via arborist-metrics
 - **`devtrail audit`** — Audit trail reports with timeline, traceability maps, and HTML export
 - **Pre-commit hooks** + **GitHub Actions** for CI/CD validation
 
@@ -164,6 +165,7 @@ Check installed versions with `devtrail status` or `devtrail about`.
 | `devtrail validate [path]` | Validate documents for compliance and correctness |
 | `devtrail compliance [path]` | Check regulatory compliance (EU AI Act, ISO 42001, NIST) |
 | `devtrail metrics [path]` | Show governance metrics and documentation statistics |
+| `devtrail analyze [path]` | Analyze code complexity (cognitive + cyclomatic metrics) |
 | `devtrail audit [path]` | Generate audit trail reports with timeline and traceability |
 | `devtrail explore [path]` | Browse documentation interactively in a TUI |
 | `devtrail about` | Show version and license info |

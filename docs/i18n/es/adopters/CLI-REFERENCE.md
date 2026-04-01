@@ -12,7 +12,7 @@
 
 1. [Instalación](#instalación)
 2. [Versionado](#versionado)
-3. [Comandos](#comandos) — init, update, remove, status, repair, validate, compliance, metrics, audit, explore, about
+3. [Comandos](#comandos) — init, update, remove, status, repair, validate, compliance, metrics, analyze, audit, explore, about
 4. [Variables de Entorno](#variables-de-entorno)
 5. [Códigos de Salida](#códigos-de-salida)
 
@@ -310,6 +310,72 @@ Muestra métricas de gobernanza y estadísticas de documentación.
 - Distribución de niveles de riesgo
 - Actividad por agente
 - Tendencias vs período anterior (↑/↓/→)
+
+---
+
+### `devtrail analyze [path] [--threshold <N>] [--output <formato>] [--top <N>]`
+
+Analiza la complejidad del código fuente usando métricas cognitivas y ciclomáticas, impulsado por [arborist-metrics](https://crates.io/crates/arborist-metrics).
+
+**Argumentos y flags:**
+
+| Argumento/Flag | Predeterminado | Descripción |
+|----------------|----------------|-------------|
+| `path` | `.` (directorio actual) | Directorio a analizar |
+| `--threshold` | `8` (o desde config) | Umbral de complejidad cognitiva |
+| `--output` | `text` | Formato de salida: `text`, `json` o `markdown` |
+| `--top` | — | Mostrar solo las N funciones más complejas |
+
+**Lenguajes soportados:** Rust, Python, JavaScript, TypeScript, Java, Go
+
+**Resolución de umbral:** flag CLI → `.devtrail/config.yml` → predeterminado (8)
+
+**Configuración** (opcional, en `.devtrail/config.yml`):
+
+```yaml
+complexity:
+  threshold: 8
+```
+
+**Ejemplos:**
+
+```bash
+# Analizar directorio actual
+$ devtrail analyze
+
+# Umbral personalizado y top 10
+$ devtrail analyze --threshold 5 --top 10
+
+# Salida JSON para integración CI
+$ devtrail analyze --output json
+
+# Analizar un proyecto específico
+$ devtrail analyze /ruta/al/proyecto
+```
+
+**Ejemplo de salida:**
+
+```
+  DevTrail Analyze
+  /home/user/project
+  Threshold: cognitive complexity > 8
+
+  Functions exceeding threshold (3 of 42 total)
+
+    FILE                                     FUNCTION                  LINE  COGN  CYCL  SLOC
+    src/parser.rs                            parse_expression            42    18    12    45
+    src/compiler.rs                          Compiler::emit             128    15     9    38
+    src/eval.rs                              evaluate                    67    12     8    29
+
+  Summary
+    → Files analyzed: 12
+    → Total functions: 42
+    → Above threshold: 3 (7.1%)
+    → Max cognitive complexity: 18 (src/parser.rs:parse_expression)
+    → Average cognitive complexity: 3.8
+```
+
+> **Nota:** Este comando funciona sin `devtrail init`. Opera sobre archivos fuente, no documentos DevTrail. La feature `analyze` se puede desactivar en compilación con `--no-default-features`.
 
 ---
 
