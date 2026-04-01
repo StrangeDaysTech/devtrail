@@ -8,6 +8,29 @@ pub struct DevTrailConfig {
     /// Language setting: "en" or "es"
     #[serde(default = "default_language")]
     pub language: String,
+    /// Complexity analysis settings
+    #[serde(default)]
+    pub complexity: ComplexityConfig,
+}
+
+/// Configuration for the `devtrail analyze` command
+#[derive(Debug, Deserialize, Serialize)]
+pub struct ComplexityConfig {
+    /// Cognitive complexity threshold (default: 8)
+    #[serde(default = "default_threshold")]
+    pub threshold: u32,
+}
+
+fn default_threshold() -> u32 {
+    8
+}
+
+impl Default for ComplexityConfig {
+    fn default() -> Self {
+        Self {
+            threshold: default_threshold(),
+        }
+    }
 }
 
 fn default_language() -> String {
@@ -18,6 +41,7 @@ impl Default for DevTrailConfig {
     fn default() -> Self {
         Self {
             language: default_language(),
+            complexity: ComplexityConfig::default(),
         }
     }
 }

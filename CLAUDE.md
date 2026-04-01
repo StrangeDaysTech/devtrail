@@ -12,9 +12,10 @@ devtrail/
 ├── cli/                    # Rust CLI source code
 │   ├── src/
 │   │   ├── main.rs         # Entry point, command routing
-│   │   ├── commands/       # Subcommands: init, update, remove, status, repair, validate, compliance, metrics, audit, explore, about
+│   │   ├── commands/       # Subcommands: init, update, remove, status, repair, validate, compliance, metrics, analyze, audit, explore, about
 │   │   ├── tui/            # Terminal UI for `explore` (ratatui + crossterm)
-│   │   ├── config.rs       # DevTrailConfig, Checksums
+│   │   ├── analysis_engine.rs # Code complexity analysis (arborist-metrics)
+│   │   ├── config.rs       # DevTrailConfig, Checksums, ComplexityConfig
 │   │   ├── download.rs     # GitHub API, ZIP downloads
 │   │   ├── inject.rs       # Directive injection system
 │   │   ├── manifest.rs     # dist-manifest.yml parser
@@ -178,6 +179,7 @@ Users can now run `devtrail update-framework` to get the new version.
 | `devtrail validate [path]` | Validate documents for compliance and correctness |
 | `devtrail compliance [path]` | Check regulatory compliance (EU AI Act, ISO 42001, NIST) |
 | `devtrail metrics [path]` | Show governance metrics and documentation statistics |
+| `devtrail analyze [path]` | Analyze code complexity (cognitive + cyclomatic metrics) |
 | `devtrail audit [path]` | Generate audit trail reports with timeline and traceability |
 | `devtrail explore [path]` | Interactive TUI documentation browser |
 | `devtrail about` | Show version and license info |
@@ -196,7 +198,7 @@ cargo build --no-default-features  # Without TUI
 ### Test
 
 ```bash
-cargo test    # All 95 tests
+cargo test    # All 111 tests
 ```
 
 ### Feature Flags

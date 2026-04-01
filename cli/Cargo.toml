@@ -35,10 +35,12 @@ tar = "0.4"
 ratatui = { version = "0.29", optional = true, default-features = false, features = ["crossterm"] }
 crossterm = { version = "0.28", optional = true }
 pulldown-cmark = { version = "0.12", optional = true }
+arborist-metrics = { version = "0.1", optional = true }
 
 [features]
-default = ["tui"]
+default = ["tui", "analyze"]
 tui = ["ratatui", "crossterm", "pulldown-cmark"]
+analyze = ["arborist-metrics"]
 
 [dev-dependencies]
 assert_cmd = "2"

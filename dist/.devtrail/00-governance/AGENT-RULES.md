@@ -37,6 +37,7 @@ confidence: high | medium | low
 | Addition/removal/upgrade of security-critical dependencies | AILOG | Human review required |
 | Changes affecting AI system lifecycle (deployment, retirement) | AILOG + ADR | Human review required |
 | Changes to OTel instrumentation (spans, attributes, pipeline) | AILOG | Tag `observabilidad`, see §9 |
+| Function with cognitive complexity > threshold | AILOG | Run `devtrail analyze` to identify; default threshold: 8 |
 
 ### PROHIBITED - Do not document
 

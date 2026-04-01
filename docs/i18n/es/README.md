@@ -103,6 +103,7 @@ Herramientas CLI integradas para gobernanza:
 - **`devtrail validate`** — 13 reglas de validación para corrección documental
 - **`devtrail compliance`** — Puntuación de cumplimiento regulatorio (EU AI Act, ISO 42001, NIST AI RMF)
 - **`devtrail metrics`** — KPIs de gobernanza, tasas de revisión, distribución de riesgo, tendencias
+- **`devtrail analyze`** — Análisis de complejidad de código (cognitiva + ciclomática) via arborist-metrics
 - **`devtrail audit`** — Reportes de auditoría con línea temporal, mapas de trazabilidad y exportación HTML
 - **Hooks pre-commit** + **GitHub Actions** para validación CI/CD
 
@@ -164,6 +165,7 @@ Verifica las versiones instaladas con `devtrail status` o `devtrail about`.
 | `devtrail validate [path]` | Validar documentos por cumplimiento y corrección |
 | `devtrail compliance [path]` | Verificar cumplimiento regulatorio (EU AI Act, ISO 42001, NIST) |
 | `devtrail metrics [path]` | Mostrar métricas de gobernanza y estadísticas |
+| `devtrail analyze [path]` | Analizar complejidad de código (métricas cognitiva + ciclomática) |
 | `devtrail audit [path]` | Generar reportes de auditoría con línea temporal y trazabilidad |
 | `devtrail explore [path]` | Explorar documentación interactivamente en terminal (TUI) |
 | `devtrail about` | Mostrar información de versión y licencia |
