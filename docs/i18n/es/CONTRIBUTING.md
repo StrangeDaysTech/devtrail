@@ -89,8 +89,7 @@ Las contribuciones de código deben:
 
 - **Git**
 - **Un editor de texto** (VS Code recomendado)
-- **Bash** (para scripts de validación en Linux/Mac)
-- **PowerShell** (para scripts de validación en Windows)
+- **DevTrail CLI** (para validación de documentos — multiplataforma)
 - **Rust toolchain** (para desarrollo del CLI — instalar vía [rustup.rs](https://rustup.rs/))
 - **Node.js 20+** (opcional, para markdownlint)
 
@@ -108,7 +107,8 @@ Las contribuciones de código deben:
 
 3. **Instalar el hook de pre-commit**
    ```bash
-   cp dist/scripts/pre-commit-docs.sh .git/hooks/pre-commit
+   echo '#!/bin/sh
+   devtrail validate --staged' > .git/hooks/pre-commit
    chmod +x .git/hooks/pre-commit
    ```
 
@@ -127,11 +127,7 @@ Las contribuciones de código deben:
 
 6. **Hacer tus cambios y validar**
    ```bash
-   # Linux/Mac
-   bash dist/scripts/pre-commit-docs.sh
-
-   # Windows
-   .\dist\scripts\validate-docs.ps1
+   devtrail validate
    ```
 
 ---
@@ -140,7 +136,7 @@ Las contribuciones de código deben:
 
 ### Antes de Enviar
 
-- [ ] Ejecutar scripts de validación exitosamente
+- [ ] Ejecutar `devtrail validate` exitosamente
 - [ ] Actualizar documentación si es necesario
 - [ ] Agregarte a CONTRIBUTORS.md (si aplica)
 - [ ] Escribir una descripción clara del PR
@@ -184,7 +180,7 @@ Breve descripción de los cambios
 ¿Cómo se probaron estos cambios?
 
 ## Lista de Verificación
-- [ ] Scripts de validación pasan
+- [ ] `devtrail validate` pasa sin errores
 - [ ] Documentación actualizada
 - [ ] Sin información sensible incluida
 ```
@@ -257,8 +253,7 @@ Si estás proponiendo un nuevo tipo de documento:
    - `dist/dist-templates/directives/` (plantillas de distribución)
 
 4. **Actualizar validación**
-   - `dist/scripts/pre-commit-docs.sh`
-   - `dist/scripts/validate-docs.ps1`
+   - Reglas de validación en el CLI (`cli/src/commands/validate.rs`)
    - `dist/.github/workflows/docs-validation.yml`
 
 5. **Documentar el cambio**

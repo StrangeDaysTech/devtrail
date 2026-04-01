@@ -146,7 +146,7 @@ DevTrail uses independent version tags for each component:
 
 | Component | Tag prefix | Example | Includes |
 |-----------|-----------|---------|----------|
-| Framework | `fw-` | `fw-4.0.0` | Templates (12 types), governance, directives, scripts |
+| Framework | `fw-` | `fw-4.0.0` | Templates (12 types), governance, directives |
 | CLI | `cli-` | `cli-2.1.0` | The `devtrail` binary |
 
 Check installed versions with `devtrail status` or `devtrail about`.
@@ -184,7 +184,7 @@ unzip devtrail-fw-*.zip -d your-project/
 cd your-project
 
 # Commit
-git add .devtrail/ DEVTRAIL.md scripts/
+git add .devtrail/ DEVTRAIL.md
 git commit -m "chore: adopt DevTrail"
 ```
 
@@ -319,18 +319,15 @@ concerns:
 
 ```bash
 # Install the pre-commit hook
-cp scripts/pre-commit-docs.sh .git/hooks/pre-commit
+echo 'devtrail validate --staged' > .git/hooks/pre-commit
 chmod +x .git/hooks/pre-commit
 ```
 
 ### Manual Validation
 
 ```bash
-# Linux/Mac
-bash scripts/pre-commit-docs.sh
-
-# Windows PowerShell
-.\scripts\validate-docs.ps1
+# Cross-platform (any OS with devtrail installed)
+devtrail validate
 ```
 
 ### GitHub Actions
@@ -380,21 +377,20 @@ DevTrail includes skills for AI agents that enable **active documentation creati
 /devtrail-adr
 ```
 
-### Shell Scripts (Manual Use)
+### CLI Commands (Manual Use)
 
-For users who prefer command-line or use agents without skill support:
+For users who prefer the command line or use agents without skill support:
 
 ```bash
 # Interactive document creation
-./scripts/devtrail-new.sh
+devtrail new
 
 # Create specific type directly
-./scripts/devtrail-new.sh ailog
+devtrail new --doc-type ailog
 
 # Check documentation status
-./scripts/devtrail-status.sh
+devtrail status
 ```
-
 
 ### Agent Reporting
 
@@ -449,11 +445,11 @@ All skill implementations are **functionally identical**—only the format diffe
 
 ### Operating Systems
 
-| OS | Validation Script |
-|----|-------------------|
-| Linux | `scripts/pre-commit-docs.sh` |
-| macOS | `scripts/pre-commit-docs.sh` |
-| Windows | `scripts/validate-docs.ps1` |
+| OS | Validation |
+|----|------------|
+| Linux | `devtrail validate` |
+| macOS | `devtrail validate` |
+| Windows | `devtrail validate` |
 
 ### CI/CD Platforms
 

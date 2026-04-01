@@ -189,7 +189,7 @@ Luego inicializa y haz commit:
 cd tu-proyecto
 devtrail init .
 
-git add .devtrail/ DEVTRAIL.md scripts/
+git add .devtrail/ DEVTRAIL.md
 git commit -m "chore: adoptar DevTrail"
 ```
 
@@ -198,7 +198,7 @@ El CLI automáticamente:
 - Configura la estructura de directorios `.devtrail/`
 - Crea `DEVTRAIL.md` con las reglas de gobernanza
 - Configura las directivas de agentes IA (`CLAUDE.md`, `GEMINI.md`, `.cursorrules`, etc.)
-- Copia scripts de validación y workflows de CI/CD
+- Copia workflows de CI/CD
 
 ### Opción 2: Configuración Manual
 
@@ -213,7 +213,7 @@ El CLI automáticamente:
 
 3. **Commit de la estructura**
    ```bash
-   git add .devtrail/ DEVTRAIL.md scripts/
+   git add .devtrail/ DEVTRAIL.md
    git commit -m "chore: adoptar DevTrail para gobernanza de documentación"
    ```
 
@@ -320,12 +320,13 @@ El CLI automáticamente:
 
 2. **Habilitar hooks pre-commit (opcional)**
    ```bash
-   # Copiar el hook pre-commit
-   cp scripts/pre-commit-docs.sh .git/hooks/pre-commit
+   # Crear el hook pre-commit
+   echo '#!/bin/sh
+   devtrail validate --staged' > .git/hooks/pre-commit
    chmod +x .git/hooks/pre-commit
 
    # O con Husky
-   npx husky add .husky/pre-commit "bash scripts/pre-commit-docs.sh"
+   npx husky add .husky/pre-commit "devtrail validate --staged"
    ```
 
 3. **Habilitar GitHub Actions (opcional)**
@@ -385,11 +386,10 @@ Para agregar un nuevo tipo de documento:
 
    Agregar el nuevo tipo a todos los archivos de configuración de agente.
 
-4. **Actualizar scripts de validación**
+4. **Actualizar validación**
 
    Agregar el nuevo prefijo de tipo a:
-   - `scripts/pre-commit-docs.sh`
-   - `scripts/validate-docs.ps1`
+   - Reglas de validación en el CLI (`devtrail validate`)
    - `.github/workflows/docs-validation.yml`
 
 ### Personalizar Estructura de Carpetas
@@ -402,7 +402,7 @@ La estructura de carpetas numerada (`00-governance`, `01-requirements`, etc.) es
 Puedes renombrar carpetas, pero actualiza todas las referencias en:
 - Archivos de configuración de agente
 - Documentos de gobernanza
-- Scripts de validación
+- Reglas de validación del CLI
 
 ---
 
@@ -426,12 +426,8 @@ Este skill muestra:
 Después de la adopción, verifica tu configuración:
 
 ```bash
-# Ejecutar el script de validación
-# En Linux/Mac:
-bash scripts/pre-commit-docs.sh
-
-# En Windows PowerShell:
-.\scripts\validate-docs.ps1
+# Ejecutar la validación (multiplataforma)
+devtrail validate
 ```
 
 ### Lista de Verificación
@@ -442,7 +438,7 @@ bash scripts/pre-commit-docs.sh
 - [ ] Plantillas presentes en `.devtrail/templates/`
 - [ ] Estrategia de branching Git documentada en `.devtrail/03-implementation/`
 - [ ] `QUICK-REFERENCE.md` es accesible
-- [ ] Scripts de validación se ejecutan sin errores
+- [ ] `devtrail validate` se ejecuta sin errores
 - [ ] (Opcional) Hook pre-commit está instalado
 - [ ] (Opcional) Flujo de trabajo de GitHub Actions está habilitado
 

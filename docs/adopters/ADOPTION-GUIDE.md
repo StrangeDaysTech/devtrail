@@ -198,7 +198,7 @@ Then initialize and commit:
 cd your-project
 devtrail init .
 
-git add .devtrail/ DEVTRAIL.md scripts/
+git add .devtrail/ DEVTRAIL.md
 git commit -m "chore: adopt DevTrail"
 ```
 
@@ -207,7 +207,7 @@ The CLI automatically:
 - Sets up the `.devtrail/` directory structure
 - Creates `DEVTRAIL.md` with governance rules
 - Configures AI agent directives (`CLAUDE.md`, `GEMINI.md`, `.cursorrules`, etc.)
-- Copies validation scripts and CI/CD workflows
+- Copies CI/CD workflows
 
 ### Option 2: Manual Setup
 
@@ -222,7 +222,7 @@ The CLI automatically:
 
 3. **Commit the structure**
    ```bash
-   git add .devtrail/ DEVTRAIL.md scripts/
+   git add .devtrail/ DEVTRAIL.md
    git commit -m "chore: adopt DevTrail for documentation governance"
    ```
 
@@ -329,12 +329,12 @@ The CLI automatically:
 
 2. **Enable pre-commit hooks (optional)**
    ```bash
-   # Copy the pre-commit hook
-   cp scripts/pre-commit-docs.sh .git/hooks/pre-commit
+   # Install the pre-commit hook
+   echo 'devtrail validate --staged' > .git/hooks/pre-commit
    chmod +x .git/hooks/pre-commit
 
    # Or with Husky
-   npx husky add .husky/pre-commit "bash scripts/pre-commit-docs.sh"
+   npx husky add .husky/pre-commit "devtrail validate --staged"
    ```
 
 3. **Enable GitHub Actions (optional)**
@@ -394,11 +394,9 @@ To add a new document type:
 
    Add the new type to all agent configuration files.
 
-4. **Update validation scripts**
+4. **Update validation**
 
-   Add the new type prefix to:
-   - `scripts/pre-commit-docs.sh`
-   - `scripts/validate-docs.ps1`
+   Add the new type to the CLI validation logic and update:
    - `.github/workflows/docs-validation.yml`
 
 ### Customizing Folder Structure
@@ -411,7 +409,6 @@ The numbered folder structure (`00-governance`, `01-requirements`, etc.) is desi
 You can rename folders, but update all references in:
 - Agent configuration files
 - Governance documents
-- Validation scripts
 
 ---
 
@@ -435,12 +432,8 @@ This skill shows:
 After adoption, verify your setup:
 
 ```bash
-# Run the validation script
-# On Linux/Mac:
-bash scripts/pre-commit-docs.sh
-
-# On Windows PowerShell:
-.\scripts\validate-docs.ps1
+# Run validation (cross-platform)
+devtrail validate
 ```
 
 ### Checklist
@@ -451,7 +444,7 @@ bash scripts/pre-commit-docs.sh
 - [ ] Templates are present in `.devtrail/templates/`
 - [ ] Git branching strategy documented in `.devtrail/03-implementation/`
 - [ ] `QUICK-REFERENCE.md` is accessible
-- [ ] Validation scripts run without errors
+- [ ] `devtrail validate` runs without errors
 - [ ] (Optional) Pre-commit hook is installed
 - [ ] (Optional) GitHub Actions workflow is enabled
 
@@ -510,7 +503,7 @@ A: You have three options:
 **Q: What if my AI assistant doesn't follow the rules?**
 
 A: DevTrail rules are instructions, not enforcement. If an AI assistant creates non-compliant documentation:
-1. The pre-commit hook will catch validation errors
+1. The pre-commit hook (`devtrail validate --staged`) will catch validation errors
 2. CI/CD will flag issues in PRs
 3. You can manually fix and educate the AI in the next prompt
 

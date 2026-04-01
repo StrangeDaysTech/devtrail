@@ -146,7 +146,7 @@ DevTrail usa tags de versión independientes para cada componente:
 
 | Componente | Prefijo de tag | Ejemplo | Incluye |
 |------------|---------------|---------|---------|
-| Framework | `fw-` | `fw-4.0.0` | Plantillas (12 tipos), gobernanza, directivas, scripts |
+| Framework | `fw-` | `fw-4.0.0` | Plantillas (12 tipos), gobernanza, directivas |
 | CLI | `cli-` | `cli-2.1.0` | El binario `devtrail` |
 
 Verifica las versiones instaladas con `devtrail status` o `devtrail about`.
@@ -184,7 +184,7 @@ unzip devtrail-fw-*.zip -d tu-proyecto/
 cd tu-proyecto
 
 # Commit
-git add .devtrail/ DEVTRAIL.md scripts/
+git add .devtrail/ DEVTRAIL.md
 git commit -m "chore: adoptar DevTrail"
 ```
 
@@ -315,20 +315,20 @@ concerns:
 
 ### Hook Pre-commit
 
+Configura un hook de Git que ejecute la validación automáticamente antes de cada commit:
+
 ```bash
-# Instalar el hook pre-commit
-cp scripts/pre-commit-docs.sh .git/hooks/pre-commit
+# Crear el hook pre-commit
+echo '#!/bin/sh
+devtrail validate --staged' > .git/hooks/pre-commit
 chmod +x .git/hooks/pre-commit
 ```
 
 ### Validación Manual
 
 ```bash
-# Linux/Mac
-bash scripts/pre-commit-docs.sh
-
-# Windows PowerShell
-.\scripts\validate-docs.ps1
+# Multiplataforma (Linux, macOS, Windows)
+devtrail validate
 ```
 
 ### GitHub Actions
@@ -376,19 +376,19 @@ DevTrail incluye skills para agentes IA que habilitan la **creación activa de d
 /devtrail-adr
 ```
 
-### Scripts Shell (Uso Manual)
+### Comandos CLI (Uso Manual)
 
 Para usuarios que prefieren línea de comandos o usan agentes sin soporte de skills:
 
 ```bash
 # Creación interactiva de documentos
-./scripts/devtrail-new.sh
+devtrail new
 
 # Crear tipo específico directamente
-./scripts/devtrail-new.sh ailog
+devtrail new --doc-type ailog
 
 # Verificar estado de documentación
-./scripts/devtrail-status.sh
+devtrail status
 ```
 
 ### Reporte de Agentes
@@ -444,11 +444,11 @@ Todas las implementaciones de skills son **funcionalmente idénticas**—solo di
 
 ### Sistemas Operativos
 
-| SO | Script de Validación |
-|----|---------------------|
-| Linux | `scripts/pre-commit-docs.sh` |
-| macOS | `scripts/pre-commit-docs.sh` |
-| Windows | `scripts/validate-docs.ps1` |
+| SO | Validación |
+|----|------------|
+| Linux | `devtrail validate` |
+| macOS | `devtrail validate` |
+| Windows | `devtrail validate` |
 
 ### Plataformas CI/CD
 

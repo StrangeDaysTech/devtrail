@@ -15,12 +15,6 @@ files:
   - .gemini/skills/
   - .agent/workflows/
 
-  # Scripts (bash + powershell)
-  - scripts/devtrail-new.sh
-  - scripts/devtrail-status.sh
-  - scripts/pre-commit-docs.sh
-  - scripts/validate-docs.ps1
-
   # CI/CD
   - .github/workflows/docs-validation.yml
 
