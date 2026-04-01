@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{bail, Result};
 use colored::Colorize;
 use std::collections::BTreeMap;
 use std::path::PathBuf;
@@ -6,7 +6,7 @@ use std::path::PathBuf;
 use crate::utils;
 use crate::validation::{self, Severity, ValidationIssue};
 
-pub fn run(path: &str, fix: bool) -> Result<()> {
+pub fn run(path: &str, fix: bool, staged: bool) -> Result<()> {
     let resolved = match utils::resolve_project_root(path) {
         Some(r) => r,
         None => {
@@ -32,6 +32,11 @@ pub fn run(path: &str, fix: bool) -> Result<()> {
     let target = resolved.path;
     let devtrail_dir = target.join(".devtrail");
 
+    // --staged mode: validate only git-staged .devtrail/ documents
+    if staged {
+        return run_staged(&target, &devtrail_dir);
+    }
+
     // Header
     println!();
     println!("  {}", "DevTrail Validate".bold().cyan());
@@ -46,7 +51,7 @@ pub fn run(path: &str, fix: bool) -> Result<()> {
         println!(
             "  {} Create documents with {} or {}",
             "→".blue().bold(),
-            "devtrail-new".cyan(),
+            "devtrail new".cyan(),
             "/devtrail-new".cyan()
         );
         println!();
@@ -60,6 +65,58 @@ pub fn run(path: &str, fix: bool) -> Result<()> {
         let (result, doc_count) = validation::validate_all(&devtrail_dir);
         print_results(&result, doc_count);
         return exit_with_code(&result);
+    }
+
+    print_results(&result, doc_count);
+    exit_with_code(&result)
+}
+
+fn run_staged(project_root: &std::path::Path, devtrail_dir: &std::path::Path) -> Result<()> {
+    // Get staged files from git
+    let output = std::process::Command::new("git")
+        .args(["diff", "--cached", "--name-only"])
+        .current_dir(project_root)
+        .output();
+
+    let output = match output {
+        Ok(o) if o.status.success() => o,
+        _ => {
+            bail!("Not a git repository or git is not available. --staged requires a git repo.");
+        }
+    };
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let staged_paths: Vec<PathBuf> = stdout
+        .lines()
+        .filter(|line| line.starts_with(".devtrail/") && line.ends_with(".md"))
+        .map(|line| project_root.join(line))
+        .collect();
+
+    if staged_paths.is_empty() {
+        println!(
+            "  {} No staged documentation to validate.",
+            "✓".green().bold()
+        );
+        return Ok(());
+    }
+
+    // Header
+    println!();
+    println!("  {}", "DevTrail Validate (staged)".bold().cyan());
+    println!(
+        "  {} file(s)",
+        staged_paths.len().to_string().dimmed()
+    );
+    println!();
+
+    let (result, doc_count) = validation::validate_paths(&staged_paths, devtrail_dir);
+
+    if doc_count == 0 {
+        println!(
+            "  {} No DevTrail documents among staged files.",
+            "✓".green().bold()
+        );
+        return Ok(());
     }
 
     print_results(&result, doc_count);

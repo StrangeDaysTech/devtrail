@@ -63,6 +63,68 @@ impl DocType {
         "AILOG", "AIDEC", "ADR", "ETH", "REQ", "TES", "INC", "TDE",
         "SEC", "MCARD", "SBOM", "DPIA",
     ];
+
+    /// All DocType variants in display order
+    pub const ALL: &'static [DocType] = &[
+        DocType::Ailog, DocType::Aidec, DocType::Adr, DocType::Eth,
+        DocType::Req, DocType::Tes, DocType::Inc, DocType::Tde,
+        DocType::Sec, DocType::Mcard, DocType::Sbom, DocType::Dpia,
+    ];
+
+    /// Human-readable display name
+    pub fn display_name(&self) -> &'static str {
+        match self {
+            DocType::Ailog => "AI Action Log",
+            DocType::Aidec => "AI Decision",
+            DocType::Adr => "Architecture Decision Record",
+            DocType::Eth => "Ethical Review",
+            DocType::Req => "Requirement",
+            DocType::Tes => "Test Plan",
+            DocType::Inc => "Incident Post-mortem",
+            DocType::Tde => "Technical Debt",
+            DocType::Sec => "Security Assessment",
+            DocType::Mcard => "Model/System Card",
+            DocType::Sbom => "Software Bill of Materials",
+            DocType::Dpia => "Data Protection Impact Assessment",
+        }
+    }
+
+    /// Subdirectory under .devtrail/ where this document type lives
+    pub fn directory(&self) -> &'static str {
+        match self {
+            DocType::Ailog => "07-ai-audit/agent-logs",
+            DocType::Aidec => "07-ai-audit/decisions",
+            DocType::Eth => "07-ai-audit/ethical-reviews",
+            DocType::Adr => "02-design/decisions",
+            DocType::Req => "01-requirements",
+            DocType::Tes => "04-testing",
+            DocType::Inc => "05-operations/incidents",
+            DocType::Tde => "06-evolution/technical-debt",
+            DocType::Sec => "08-security",
+            DocType::Mcard => "09-ai-models",
+            DocType::Sbom => "07-ai-audit",
+            DocType::Dpia => "07-ai-audit/ethical-reviews",
+        }
+    }
+
+    /// Parse a DocType from a user-provided string (case-insensitive)
+    pub fn from_str_loose(s: &str) -> Option<DocType> {
+        match s.to_lowercase().as_str() {
+            "ailog" => Some(DocType::Ailog),
+            "aidec" => Some(DocType::Aidec),
+            "adr" => Some(DocType::Adr),
+            "eth" => Some(DocType::Eth),
+            "req" => Some(DocType::Req),
+            "tes" => Some(DocType::Tes),
+            "inc" => Some(DocType::Inc),
+            "tde" => Some(DocType::Tde),
+            "sec" => Some(DocType::Sec),
+            "mcard" => Some(DocType::Mcard),
+            "sbom" => Some(DocType::Sbom),
+            "dpia" => Some(DocType::Dpia),
+            _ => None,
+        }
+    }
 }
 
 impl fmt::Display for DocType {
@@ -154,7 +216,7 @@ pub fn parse_document(path: &Path) -> Result<DevTrailDocument> {
 }
 
 /// Detect document type from filename prefix
-fn detect_doc_type(filename: &str) -> Option<DocType> {
+pub fn detect_doc_type(filename: &str) -> Option<DocType> {
     for prefix in DocType::ALL_PREFIXES {
         if filename.starts_with(&format!("{}-", prefix)) {
             return DocType::from_prefix(prefix);
@@ -275,5 +337,38 @@ mod tests {
         assert_eq!(fm.id.as_deref(), Some("AILOG-2025-01-01-001"));
         assert_eq!(fm.title.as_deref(), Some("Test"));
         assert!(body.contains("# Body"));
+    }
+
+    #[test]
+    fn test_doc_type_all_has_12_entries() {
+        assert_eq!(DocType::ALL.len(), 12);
+        assert_eq!(DocType::ALL_PREFIXES.len(), 12);
+    }
+
+    #[test]
+    fn test_doc_type_directory_mapping() {
+        for dt in DocType::ALL {
+            let dir = dt.directory();
+            assert!(!dir.is_empty(), "{} has empty directory", dt.prefix());
+            assert!(!dir.starts_with('/'), "{} directory should be relative", dt.prefix());
+        }
+    }
+
+    #[test]
+    fn test_doc_type_display_names() {
+        for dt in DocType::ALL {
+            let name = dt.display_name();
+            assert!(!name.is_empty(), "{} has empty display_name", dt.prefix());
+        }
+    }
+
+    #[test]
+    fn test_doc_type_from_str_loose() {
+        assert_eq!(DocType::from_str_loose("ailog"), Some(DocType::Ailog));
+        assert_eq!(DocType::from_str_loose("AILOG"), Some(DocType::Ailog));
+        assert_eq!(DocType::from_str_loose("AiLog"), Some(DocType::Ailog));
+        assert_eq!(DocType::from_str_loose("sec"), Some(DocType::Sec));
+        assert_eq!(DocType::from_str_loose("mcard"), Some(DocType::Mcard));
+        assert_eq!(DocType::from_str_loose("invalid"), None);
     }
 }

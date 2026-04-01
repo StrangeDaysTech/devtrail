@@ -84,6 +84,44 @@ pub fn validate_all(devtrail_dir: &Path) -> (ValidationResult, usize) {
     (result, doc_count)
 }
 
+/// Validate a specific set of document paths (used for --staged mode).
+/// Skips orphan document checking since that is not meaningful for partial validation.
+pub fn validate_paths(paths: &[PathBuf], devtrail_dir: &Path) -> (ValidationResult, usize) {
+    let mut result = ValidationResult::default();
+    let mut doc_count = 0;
+
+    for path in paths {
+        if !path.exists() {
+            continue;
+        }
+        let filename = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
+        if document::detect_doc_type(filename).is_none() {
+            continue;
+        }
+        match document::parse_document(path) {
+            Ok(doc) => {
+                doc_count += 1;
+                result.merge(validate_document(&doc, devtrail_dir));
+            }
+            Err(e) => {
+                doc_count += 1;
+                result.errors.push(ValidationIssue {
+                    file: path.clone(),
+                    rule: "PARSE-001".to_string(),
+                    message: format!("Failed to parse document: {e}"),
+                    severity: Severity::Error,
+                    fix_hint: Some(
+                        "Check that the file has valid YAML frontmatter between --- delimiters"
+                            .to_string(),
+                    ),
+                });
+            }
+        }
+    }
+
+    (result, doc_count)
+}
+
 /// REF-002: Check for documents with no traceability links.
 /// A document is orphan if it has no `related` field AND is not referenced
 /// by any other document's `related` field.
