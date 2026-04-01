@@ -89,8 +89,6 @@ Code contributions should:
 
 - **Git**
 - **A text editor** (VS Code recommended)
-- **Bash** (for Linux/Mac validation scripts)
-- **PowerShell** (for Windows validation scripts)
 - **Rust toolchain** (for CLI development — install via [rustup.rs](https://rustup.rs/))
 - **Node.js 20+** (optional, for markdownlint)
 
@@ -108,7 +106,7 @@ Code contributions should:
 
 3. **Install the pre-commit hook**
    ```bash
-   cp dist/scripts/pre-commit-docs.sh .git/hooks/pre-commit
+   echo 'devtrail validate --staged' > .git/hooks/pre-commit
    chmod +x .git/hooks/pre-commit
    ```
 
@@ -127,11 +125,7 @@ Code contributions should:
 
 6. **Make your changes and validate**
    ```bash
-   # Linux/Mac
-   bash dist/scripts/pre-commit-docs.sh
-
-   # Windows
-   .\dist\scripts\validate-docs.ps1
+   devtrail validate
    ```
 
 ---
@@ -140,7 +134,7 @@ Code contributions should:
 
 ### Before Submitting
 
-- [ ] Run validation scripts successfully
+- [ ] Run `devtrail validate` successfully
 - [ ] Update documentation if needed
 - [ ] Add yourself to CONTRIBUTORS.md (if applicable)
 - [ ] Write a clear PR description
@@ -184,7 +178,7 @@ Why is this change needed?
 How were these changes tested?
 
 ## Checklist
-- [ ] Validation scripts pass
+- [ ] `devtrail validate` passes
 - [ ] Documentation updated
 - [ ] No sensitive information included
 ```
@@ -257,8 +251,7 @@ If you're proposing a new document type:
    - `dist/dist-templates/directives/` (distribution templates)
 
 4. **Update validation**
-   - `dist/scripts/pre-commit-docs.sh`
-   - `dist/scripts/validate-docs.ps1`
+   - Add the new type to the CLI validation logic (`cli/src/commands/validate.rs`)
    - `dist/.github/workflows/docs-validation.yml`
 
 5. **Document the change**

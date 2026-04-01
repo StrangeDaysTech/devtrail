@@ -12,7 +12,7 @@
 
 1. [Instalación](#instalación)
 2. [Versionado](#versionado)
-3. [Comandos](#comandos) — init, update, remove, status, repair, validate, compliance, metrics, analyze, audit, explore, about
+3. [Comandos](#comandos) — init, update, remove, status, repair, validate, new, compliance, metrics, analyze, audit, explore, about
 4. [Variables de Entorno](#variables-de-entorno)
 5. [Códigos de Salida](#códigos-de-salida)
 
@@ -48,7 +48,7 @@ DevTrail usa **tags de versión independientes** para cada componente:
 
 | Componente | Prefijo de tag | Ejemplo | Qué incluye |
 |------------|---------------|---------|-------------|
-| Framework | `fw-` | `fw-4.0.0` | Plantillas (12 tipos), docs de gobernanza, directivas, scripts |
+| Framework | `fw-` | `fw-4.0.0` | Plantillas (12 tipos), docs de gobernanza, directivas |
 | CLI | `cli-` | `cli-2.1.0` | El binario `devtrail` |
 
 Framework y CLI se publican de forma independiente. Una actualización del framework no requiere actualización del CLI, y viceversa.
@@ -80,7 +80,7 @@ Inicializa DevTrail en un directorio de proyecto.
 2. Crea la estructura de directorios `.devtrail/`
 3. Crea `DEVTRAIL.md` con las reglas de gobernanza
 4. Configura archivos de directivas de agentes IA (`CLAUDE.md`, `GEMINI.md`, `.cursorrules`, etc.)
-5. Copia scripts de validación y workflows de CI/CD
+5. Copia workflows de CI/CD
 
 **Ejemplo:**
 
@@ -90,10 +90,8 @@ $ devtrail init .
 ✔ Created .devtrail/ directory structure
 ✔ Created DEVTRAIL.md
 ✔ Configured AI agent directives
-✔ Copied validation scripts
-
 DevTrail initialized successfully!
-Next: git add .devtrail/ DEVTRAIL.md scripts/ && git commit -m "chore: adopt DevTrail"
+Next: git add .devtrail/ DEVTRAIL.md && git commit -m "chore: adopt DevTrail"
 ```
 
 ---
@@ -249,7 +247,7 @@ Repairing DevTrail in /home/user/mi-proyecto
 
 ---
 
-### `devtrail validate [path] [--fix]`
+### `devtrail validate [path] [--fix] [--staged]`
 
 Valida documentos DevTrail verificando cumplimiento y corrección.
 
@@ -259,6 +257,7 @@ Valida documentos DevTrail verificando cumplimiento y corrección.
 |----------------|---------|-------------|
 | `path` | `.` (directorio actual) | Directorio del proyecto |
 | `--fix` | — | Corregir automáticamente problemas simples |
+| `--staged` | — | Validar solo archivos staged en Git (ideal para hooks pre-commit) |
 
 **Reglas de validación:**
 
@@ -271,6 +270,47 @@ Valida documentos DevTrail verificando cumplimiento y corrección.
 - `OBS-001`: Tag observabilidad requiere sección de alcance
 
 **Código de salida:** 0 si no hay errores (warnings OK), 1 si hay errores.
+
+---
+
+### `devtrail new [path] [-t <tipo>] [--title <titulo>]`
+
+Crea un nuevo documento DevTrail a partir de una plantilla.
+
+**Argumentos y flags:**
+
+| Argumento/Flag | Default | Descripción |
+|----------------|---------|-------------|
+| `path` | `.` (directorio actual) | Directorio del proyecto |
+| `--doc-type`, `-t` | — | Tipo de documento: `ailog`, `aidec`, `adr`, `eth`, `req`, `tes`, `inc`, `tde`, `sec`, `mcard`, `sbom`, `dpia` |
+| `--title` | — | Título del documento |
+
+Si no se especifica `--doc-type` o `--title`, se solicitan de forma interactiva.
+
+**Ejemplos:**
+
+```bash
+# Creación interactiva
+$ devtrail new
+
+# Crear un AILOG con título (no-interactivo)
+$ devtrail new -t ailog --title "Implementar autenticación JWT"
+
+# Crear un ADR
+$ devtrail new --doc-type adr --title "Elegir PostgreSQL como base de datos"
+```
+
+**Ejemplo de salida:**
+
+```
+$ devtrail new -t ailog --title "Refactorizar módulo de pagos"
+
+  ✔ Created: .devtrail/07-ai-audit/agent-logs/AILOG-2026-04-01-001-refactorizar-modulo-de-pagos.md
+
+  Next steps:
+    1. Edit the document to fill in details
+    2. Commit: git add .devtrail/07-ai-audit/agent-logs/AILOG-2026-04-01-001-refactorizar-modulo-de-pagos.md
+```
 
 ---
 

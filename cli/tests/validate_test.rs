@@ -417,24 +417,61 @@ fn test_new_templates_exist_in_dist() {
     assert!(devtrail.join("09-ai-models").exists(), "09-ai-models/ directory missing");
 }
 
-/// F2.QA.02.02 — Verify devtrail-new.sh has all 12 types configured
+/// F2.QA.02.02 — Verify devtrail new supports all 12 document types via DocType::ALL
 #[test]
-fn test_devtrail_new_script_has_all_types() {
-    let script_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-        .parent()
-        .unwrap()
-        .join("dist/scripts/devtrail-new.sh");
+fn test_new_supports_all_doc_types() {
+    let source_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("src/document.rs");
 
-    let content = std::fs::read_to_string(&script_path).expect("Cannot read devtrail-new.sh");
+    let content = std::fs::read_to_string(&source_path).expect("Cannot read document.rs");
 
-    // Verify all 12 types are in DOC_PATHS
-    for doc_type in &["ailog", "aidec", "adr", "eth", "req", "tes", "inc", "tde", "sec", "mcard", "sbom", "dpia"] {
+    for doc_type in &["Ailog", "Aidec", "Adr", "Eth", "Req", "Tes", "Inc", "Tde", "Sec", "Mcard", "Sbom", "Dpia"] {
         assert!(
-            content.contains(&format!("[\"{}\"]", doc_type)),
-            "devtrail-new.sh missing DOC_PATHS entry for '{}'", doc_type
+            content.contains(&format!("DocType::{}", doc_type)),
+            "document.rs missing DocType::{}", doc_type
         );
     }
+}
 
-    // Verify the menu has 12 options
-    assert!(content.contains("1-12 or name"), "devtrail-new.sh menu does not show 1-12 range");
+#[test]
+fn test_validate_staged_no_git_repo() {
+    let dir = tempfile::TempDir::new().unwrap();
+
+    // Create minimal .devtrail/
+    let devtrail = dir.path().join(".devtrail");
+    std::fs::create_dir_all(&devtrail).unwrap();
+    std::fs::write(devtrail.join("config.yml"), "language: en\n").unwrap();
+
+    let mut cmd = Command::cargo_bin("devtrail").unwrap();
+    cmd.arg("validate")
+        .arg("--staged")
+        .arg(dir.path().to_str().unwrap())
+        .assert()
+        .failure()
+        .stderr(predicates::str::contains("git"));
+}
+
+#[test]
+fn test_validate_staged_no_staged_docs() {
+    let dir = tempfile::TempDir::new().unwrap();
+
+    // Init a git repo
+    std::process::Command::new("git")
+        .args(["init"])
+        .current_dir(dir.path())
+        .output()
+        .unwrap();
+
+    // Create .devtrail/
+    let devtrail = dir.path().join(".devtrail");
+    std::fs::create_dir_all(&devtrail).unwrap();
+    std::fs::write(devtrail.join("config.yml"), "language: en\n").unwrap();
+
+    let mut cmd = Command::cargo_bin("devtrail").unwrap();
+    cmd.arg("validate")
+        .arg("--staged")
+        .arg(dir.path().to_str().unwrap())
+        .assert()
+        .success()
+        .stdout(predicates::str::contains("No staged documentation"));
 }

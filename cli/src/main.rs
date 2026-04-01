@@ -68,6 +68,9 @@ enum Commands {
         /// Automatically fix simple issues
         #[arg(long)]
         fix: bool,
+        /// Validate only git-staged files (for pre-commit hooks)
+        #[arg(long)]
+        staged: bool,
     },
     /// Check regulatory compliance (EU AI Act, ISO 42001, NIST AI RMF)
     Compliance {
@@ -114,6 +117,18 @@ enum Commands {
         #[arg(long, default_value = "text", value_parser = ["text", "markdown", "json"])]
         output: String,
     },
+    /// Create a new DevTrail document from a template
+    New {
+        /// Target directory (default: current directory)
+        #[arg(default_value = ".")]
+        path: String,
+        /// Document type (e.g., ailog, adr, sec)
+        #[arg(long, short = 't')]
+        doc_type: Option<String>,
+        /// Document title
+        #[arg(long)]
+        title: Option<String>,
+    },
     /// Show version, author, and license information
     About,
     /// Analyze code complexity using cognitive and cyclomatic metrics
@@ -153,7 +168,7 @@ fn main() {
         Commands::UpdateFramework => commands::update_framework::run(),
         Commands::UpdateCli => commands::update_cli::run(),
         Commands::Remove { full } => commands::remove::run(full),
-        Commands::Validate { path, fix } => commands::validate::run(&path, fix),
+        Commands::Validate { path, fix, staged } => commands::validate::run(&path, fix, staged),
         Commands::Audit {
             path,
             from,
@@ -172,6 +187,11 @@ fn main() {
             period,
             output,
         } => commands::metrics::run(&path, &period, &output),
+        Commands::New {
+            path,
+            doc_type,
+            title,
+        } => commands::new::run(&path, doc_type.as_deref(), title.as_deref()),
         Commands::Status { path } => commands::status::run(&path),
         Commands::Repair { path } => commands::repair::run(&path),
         Commands::About => commands::about::run(),

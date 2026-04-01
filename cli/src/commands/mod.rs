@@ -7,6 +7,7 @@ pub mod compliance;
 pub mod explore;
 pub mod init;
 pub mod metrics;
+pub mod new;
 pub mod remove;
 pub mod repair;
 pub mod status;

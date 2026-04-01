@@ -70,7 +70,7 @@ pub fn run(path: &str) -> Result<()> {
     println!("    2. Check DEVTRAIL.md for governance rules");
     println!(
         "    3. Run {} to validate your setup",
-        "bash scripts/pre-commit-docs.sh".cyan()
+        "devtrail validate".cyan()
     );
     println!(
         "    4. Commit: {}",

@@ -12,7 +12,7 @@
 
 1. [Installation](#installation)
 2. [Versioning](#versioning)
-3. [Commands](#commands) — init, update, remove, status, repair, validate, compliance, metrics, analyze, audit, explore, about
+3. [Commands](#commands) — init, update, remove, status, repair, validate, new, compliance, metrics, analyze, audit, explore, about
 4. [Environment Variables](#environment-variables)
 5. [Exit Codes](#exit-codes)
 
@@ -48,7 +48,7 @@ DevTrail uses **independent version tags** for each component:
 
 | Component | Tag prefix | Example | What it includes |
 |-----------|-----------|---------|------------------|
-| Framework | `fw-` | `fw-4.0.0` | Templates (12 types), governance docs, directives, scripts |
+| Framework | `fw-` | `fw-4.0.0` | Templates (12 types), governance docs, directives |
 | CLI | `cli-` | `cli-2.1.0` | The `devtrail` binary |
 
 Framework and CLI are released independently. A framework update does not require a CLI update, and vice versa.
@@ -80,7 +80,7 @@ Initialize DevTrail in a project directory.
 2. Creates the `.devtrail/` directory structure
 3. Creates `DEVTRAIL.md` with governance rules
 4. Configures AI agent directive files (`CLAUDE.md`, `GEMINI.md`, `.cursorrules`, etc.)
-5. Copies validation scripts and CI/CD workflows
+5. Copies CI/CD workflows
 
 **Example:**
 
@@ -90,10 +90,9 @@ $ devtrail init .
 ✔ Created .devtrail/ directory structure
 ✔ Created DEVTRAIL.md
 ✔ Configured AI agent directives
-✔ Copied validation scripts
 
 DevTrail initialized successfully!
-Next: git add .devtrail/ DEVTRAIL.md scripts/ && git commit -m "chore: adopt DevTrail"
+Next: git add .devtrail/ DEVTRAIL.md && git commit -m "chore: adopt DevTrail"
 ```
 
 ---
@@ -267,7 +266,7 @@ Repairing DevTrail in /home/user/my-project
 
 ---
 
-### `devtrail validate [path] [--fix]`
+### `devtrail validate [path] [--fix] [--staged]`
 
 Validate DevTrail documents for compliance and correctness.
 
@@ -277,6 +276,7 @@ Validate DevTrail documents for compliance and correctness.
 |---------------|---------|-------------|
 | `path` | `.` (current directory) | Target project directory |
 | `--fix` | — | Automatically fix simple issues (e.g., missing `review_required: true` for high-risk docs) |
+| `--staged` | — | Validate only staged (git-added) files. Ideal for pre-commit hooks. |
 
 **What it checks:**
 
@@ -299,6 +299,47 @@ $ devtrail validate --fix
   DevTrail Validate
   Auto-fixing 2 issue(s)...
   ✓ Fixed 2 issue(s)
+```
+
+---
+
+### `devtrail new [path] [-t <type>] [--title <title>]`
+
+Create a new DevTrail document from a template.
+
+**Arguments and flags:**
+
+| Argument/Flag | Default | Description |
+|---------------|---------|-------------|
+| `path` | `.` (current directory) | Target project directory |
+| `--doc-type`, `-t` | — | Document type: `ailog`, `aidec`, `adr`, `eth`, `req`, `tes`, `inc`, `tde`, `sec`, `mcard`, `sbom`, `dpia` |
+| `--title` | — | Title for the new document |
+
+If `--doc-type` or `--title` are omitted, the command prompts interactively.
+
+**Examples:**
+
+```bash
+# Interactive — prompts for type and title
+$ devtrail new
+
+# Create an AILOG with a title (non-interactive)
+$ devtrail new -t ailog --title "Implement JWT authentication"
+
+# Create an ADR
+$ devtrail new --doc-type adr --title "Use PostgreSQL for persistence"
+```
+
+**Example output:**
+
+```
+$ devtrail new -t ailog --title "Implement JWT authentication"
+
+  ✔ Created: .devtrail/07-ai-audit/agent-logs/AILOG-2026-04-01-001-implement-jwt-authentication.md
+
+  Next steps:
+    1. Edit the document to fill in details
+    2. Commit: git add .devtrail/07-ai-audit/agent-logs/AILOG-2026-04-01-001-implement-jwt-authentication.md
 ```
 
 ---

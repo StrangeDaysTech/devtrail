@@ -84,7 +84,7 @@ pub fn run(full: bool) -> Result<()> {
     remove_empty_dir(&target.join(".cursor/rules"))?;
     remove_empty_dir(&target.join(".cursor"))?;
 
-    // Remove scripts
+    // Legacy: clean up scripts from pre-CLI installations (removed in fw-5.0)
     let scripts = [
         "scripts/devtrail-new.sh",
         "scripts/devtrail-status.sh",

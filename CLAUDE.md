@@ -2,7 +2,7 @@
 
 This is the DevTrail project repository. It contains two main components:
 
-- **Framework** (`dist/`): documentation templates, governance policies, agent directives, and scripts
+- **Framework** (`dist/`): documentation templates, governance policies, and agent directives
 - **CLI** (`cli/`): the `devtrail` Rust binary that manages the framework in user projects
 
 ## Project Structure
@@ -12,7 +12,7 @@ devtrail/
 ├── cli/                    # Rust CLI source code
 │   ├── src/
 │   │   ├── main.rs         # Entry point, command routing
-│   │   ├── commands/       # Subcommands: init, update, remove, status, repair, validate, compliance, metrics, analyze, audit, explore, about
+│   │   ├── commands/       # Subcommands: init, update, remove, status, repair, validate, new, compliance, metrics, analyze, audit, explore, about
 │   │   ├── tui/            # Terminal UI for `explore` (ratatui + crossterm)
 │   │   ├── analysis_engine.rs # Code complexity analysis (arborist-metrics)
 │   │   ├── config.rs       # DevTrailConfig, Checksums, ComplexityConfig
@@ -176,7 +176,8 @@ Users can now run `devtrail update-framework` to get the new version.
 | `devtrail remove [--full]` | Remove DevTrail from project |
 | `devtrail status [path]` | Show installation health and doc stats |
 | `devtrail repair [path]` | Restore missing directories and framework files |
-| `devtrail validate [path]` | Validate documents for compliance and correctness |
+| `devtrail validate [path] [--staged]` | Validate documents for compliance and correctness |
+| `devtrail new [path] [-t type] [--title]` | Create a new DevTrail document from a template |
 | `devtrail compliance [path]` | Check regulatory compliance (EU AI Act, ISO 42001, NIST) |
 | `devtrail metrics [path]` | Show governance metrics and documentation statistics |
 | `devtrail analyze [path]` | Analyze code complexity (cognitive + cyclomatic metrics) |
@@ -198,7 +199,7 @@ cargo build --no-default-features  # Without TUI
 ### Test
 
 ```bash
-cargo test    # All 111 tests
+cargo test    # All 121 tests
 ```
 
 ### Feature Flags
