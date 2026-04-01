@@ -16,9 +16,10 @@ const EXCLUDED_DIRS: &[&str] = &[
     "__pycache__",
 ];
 
-/// File extensions recognized for analysis (matches arborist default features)
+/// File extensions recognized for analysis (matches arborist "all" features)
 const SOURCE_EXTENSIONS: &[&str] = &[
     "rs", "py", "js", "ts", "jsx", "tsx", "java", "go",
+    "cs", "cpp", "cc", "cxx", "c", "h", "php", "kt", "swift",
 ];
 
 /// Full analysis report
