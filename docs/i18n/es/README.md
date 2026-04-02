@@ -103,7 +103,7 @@ Herramientas CLI integradas para gobernanza:
 - **`devtrail validate`** — 13 reglas de validación para corrección documental
 - **`devtrail compliance`** — Puntuación de cumplimiento regulatorio (EU AI Act, ISO 42001, NIST AI RMF)
 - **`devtrail metrics`** — KPIs de gobernanza, tasas de revisión, distribución de riesgo, tendencias
-- **`devtrail analyze`** — Análisis de complejidad de código (cognitiva + ciclomática) via arborist-metrics
+- **`devtrail analyze`** — Análisis de complejidad de código (cognitiva + ciclomática) impulsado por [arborist-metrics](https://github.com/StrangeDaysTech/arborist), nuestra librería open-source en Rust para métricas de código multi-lenguaje
 - **`devtrail audit`** — Reportes de auditoría con línea temporal, mapas de trazabilidad y exportación HTML
 - **Hooks pre-commit** + **GitHub Actions** para validación CI/CD
 
@@ -497,7 +497,14 @@ Este proyecto está licenciado bajo la Licencia MIT - ver el archivo [LICENSE](.
 
 <div align="center">
 
-**[Strange Days Tech](https://strangedays.tech)** construye herramientas para desarrollo de software responsable asistido por IA. DevTrail es uno de nuestros proyectos de código abierto.
+**[Strange Days Tech](https://strangedays.tech)** construye herramientas para desarrollo de software responsable asistido por IA.
+
+Nuestro ecosistema open-source:
+
+| Proyecto | Descripción |
+|----------|-------------|
+| **[DevTrail](https://github.com/StrangeDaysTech/devtrail)** | Plataforma de gobernanza de IA para desarrollo de software responsable |
+| **[arborist-metrics](https://github.com/StrangeDaysTech/arborist)** | Librería de análisis de complejidad de código multi-lenguaje para Rust — [crates.io](https://crates.io/crates/arborist-metrics) |
 
 [Sitio Web](https://strangedays.tech) • [GitHub](https://github.com/StrangeDaysTech)
 
