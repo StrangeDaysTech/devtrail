@@ -519,6 +519,8 @@ $ devtrail analyze /path/to/project
 
 > **Note:** This command works without `devtrail init`. It operates on source files, not DevTrail documents. The `analyze` feature can be disabled at compile time with `--no-default-features`.
 
+> **Documentation trigger:** AI agents use `devtrail analyze --output json` as the primary method to determine when to create AILOG documents. If `summary.above_threshold > 0` in the JSON output, the agent should create an AILOG. When the CLI is not available, agents fall back to the >20 lines of business logic heuristic.
+
 ---
 
 ### `devtrail audit [path] [--from <date>] [--to <date>] [--system <name>] [--output <format>]`

@@ -417,6 +417,8 @@ $ devtrail analyze /ruta/al/proyecto
 
 > **Nota:** Este comando funciona sin `devtrail init`. Opera sobre archivos fuente, no documentos DevTrail. La feature `analyze` se puede desactivar en compilación con `--no-default-features`.
 
+> **Trigger de documentación:** Los agentes de IA usan `devtrail analyze --output json` como método primario para determinar cuándo crear documentos AILOG. Si `summary.above_threshold > 0` en la salida JSON, el agente debe crear un AILOG. Cuando el CLI no está disponible, los agentes usan la heurística de >20 líneas de lógica de negocio como alternativa.
+
 ---
 
 ### `devtrail audit [path] [--from <fecha>] [--to <fecha>] [--system <nombre>] [--output <formato>]`

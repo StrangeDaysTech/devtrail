@@ -24,7 +24,7 @@
 
 Before committing, check:
 - [ ] Changed auth/PII/security code? → Create AILOG (`risk_level: high`) + ETH draft
-- [ ] Changed >20 lines of business logic? → Create AILOG
+- [ ] Complex code change? → Run `devtrail analyze <changed-files> --output json`; if `above_threshold > 0` create AILOG (fallback if CLI unavailable: >20 lines)
 - [ ] Chose between 2+ alternatives? → Create AIDEC
 - [ ] Changed public API or DB schema? → Create AILOG + consider ADR
 - [ ] Changed ML model/prompts? → Create AILOG + human review

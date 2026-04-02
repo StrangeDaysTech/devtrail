@@ -160,7 +160,7 @@ Mark `review_required: true` when:
 
 | I just... | Create |
 |-----------|--------|
-| Implemented >20 lines | AILOG |
+| Implemented complex logic | AILOG |
 | Chose between options | AIDEC |
 | Fixed security issue | AILOG + `risk_level: high` |
 | Found tech debt | TDE |

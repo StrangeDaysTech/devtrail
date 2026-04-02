@@ -12,7 +12,7 @@
 When assisting with code changes in this project, follow these documentation rules:
 
 **Document when:**
-- Changing >20 lines of business logic → suggest creating AILOG
+- Complex code change → suggest running `devtrail analyze`; if `above_threshold > 0`, suggest AILOG (fallback: >20 lines)
 - Choosing between alternatives → suggest creating AIDEC
 - Changing auth/PII/security → suggest AILOG (risk_level: high) + ETH draft
 - Changing public API or DB schema → suggest AILOG + consider ADR
