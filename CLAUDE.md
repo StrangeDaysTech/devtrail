@@ -76,40 +76,31 @@ git commit -m "chore: bump CLI version to X.Y.Z"
 # Push, create PR, merge to main
 ```
 
-### Step 3: Create GitHub release
+### Step 3: Create and push tag
 
 ```bash
-gh release create cli-X.Y.Z \
-  --title "DevTrail CLI X.Y.Z" \
-  --notes "Release notes here..." \
-  --latest
+git tag cli-X.Y.Z
+git push origin cli-X.Y.Z
 ```
 
-### Step 4: CI builds binaries automatically
+The `release-cli.yml` workflow triggers automatically:
 
-The `release-cli.yml` workflow triggers automatically when a release with a `cli-*` tag is published. It:
-
-1. Compiles for 4 platforms in parallel:
+1. Verifies `Cargo.toml` version matches the tag
+2. Compiles for 4 platforms in parallel:
    - `x86_64-unknown-linux-gnu` (Ubuntu)
    - `x86_64-apple-darwin` (macOS Intel)
    - `aarch64-apple-darwin` (macOS ARM)
    - `x86_64-pc-windows-msvc` (Windows)
-2. Packages each as `.tar.gz` (Unix) or `.zip` (Windows)
-3. Uploads all binaries to the existing release
+3. Packages each as `.tar.gz` (Unix) or `.zip` (Windows)
+4. Creates the GitHub release and uploads all binaries
 
-**If CI doesn't trigger** (e.g., release was created before workflow was merged), run manually:
+**If CI needs re-running**, trigger manually:
 
 ```bash
 gh workflow run release-cli.yml -f tag=cli-X.Y.Z
 ```
 
-### Step 5: Delete old release (optional)
-
-```bash
-gh release delete cli-OLD.VERSION --yes
-```
-
-### Step 6: Verify
+### Step 4: Verify
 
 ```bash
 gh release view cli-X.Y.Z --json assets --jq '.assets[].name'
@@ -135,6 +126,8 @@ Update version references in docs:
 - `README.md` and `docs/i18n/es/README.md` (versioning tables)
 - `dist/.devtrail/00-governance/QUICK-REFERENCE.md` (EN + ES footer)
 - `dist/.devtrail/00-governance/AGENT-RULES.md` (EN + ES footer)
+- `dist/.devtrail/00-governance/DOCUMENTATION-POLICY.md` (EN + ES footer)
+- `dist/.devtrail/00-governance/C4-DIAGRAM-GUIDE.md` (EN + ES footer)
 
 ### Step 2: Commit and merge
 
@@ -153,8 +146,15 @@ git push origin fw-X.Y.Z
 ```
 
 The `release-framework.yml` workflow triggers automatically:
-1. Packages `dist/` contents into `devtrail-fw-X.Y.Z.zip`
-2. Creates the GitHub release with the ZIP as asset
+1. Verifies `dist-manifest.yml` version matches the tag
+2. Packages `dist/` contents into `devtrail-fw-X.Y.Z.zip`
+3. Creates the GitHub release with the ZIP as asset
+
+**If CI needs re-running**, trigger manually:
+
+```bash
+gh workflow run release-framework.yml -f tag=fw-X.Y.Z
+```
 
 ### Step 4: Verify
 

@@ -4,6 +4,11 @@ on:
   push:
     tags:
       - 'fw-*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g., fw-4.1.0)'
+        required: true
 
 permissions:
   contents: write
@@ -14,12 +19,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref_name }}
 
-      - name: Extract version from tag
+      - name: Resolve tag and version
         id: version
         run: |
-          VERSION="${GITHUB_REF_NAME#fw-}"
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          VERSION="${TAG#fw-}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Packaging Framework $VERSION from tag $TAG"
+
+      - name: Verify dist-manifest.yml version matches tag
+        run: |
+          MANIFEST_VERSION=$(grep '^version:' dist/dist-manifest.yml | sed 's/version: *"\(.*\)"/\1/')
+          TAG_VERSION="${{ steps.version.outputs.version }}"
+          if [ "$MANIFEST_VERSION" != "$TAG_VERSION" ]; then
+            echo "ERROR: dist-manifest.yml version ($MANIFEST_VERSION) does not match tag version ($TAG_VERSION)"
+            exit 1
+          fi
 
       - name: Create distribution ZIP
         run: |
@@ -29,11 +48,21 @@ jobs:
           zip -r "../devtrail-fw-${{ steps.version.outputs.version }}.zip" .
           cd ..
 
-      - name: Create GitHub Release
+      - name: Create or update GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "${{ github.ref_name }}" \
-            --title "DevTrail Framework ${{ steps.version.outputs.version }}" \
-            --generate-notes \
-            "devtrail-fw-${{ steps.version.outputs.version }}.zip"
+          TAG="${{ steps.version.outputs.tag }}"
+          VERSION="${{ steps.version.outputs.version }}"
+          ASSET="devtrail-fw-${VERSION}.zip"
+
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "Release $TAG exists, uploading asset..."
+            gh release upload "$TAG" "$ASSET" --clobber
+          else
+            echo "Creating release $TAG..."
+            gh release create "$TAG" \
+              --title "DevTrail Framework $VERSION" \
+              --generate-notes \
+              "$ASSET"
+          fi
