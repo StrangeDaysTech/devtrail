@@ -188,4 +188,4 @@ Mark `review_required: true` when:
 
 ---
 
-*DevTrail v4.0.0 | [Strange Days Tech](https://strangedays.tech)*
+*DevTrail v4.1.0 | [Strange Days Tech](https://strangedays.tech)*

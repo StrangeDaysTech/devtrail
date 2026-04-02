@@ -146,8 +146,8 @@ DevTrail usa tags de versión independientes para cada componente:
 
 | Componente | Prefijo de tag | Ejemplo | Incluye |
 |------------|---------------|---------|---------|
-| Framework | `fw-` | `fw-4.0.0` | Plantillas (12 tipos), gobernanza, directivas |
-| CLI | `cli-` | `cli-2.1.0` | El binario `devtrail` |
+| Framework | `fw-` | `fw-4.1.0` | Plantillas (12 tipos), gobernanza, directivas |
+| CLI | `cli-` | `cli-3.0.0` | El binario `devtrail` |
 
 Verifica las versiones instaladas con `devtrail status` o `devtrail about`.
 
@@ -177,7 +177,7 @@ Ver [Referencia CLI](adopters/CLI-REFERENCE.md) para uso detallado.
 ```bash
 # Descargar el último release ZIP del framework desde GitHub
 # Ve a https://github.com/StrangeDaysTech/devtrail/releases
-# y descarga el último release fw-* (ej. fw-2.1.0)
+# y descarga el último release fw-* (ej. fw-4.1.0)
 
 # Extraer y copiar a tu proyecto
 unzip devtrail-fw-*.zip -d tu-proyecto/

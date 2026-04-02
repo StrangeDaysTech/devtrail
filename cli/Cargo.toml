@@ -1,6 +1,6 @@
 [package]
 name = "devtrail-cli"
-version = "2.1.0"
+version = "3.0.0"
 edition = "2021"
 description = "CLI tool for DevTrail - Documentation Governance for AI-Assisted Development"
 license = "MIT"
