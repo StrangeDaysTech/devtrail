@@ -147,7 +147,7 @@ DevTrail uses independent version tags for each component:
 | Component | Tag prefix | Example | Includes |
 |-----------|-----------|---------|----------|
 | Framework | `fw-` | `fw-4.1.0` | Templates (12 types), governance, directives |
-| CLI | `cli-` | `cli-3.0.0` | The `devtrail` binary |
+| CLI | `cli-` | `cli-3.0.1` | The `devtrail` binary |
 
 Check installed versions with `devtrail status` or `devtrail about`.
 
