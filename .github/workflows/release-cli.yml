@@ -155,3 +155,16 @@ jobs:
               --latest \
               release/*
           fi
+
+      - name: Delete previous CLI releases
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          CURRENT_TAG="${{ needs.resolve-version.outputs.tag }}"
+          gh release list --json tagName --jq '.[].tagName' | while read -r tag; do
+            if [[ "$tag" == cli-* && "$tag" != "$CURRENT_TAG" ]]; then
+              echo "Deleting old release $tag..."
+              gh release delete "$tag" --yes --cleanup-tag
+            fi
+          done
