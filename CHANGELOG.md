@@ -7,7 +7,55 @@ and this project uses [independent versioning](README.md#versioning) for Framewo
 
 ---
 
-## Framework 4.0.0 / CLI 2.1.0 — Phase 4: Advanced Automation & Ecosystem
+## CLI 3.0.1 — Validate False Positive Fix
+
+### Fixed (CLI)
+- **REF-001**: Only validate `related:` references that match DevTrail document ID patterns (AILOG-*, AIDEC-*, ADR-*, etc.). Skips task IDs, requirement IDs, risk IDs, external paths, and other non-document references
+- **SEC-001**: `Bearer` and `token:` moved from errors to warnings — common in documentation describing auth flows. Actual secret patterns remain as errors
+
+---
+
+## Framework 4.1.0 / CLI 3.0.0 — Complexity-Based Documentation & Ecosystem
+
+### Added (CLI)
+- **`devtrail analyze`** command — Code complexity analysis (cognitive + cyclomatic) powered by [arborist-metrics](https://github.com/StrangeDaysTech/arborist)
+  - Output formats: text (colored), json, markdown
+  - 12 languages: Rust, Python, JavaScript, TypeScript, Java, Go, C, C++, C#, PHP, Kotlin, Swift
+  - Configurable threshold: CLI flag → `.devtrail/config.yml` → default (8)
+- **`devtrail new`** command — Interactive document creation with type suggestion based on context
+  - Supports all 12 document types
+  - Analyzes git diff to suggest appropriate type
+- **`--staged` flag** for `devtrail validate` — Validate only staged documents (pre-commit hooks)
+
+### Changed (Framework)
+- **Documentation triggers redesigned**: `devtrail analyze --output json` is now the primary method for determining when to create AILOGs. The >20 lines heuristic is preserved as fallback when the CLI is unavailable
+  - Updated across all governance docs, agent directives, skills/workflows (18 files, EN + ES)
+- Agent directives (Claude, Gemini, Copilot, Cursor) updated with complexity-based pre-commit checklist
+
+### Changed (CLI)
+- All 12 arborist-metrics languages enabled (was limited subset)
+- Legacy scripts removed, replaced with CLI commands in all docs
+
+### Added (Docs)
+- arborist-metrics promotion in README (EN + ES) — Open Source Ecosystem table
+- Documentation trigger notes in CLI-REFERENCE (EN + ES)
+
+### Changed (CI/CD)
+- Release workflows unified: both trigger on tag push with automatic release creation
+- Idempotent releases: create if missing, upload with `--clobber` if exists
+- Auto-delete previous releases on new version (keeps only latest per component)
+- GitHub Actions updated to Node.js 24 compatible versions (checkout v6, upload-artifact v7, download-artifact v8)
+- Version verification: workflows check Cargo.toml / dist-manifest.yml matches tag
+- `workflow_dispatch` added to both workflows for manual re-runs
+
+### Removed
+- Legacy `auditoria/` directory (one-time audit reviews, findings already addressed)
+- Legacy `docs/archive/` (obsolete planning documents)
+- Legacy shell scripts (replaced by CLI commands)
+
+---
+
+## Framework 4.0.0 / CLI 2.1.0 — Advanced Automation & Ecosystem
 
 ### Added (CLI)
 - **`devtrail audit`** command — Generate audit trail reports with timeline, traceability map, risk distribution, and compliance summary
@@ -25,16 +73,14 @@ and this project uses [independent versioning](README.md#versioning) for Framewo
 - Architecture Diagram section in TEMPLATE-ADR.md with Mermaid C4 placeholder
 - Sections 10 (C4 Model) and 11 (API Specification Tracking) in AGENT-RULES.md
 - Terminal compatibility notes in skill files for box-drawing character fallback
-- Canonical source comment in docs-validation.yml for document type list
 
 ### Changed
 - QUICK-REFERENCE.md: Added C4 Model reference to regulatory alignment table
-- Version bumps: Framework 3.2.0 → 4.0.0, CLI 2.0.0 → 2.1.0
 - Updated CLI-REFERENCE.md, README.md with 13 commands (EN + ES)
 
 ---
 
-## Framework 3.2.0 / CLI 2.0.0 — Phase 3: Compliance Automation & Metrics
+## Framework 3.2.0 / CLI 2.0.0 — Compliance Automation & Metrics
 
 ### Added (CLI)
 - **`devtrail compliance`** command — Check regulatory compliance (EU AI Act, ISO 42001, NIST AI RMF)
@@ -54,7 +100,7 @@ and this project uses [independent versioning](README.md#versioning) for Framewo
 
 ---
 
-## Framework 3.1.0 / CLI 1.4.0 — Phase 2: New Document Types & Validation
+## Framework 3.1.0 / CLI 1.4.0 — New Document Types & Validation
 
 ### Added (CLI)
 - **`devtrail validate`** command — Validate documents with 13 rules (NAMING, META, CROSS, TYPE, REF, SEC, OBS)
@@ -62,7 +108,6 @@ and this project uses [independent versioning](README.md#versioning) for Framewo
   - Exit code 1 on errors, 0 on warnings-only
 - Document parsing engine (`document.rs`) — Shared by validate, compliance, metrics, audit
 - Validation engine (`validation.rs`) — Extensible rule-based validation
-- Lizard integration (`complexity.rs`) — Cyclomatic complexity analysis
 
 ### Added (Framework)
 - **TEMPLATE-SEC.md** — Security Assessment (STRIDE threat model, OWASP ASVS)
@@ -75,7 +120,7 @@ and this project uses [independent versioning](README.md#versioning) for Framewo
 
 ---
 
-## Framework 3.0.0 / CLI 1.3.0 — Phase 1: Regulatory Base & Standards Update
+## Framework 3.0.0 / CLI 1.3.0 — Regulatory Base & Standards Update
 
 ### Changed (Framework)
 - **IEEE 830 → ISO/IEC/IEEE 29148:2018** in TEMPLATE-REQ.md (External Interfaces, V&V, Traceability)
