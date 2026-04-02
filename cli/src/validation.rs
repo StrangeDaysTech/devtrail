@@ -49,10 +49,18 @@ const VALID_RISK_LEVELS: &[&str] = &["low", "medium", "high", "critical"];
 /// Valid confidence levels
 const VALID_CONFIDENCES: &[&str] = &["low", "medium", "high"];
 
-/// Patterns that indicate sensitive information
+/// Patterns that indicate sensitive information.
+/// These are checked against the document body. Patterns should be specific enough
+/// to avoid false positives in documentation that describes auth flows.
 const SENSITIVE_PATTERNS: &[&str] = &[
-    "password:", "api_key:", "secret:", "token:", "private_key:",
-    "credentials:", "Bearer ", "AWS_SECRET", "PRIVATE KEY",
+    "password:", "api_key:", "secret:", "private_key:",
+    "credentials:", "AWS_SECRET", "PRIVATE KEY",
+];
+
+/// Patterns that are suspicious but common in documentation describing auth flows.
+/// These produce warnings instead of errors.
+const SOFT_SENSITIVE_PATTERNS: &[&str] = &[
+    "token:", "Bearer ",
 ];
 
 /// Validate all documents found under a .devtrail/ directory
@@ -489,10 +497,18 @@ fn check_type_specific(result: &mut ValidationResult, doc: &DevTrailDocument) {
 }
 
 /// REF-001: Check that documents listed in related: exist
+/// Only validates references that look like DevTrail document IDs (e.g., AILOG-2025-01-27-001).
+/// Skips task IDs (T025), requirement IDs (FR-019, US2), risk IDs (RISK-001),
+/// external paths, and other non-document references to avoid false positives.
 fn check_related_exist(result: &mut ValidationResult, doc: &DevTrailDocument, devtrail_dir: &Path) {
     if let Some(related) = &doc.frontmatter.related {
         for rel_id in related {
             if rel_id.is_empty() {
+                continue;
+            }
+            // Only validate references that look like DevTrail document IDs
+            // (start with a known document type prefix followed by a dash)
+            if !looks_like_devtrail_id(rel_id) {
                 continue;
             }
             // Search for a file matching this id
@@ -507,6 +523,15 @@ fn check_related_exist(result: &mut ValidationResult, doc: &DevTrailDocument, de
             }
         }
     }
+}
+
+/// Check if a reference looks like a DevTrail document ID.
+/// Matches patterns like "AILOG-2025-01-27-001" or "ADR-2025-01-27-001-title".
+/// Returns false for task IDs (T025), requirement IDs (FR-019, US2), paths, etc.
+fn looks_like_devtrail_id(id: &str) -> bool {
+    DocType::ALL_PREFIXES.iter().any(|prefix| {
+        id.starts_with(prefix) && id.get(prefix.len()..prefix.len() + 1) == Some("-")
+    })
 }
 
 /// META-004: Check that filename date matches created field
@@ -567,6 +592,18 @@ fn check_sensitive_info(result: &mut ValidationResult, doc: &DevTrailDocument) {
                 message: format!("Possible sensitive information detected: '{}'", pattern.trim()),
                 severity: Severity::Error,
                 fix_hint: Some("Remove or redact sensitive information before committing".to_string()),
+            });
+        }
+    }
+    // Soft patterns: common in auth documentation, warn instead of error
+    for pattern in SOFT_SENSITIVE_PATTERNS {
+        if full_content.contains(pattern) {
+            result.add(ValidationIssue {
+                file: doc.path.clone(),
+                rule: "SEC-001".to_string(),
+                message: format!("Review for sensitive information: '{}' (may be documentation context)", pattern.trim()),
+                severity: Severity::Warning,
+                fix_hint: Some("Verify this is documentation context, not an actual secret".to_string()),
             });
         }
     }
