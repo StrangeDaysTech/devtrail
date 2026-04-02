@@ -54,7 +54,7 @@ DevTrail: Created AILOG-2025-01-27-001-implement-auth.md
 
 **If documentation was not needed:**
 ```
-DevTrail: No documentation required (minor change / <20 lines)
+DevTrail: No documentation required (minor change / below complexity threshold)
 ```
 
 **If you should have documented but didn't:**
@@ -123,7 +123,7 @@ gh pr create --title "fix: description" --body "..."
 
 | Situation | Action |
 |-----------|--------|
-| >20 lines of business logic | Create AILOG |
+| Code complexity above threshold | Create AILOG — run `devtrail analyze <files> --output json`; fallback: >20 lines |
 | Decision between technical alternatives | Create AIDEC |
 | Changes in auth/authorization/PII | Create AILOG (`risk_level: high`) + ETH draft |
 | Changes in public API or DB schema | Create AILOG + consider ADR |

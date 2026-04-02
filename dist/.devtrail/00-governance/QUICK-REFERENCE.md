@@ -63,7 +63,7 @@ language: en  # Options: en, es (default: en)
 
 | Situation | Action |
 |-----------|--------|
-| >20 lines business logic | AILOG |
+| Complex code (`devtrail analyze`; fallback: >20 lines) | AILOG |
 | Decision between alternatives | AIDEC |
 | Auth/authorization/PII changes | AILOG + `risk_level: high` + ETH |
 | Public API or DB schema changes | AILOG + consider ADR |

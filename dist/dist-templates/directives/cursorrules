@@ -7,7 +7,7 @@
 
 Identity: Use `cursor-v{version}` in the `agent:` field.
 
-Document when: >20 lines business logic (AILOG), alternatives (AIDEC), auth/PII (AILOG+ETH), API/DB changes (AILOG+ADR), ML/prompts (AILOG+review).
+Document when: complex code — run `devtrail analyze <files> --output json`, AILOG if `above_threshold > 0` (fallback: >20 lines), alternatives (AIDEC), auth/PII (AILOG+ETH), API/DB changes (AILOG+ADR), ML/prompts (AILOG+review).
 
 Review required: ETH, ADR, SEC, MCARD, DPIA → always. risk_level high/critical → always.
 

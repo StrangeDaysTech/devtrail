@@ -193,7 +193,7 @@ Per AGENT-RULES.md, documentation is required when:
 - Changes affect auth/authorization/PII → AILOG + ETH draft
 - Changes in public API or DB schema → AILOG
 - Changes in ML models or AI prompts → AILOG + human review
-- Business logic changes > 20 lines → AILOG
+- Code above cognitive complexity threshold (run `devtrail analyze`; fallback: >20 lines) → AILOG
 - Decision between 2+ alternatives → AIDEC
 - Security-critical dependency changes → AILOG + human review
 

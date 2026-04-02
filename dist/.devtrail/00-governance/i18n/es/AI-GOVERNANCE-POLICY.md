@@ -193,7 +193,7 @@ Según AGENT-RULES.md, la documentación es requerida cuando:
 - Cambios que afectan auth/autorización/PII → AILOG + borrador ETH
 - Cambios en API pública o esquema de BD → AILOG
 - Cambios en modelos ML o prompts de IA → AILOG + revisión humana
-- Cambios en lógica de negocio > 20 líneas → AILOG
+- Código sobre umbral de complejidad cognitiva (ejecutar `devtrail analyze`; alternativa: >20 líneas) → AILOG
 - Decisión entre 2+ alternativas → AIDEC
 - Cambios en dependencias críticas de seguridad → AILOG + revisión humana
 
