@@ -67,6 +67,11 @@ Update version references in all docs that mention version numbers:
 - `README.md` (versioning table)
 - `docs/i18n/es/README.md` (ES — versioning table)
 
+Update `CHANGELOG.md` (root) following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format:
+- Add a new `## CLI X.Y.Z` section at the top (below the header)
+- Use subsections: `### Added (CLI)`, `### Changed (CLI)`, `### Fixed (CLI)`, `### Removed` as applicable
+- Describe user-facing changes concisely
+
 ### Step 2: Commit and merge
 
 ```bash
@@ -128,6 +133,11 @@ Update version references in docs:
 - `dist/.devtrail/00-governance/AGENT-RULES.md` (EN + ES footer)
 - `dist/.devtrail/00-governance/DOCUMENTATION-POLICY.md` (EN + ES footer)
 - `dist/.devtrail/00-governance/C4-DIAGRAM-GUIDE.md` (EN + ES footer)
+
+Update `CHANGELOG.md` (root) following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format:
+- Add a new `## Framework X.Y.Z` section at the top (below the header)
+- Use subsections: `### Added (Framework)`, `### Changed (Framework)`, `### Fixed`, `### Removed` as applicable
+- If both CLI and Framework are bumped together, combine into `## Framework X.Y.Z / CLI X.Y.Z`
 
 ### Step 2: Commit and merge
 
