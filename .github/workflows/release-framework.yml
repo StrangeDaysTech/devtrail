@@ -66,3 +66,15 @@ jobs:
               --generate-notes \
               "$ASSET"
           fi
+
+      - name: Delete previous framework releases
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          CURRENT_TAG="${{ steps.version.outputs.tag }}"
+          gh release list --json tagName --jq '.[].tagName' | while read -r tag; do
+            if [[ "$tag" == fw-* && "$tag" != "$CURRENT_TAG" ]]; then
+              echo "Deleting old release $tag..."
+              gh release delete "$tag" --yes --cleanup-tag
+            fi
+          done
