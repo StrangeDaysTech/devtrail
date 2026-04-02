@@ -49,7 +49,7 @@ DevTrail uses **independent version tags** for each component:
 | Component | Tag prefix | Example | What it includes |
 |-----------|-----------|---------|------------------|
 | Framework | `fw-` | `fw-4.1.0` | Templates (12 types), governance docs, directives |
-| CLI | `cli-` | `cli-3.0.0` | The `devtrail` binary |
+| CLI | `cli-` | `cli-3.0.1` | The `devtrail` binary |
 
 Framework and CLI are released independently. A framework update does not require a CLI update, and vice versa.
 
@@ -110,7 +110,7 @@ $ devtrail update
 Updating framework...
 ✔ Framework updated to fw-4.1.0
 Updating CLI...
-✔ CLI updated to cli-3.0.0
+✔ CLI updated to cli-3.0.1
 ```
 
 ---
@@ -138,7 +138,7 @@ Auto-update the `devtrail` binary itself. Looks for the latest `cli-*` release o
 
 ```bash
 $ devtrail update-cli
-✔ CLI updated to cli-3.0.0
+✔ CLI updated to cli-3.0.1
 ```
 
 ---
@@ -201,7 +201,7 @@ $ devtrail status
   ┌───────────┬──────────────────────────┐
   │ Path      │ /home/user/my-project    │
   │ Framework │ fw-4.1.0                 │
-  │ CLI       │ cli-3.0.0                │
+  │ CLI       │ cli-3.0.1                │
   │ Language  │ en                       │
   └───────────┴──────────────────────────┘
 
@@ -625,7 +625,7 @@ Show version, authorship, and license information.
 ```bash
 $ devtrail about
 DevTrail CLI
-  CLI version:       cli-3.0.0
+  CLI version:       cli-3.0.1
   Framework version: fw-4.1.0
   Author:            Strange Days Tech, S.A.S.
   License:           MIT
