@@ -37,11 +37,19 @@ enum Commands {
         path: String,
     },
     /// Update both framework and CLI to the latest version
-    Update,
+    Update {
+        /// Update method for the CLI binary: auto, github, or cargo
+        #[arg(long, default_value = "auto", value_parser = ["auto", "github", "cargo"])]
+        method: String,
+    },
     /// Update the DevTrail framework to the latest version
     UpdateFramework,
     /// Update the CLI binary to the latest version
-    UpdateCli,
+    UpdateCli {
+        /// Update method: auto (detect), github (prebuilt binary), or cargo (compile from source)
+        #[arg(long, default_value = "auto", value_parser = ["auto", "github", "cargo"])]
+        method: String,
+    },
     /// Remove DevTrail from the project
     Remove {
         /// Remove everything including user-generated documents (requires confirmation)
@@ -164,9 +172,9 @@ fn main() {
 
     let result = match cli.command {
         Commands::Init { path } => commands::init::run(&path),
-        Commands::Update => commands::update::run(),
+        Commands::Update { method } => commands::update::run(&method),
         Commands::UpdateFramework => commands::update_framework::run(),
-        Commands::UpdateCli => commands::update_cli::run(),
+        Commands::UpdateCli { method } => commands::update_cli::run(&method),
         Commands::Remove { full } => commands::remove::run(full),
         Commands::Validate { path, fix, staged } => commands::validate::run(&path, fix, staged),
         Commands::Audit {
