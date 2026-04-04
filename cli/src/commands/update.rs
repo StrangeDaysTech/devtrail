@@ -3,7 +3,7 @@ use colored::Colorize;
 
 use crate::utils;
 
-pub fn run() -> Result<()> {
+pub fn run(method: &str) -> Result<()> {
     let target = std::env::current_dir()?;
 
     // Update framework (skip if not initialized)
@@ -19,7 +19,7 @@ pub fn run() -> Result<()> {
     // Update CLI
     println!();
     println!("{}", "── CLI ──".bold());
-    if let Err(e) = super::update_cli::run() {
+    if let Err(e) = super::update_cli::run(method) {
         utils::warn(&format!("CLI update failed: {}", e));
     }
 

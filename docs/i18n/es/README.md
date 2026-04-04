@@ -5,6 +5,7 @@
 **Plataforma de Gobernanza de IA para Desarrollo de Software Responsable**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](../../../LICENSE)
+[![Crates.io](https://img.shields.io/crates/v/devtrail-cli.svg)](https://crates.io/crates/devtrail-cli)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Handbook](https://img.shields.io/badge/docs-Handbook-orange.svg)](../../../dist/.devtrail/QUICK-REFERENCE.md)
 [![Strange Days Tech](https://img.shields.io/badge/by-Strange_Days_Tech-purple.svg)](https://strangedays.tech)
@@ -130,6 +131,8 @@ O instalar desde el código fuente con Cargo:
 ```bash
 cargo install devtrail-cli
 ```
+
+> **Nota:** `devtrail update-cli` detecta automáticamente cómo instalaste el CLI. Las instalaciones con binario precompilado se actualizan desde GitHub Releases; las instalaciones con cargo se actualizan via `cargo install`. Puedes forzar el método con `--method=github` o `--method=cargo`.
 
 Luego inicializa en tu proyecto:
 

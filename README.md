@@ -5,6 +5,7 @@
 **AI Governance Platform for Responsible Software Development**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Crates.io](https://img.shields.io/crates/v/devtrail-cli.svg)](https://crates.io/crates/devtrail-cli)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Handbook](https://img.shields.io/badge/docs-Handbook-orange.svg)](dist/.devtrail/QUICK-REFERENCE.md)
 [![Strange Days Tech](https://img.shields.io/badge/by-Strange_Days_Tech-purple.svg)](https://strangedays.tech)
@@ -130,6 +131,8 @@ Or install from source with Cargo:
 ```bash
 cargo install devtrail-cli
 ```
+
+> **Note:** `devtrail update-cli` automatically detects how you installed the CLI. Prebuilt binary installs update from GitHub Releases; cargo installs update via `cargo install`. You can override with `--method=github` or `--method=cargo`.
 
 Then initialize in your project:
 

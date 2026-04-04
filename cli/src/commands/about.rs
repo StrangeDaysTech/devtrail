@@ -2,6 +2,7 @@ use anyhow::Result;
 use colored::Colorize;
 
 use crate::manifest::DistManifest;
+use crate::self_update::{self, InstallMethod};
 
 pub fn run() -> Result<()> {
     let version = env!("CARGO_PKG_VERSION");
@@ -29,6 +30,13 @@ pub fn run() -> Result<()> {
             );
         }
     }
+
+    // Show install method
+    let install_label = match self_update::detect_install_method() {
+        InstallMethod::Cargo => "cargo (crates.io)",
+        InstallMethod::GitHubBinary => "prebuilt binary (GitHub Releases)",
+    };
+    println!("  {} {}", "Install:".dimmed(), install_label.dimmed());
 
     println!("  {}", description.dimmed());
     println!();

@@ -168,3 +168,20 @@ jobs:
               gh release delete "$tag" --yes --cleanup-tag
             fi
           done
+
+  publish-crate:
+    name: Publish to crates.io
+    needs: [resolve-version, upload-to-release]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.resolve-version.outputs.tag }}
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Publish to crates.io
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
+        run: cargo publish --manifest-path cli/Cargo.toml

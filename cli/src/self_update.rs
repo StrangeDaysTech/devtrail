@@ -6,8 +6,134 @@ use crate::download;
 use crate::platform;
 use crate::utils;
 
-/// Perform the CLI self-update
-pub fn perform_update() -> Result<()> {
+/// How the CLI was installed
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum InstallMethod {
+    /// Installed via `cargo install devtrail-cli`
+    Cargo,
+    /// Installed via prebuilt binary from GitHub Releases
+    GitHubBinary,
+}
+
+/// Check if a path indicates a cargo installation (contains `.cargo/bin/`)
+fn path_indicates_cargo(path: &Path) -> bool {
+    path.components().any(|c| c.as_os_str() == ".cargo")
+        && path
+            .parent()
+            .and_then(|p| p.file_name())
+            .map(|name| name == "bin")
+            .unwrap_or(false)
+}
+
+/// Detect the installation method based on the executable path
+pub fn detect_install_method() -> InstallMethod {
+    std::env::current_exe()
+        .ok()
+        .and_then(|p| p.canonicalize().ok().or(Some(p)))
+        .filter(|p| path_indicates_cargo(p))
+        .map(|_| InstallMethod::Cargo)
+        .unwrap_or(InstallMethod::GitHubBinary)
+}
+
+/// Parse a method string from the CLI flag into an InstallMethod override
+pub fn parse_method(method: &str) -> Option<InstallMethod> {
+    match method {
+        "cargo" => Some(InstallMethod::Cargo),
+        "github" => Some(InstallMethod::GitHubBinary),
+        _ => None, // "auto" or anything else → auto-detect
+    }
+}
+
+/// Perform the CLI self-update, using the specified method or auto-detecting
+pub fn perform_update(method_override: Option<InstallMethod>) -> Result<()> {
+    let method = method_override.unwrap_or_else(detect_install_method);
+
+    match method {
+        InstallMethod::Cargo => perform_cargo_update(),
+        InstallMethod::GitHubBinary => perform_github_update(),
+    }
+}
+
+/// Update via `cargo install --force devtrail-cli`
+fn perform_cargo_update() -> Result<()> {
+    let current_version = env!("CARGO_PKG_VERSION");
+    utils::info(&format!("Current version: cli-{}", current_version));
+    println!(
+        "  {} {}",
+        "Install method:".dimmed(),
+        "cargo (crates.io)".cyan()
+    );
+
+    // Check for newer version via GitHub API
+    utils::info("Checking for updates...");
+    let release = download::get_latest_release_full()?;
+    let tag_version = download::strip_tag_prefix(&release.tag_name);
+
+    println!(
+        "  {} {}",
+        "Latest version:".dimmed(),
+        release.tag_name.green()
+    );
+
+    let current =
+        semver::Version::parse(current_version).context("Failed to parse current version")?;
+    let latest =
+        semver::Version::parse(tag_version).context("Failed to parse release version")?;
+
+    if latest <= current {
+        utils::success(&format!(
+            "CLI is already at the latest version (cli-{})",
+            current_version
+        ));
+        return Ok(());
+    }
+
+    // Verify cargo is available
+    let cargo_available = std::process::Command::new("cargo")
+        .arg("--version")
+        .output()
+        .is_ok();
+
+    if !cargo_available {
+        utils::warn("cargo not found in PATH. Run the following command manually:");
+        println!(
+            "\n  {}\n",
+            "cargo install --force devtrail-cli".yellow().bold()
+        );
+        bail!("cargo is not available in PATH");
+    }
+
+    // Confirm with user
+    let confirm = dialoguer::Confirm::new()
+        .with_prompt(format!(
+            "Update from cli-{current_version} to cli-{tag_version} via cargo?"
+        ))
+        .default(true)
+        .interact()?;
+
+    if !confirm {
+        utils::info("Update cancelled.");
+        return Ok(());
+    }
+
+    utils::info("Compiling from source, this may take a few minutes...");
+
+    let status = std::process::Command::new("cargo")
+        .args(["install", "--force", "devtrail-cli"])
+        .status()
+        .context("Failed to run cargo install")?;
+
+    if status.success() {
+        utils::success(&format!("CLI updated to cli-{}!", tag_version));
+    } else {
+        bail!("cargo install failed with exit code: {}", status);
+    }
+
+    Ok(())
+}
+
+/// Update via prebuilt binary from GitHub Releases
+fn perform_github_update() -> Result<()> {
     let current_version = env!("CARGO_PKG_VERSION");
     utils::info(&format!("Current version: cli-{}", current_version));
 
