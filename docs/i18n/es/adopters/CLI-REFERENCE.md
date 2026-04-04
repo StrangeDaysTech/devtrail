@@ -49,7 +49,7 @@ DevTrail usa **tags de versión independientes** para cada componente:
 | Componente | Prefijo de tag | Ejemplo | Qué incluye |
 |------------|---------------|---------|-------------|
 | Framework | `fw-` | `fw-4.1.1` | Plantillas (12 tipos), docs de gobernanza, directivas |
-| CLI | `cli-` | `cli-3.0.1` | El binario `devtrail` |
+| CLI | `cli-` | `cli-3.1.0` | El binario `devtrail` |
 
 Framework y CLI se publican de forma independiente. Una actualización del framework no requiere actualización del CLI, y viceversa.
 
@@ -109,7 +109,7 @@ $ devtrail update
 Updating framework...
 ✔ Framework updated to fw-4.1.1
 Updating CLI...
-✔ CLI updated to cli-3.0.1
+✔ CLI updated to cli-3.1.0
 ```
 
 ---
@@ -131,13 +131,22 @@ $ devtrail update-framework
 
 ### `devtrail update-cli`
 
-Auto-actualiza el binario `devtrail`. Busca el último release `cli-*` en GitHub y reemplaza el binario actual.
+Auto-actualiza el binario `devtrail`. Detecta automáticamente el método de instalación y usa el mecanismo de actualización apropiado:
+
+- **Binario precompilado** (instalado via `install.sh` / `install.ps1`): Descarga el último binario de GitHub Releases
+- **Cargo** (instalado via `cargo install`): Ejecuta `cargo install --force devtrail-cli`
+
+Usa `--method` para forzar el método: `--method=github` o `--method=cargo`.
 
 **Ejemplo:**
 
 ```bash
 $ devtrail update-cli
-✔ CLI updated to cli-3.0.1
+✔ CLI updated to cli-3.1.0
+
+$ devtrail update-cli --method=cargo
+Compiling from source, this may take a few minutes...
+✔ CLI updated to cli-3.1.0
 ```
 
 ---
@@ -195,7 +204,7 @@ DevTrail Status
 ───────────────
 Path:              /home/user/my-project
 Framework version: fw-4.1.1
-CLI version:       cli-3.0.1
+CLI version:       cli-3.1.0
 Language:          en
 Structure:         ✔ Complete
 
@@ -504,7 +513,7 @@ Muestra información de versión, autoría y licencia.
 ```bash
 $ devtrail about
 DevTrail CLI
-  CLI version:       cli-3.0.1
+  CLI version:       cli-3.1.0
   Framework version: fw-4.1.1
   Author:            Strange Days Tech, S.A.S.
   License:           MIT
