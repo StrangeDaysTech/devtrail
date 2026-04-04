@@ -49,7 +49,7 @@ DevTrail uses **independent version tags** for each component:
 | Component | Tag prefix | Example | What it includes |
 |-----------|-----------|---------|------------------|
 | Framework | `fw-` | `fw-4.1.1` | Templates (12 types), governance docs, directives |
-| CLI | `cli-` | `cli-3.0.1` | The `devtrail` binary |
+| CLI | `cli-` | `cli-3.1.0` | The `devtrail` binary |
 
 Framework and CLI are released independently. A framework update does not require a CLI update, and vice versa.
 
@@ -110,7 +110,7 @@ $ devtrail update
 Updating framework...
 ✔ Framework updated to fw-4.1.1
 Updating CLI...
-✔ CLI updated to cli-3.0.1
+✔ CLI updated to cli-3.1.0
 ```
 
 ---
@@ -132,13 +132,22 @@ $ devtrail update-framework
 
 ### `devtrail update-cli`
 
-Auto-update the `devtrail` binary itself. Looks for the latest `cli-*` release on GitHub and replaces the current binary.
+Auto-update the `devtrail` binary itself. Automatically detects the installation method and uses the appropriate update mechanism:
+
+- **Prebuilt binary** (installed via `install.sh` / `install.ps1`): Downloads the latest binary from GitHub Releases
+- **Cargo** (installed via `cargo install`): Runs `cargo install --force devtrail-cli`
+
+Use `--method` to override auto-detection: `--method=github` or `--method=cargo`.
 
 **Example:**
 
 ```bash
 $ devtrail update-cli
-✔ CLI updated to cli-3.0.1
+✔ CLI updated to cli-3.1.0
+
+$ devtrail update-cli --method=cargo
+Compiling from source, this may take a few minutes...
+✔ CLI updated to cli-3.1.0
 ```
 
 ---
@@ -201,7 +210,7 @@ $ devtrail status
   ┌───────────┬──────────────────────────┐
   │ Path      │ /home/user/my-project    │
   │ Framework │ fw-4.1.1                 │
-  │ CLI       │ cli-3.0.1                │
+  │ CLI       │ cli-3.1.0                │
   │ Language  │ en                       │
   └───────────┴──────────────────────────┘
 
@@ -625,7 +634,7 @@ Show version, authorship, and license information.
 ```bash
 $ devtrail about
 DevTrail CLI
-  CLI version:       cli-3.0.1
+  CLI version:       cli-3.1.0
   Framework version: fw-4.1.1
   Author:            Strange Days Tech, S.A.S.
   License:           MIT

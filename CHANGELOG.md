@@ -7,6 +7,20 @@ and this project uses [independent versioning](README.md#versioning) for Framewo
 
 ---
 
+## CLI 3.1.0 — crates.io Distribution & Smart Self-Update
+
+### Added (CLI)
+- **crates.io distribution**: `cargo install devtrail-cli` now available as an installation method
+- **Install method detection**: `devtrail update-cli` auto-detects whether the CLI was installed via cargo or prebuilt binary and uses the appropriate update mechanism
+- **`--method` flag**: Override auto-detection on `update-cli` and `update` commands (`auto`, `github`, `cargo`)
+- **`devtrail about`**: Now displays the detected installation method
+- **CI**: `release-cli.yml` workflow publishes to crates.io after GitHub Release upload
+
+### Changed (CLI)
+- `Cargo.toml`: Added `include` field for crate packaging, removed `readme` path (outside crate boundary)
+
+---
+
 ## Framework 4.1.1 — Status Skill Complexity Fix
 
 ### Fixed (Framework)
