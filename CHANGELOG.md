@@ -7,6 +7,14 @@ and this project uses [independent versioning](README.md#versioning) for Framewo
 
 ---
 
+## Framework 4.1.1 — Status Skill Complexity Fix
+
+### Fixed (Framework)
+- **devtrail-status skill**: Replace outdated ">10 lines of changes" heuristic with `devtrail analyze --output json` (cognitive complexity, threshold 8) as the primary method for AILOG triggers, with >20 lines fallback when CLI is unavailable
+- Updated across all 3 platform variants: Claude Code, Gemini, and generic agent workflow
+
+---
+
 ## CLI 3.0.1 — Validate False Positive Fix
 
 ### Fixed (CLI)
