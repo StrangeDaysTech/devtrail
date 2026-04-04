@@ -7,6 +7,14 @@ and this project uses [independent versioning](README.md#versioning) for Framewo
 
 ---
 
+## CLI 3.1.1 — crates.io README Fix
+
+### Fixed (CLI)
+- Include project README in crates.io package (copy from repo root during CI publish)
+- Restore `readme` field in `Cargo.toml` pointing to local copy
+
+---
+
 ## CLI 3.1.0 — crates.io Distribution & Smart Self-Update
 
 ### Added (CLI)

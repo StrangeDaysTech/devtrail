@@ -1,15 +1,16 @@
 [package]
 name = "devtrail-cli"
-version = "3.1.0"
+version = "3.1.1"
 edition = "2021"
 description = "CLI tool for DevTrail - Documentation Governance for AI-Assisted Development"
 license = "MIT"
 repository = "https://github.com/StrangeDaysTech/devtrail"
 homepage = "https://strangedays.tech"
+readme = "README.md"
 keywords = ["devtrail", "documentation", "governance", "ai", "cli"]
 categories = ["command-line-utilities", "development-tools"]
 authors = ["Strange Days Tech, S.A.S."]
-include = ["src/**/*", "Cargo.toml", "Cargo.lock"]
+include = ["src/**/*", "Cargo.toml", "Cargo.lock", "README.md"]
 
 [[bin]]
 name = "devtrail"
