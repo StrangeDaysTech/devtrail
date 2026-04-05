@@ -7,6 +7,13 @@ and this project uses [independent versioning](README.md#versioning) for Framewo
 
 ---
 
+## CLI 3.2.1 — crates.io README Language Links Fix
+
+### Fixed (CLI)
+- Use absolute GitHub URLs for Español and 简体中文 language links in README so they resolve correctly on crates.io
+
+---
+
 ## Framework 4.2.0 / CLI 3.2.0 — Simplified Chinese (zh-CN) Localization
 
 ### Added (Framework)
