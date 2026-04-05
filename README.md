@@ -15,7 +15,7 @@
 [Documentation](#documentation) •
 [Contributing](#contributing)
 
-**Languages**: English | [Español](docs/i18n/es/README.md) | [简体中文](docs/i18n/zh-CN/README.md)
+**Languages**: English | [Español](https://github.com/StrangeDaysTech/devtrail/blob/main/docs/i18n/es/README.md) | [简体中文](https://github.com/StrangeDaysTech/devtrail/blob/main/docs/i18n/zh-CN/README.md)
 
 </div>
 
