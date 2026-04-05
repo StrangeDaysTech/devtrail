@@ -1,5 +1,7 @@
 # Documentation Policy - DevTrail
 
+**Languages**: English | [Español](i18n/es/DOCUMENTATION-POLICY.md) | [简体中文](i18n/zh-CN/DOCUMENTATION-POLICY.md)
+
 ## Governance Framework
 
 This policy aligns DevTrail documentation with **ISO/IEC 42001:2023** (vertebral standard for AI Management Systems) and operationalizes:

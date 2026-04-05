@@ -1,0 +1,531 @@
+# DevTrail - 采用指南
+
+**在新项目或现有项目中采用 DevTrail 的完整指南。**
+
+[![Strange Days Tech](https://img.shields.io/badge/by-Strange_Days_Tech-purple.svg)](https://strangedays.tech)
+
+**语言**: [English](../../../adopters/ADOPTION-GUIDE.md) | [Español](../../es/adopters/ADOPTION-GUIDE.md) | 简体中文
+
+---
+
+## 目录
+
+1. [什么是 DevTrail？](#什么是-devtrail)
+2. [适用对象](#适用对象)
+3. [收益](#收益)
+4. [标准合规](#标准合规)
+5. [采用路径 A：新项目](#采用路径-a新项目)
+6. [采用路径 B：现有项目](#采用路径-b现有项目)
+7. [配置](#配置)
+8. [验证](#验证)
+9. [常见问题](#常见问题)
+
+---
+
+## 什么是 DevTrail？
+
+DevTrail 是一个面向软件开发团队的**符合 ISO 42001 的 AI 治理平台**。它提供：
+
+- **12 种结构化文档类型**，覆盖完整的开发和 AI 生命周期
+- **法规合规自动化** — EU AI Act、ISO 42001、NIST AI RMF 评分和审计跟踪
+- **AI Agent 问责制**，通过强制身份标识、置信度跟踪和自主权限制
+- **人工监督**，通过对关键和高风险变更的必需审查工作流
+- **可追溯性**，连接需求 → 设计 → 实现 → 测试 → 事件
+
+### 核心原则
+
+> **"没有记录的痕迹和治理证明，就不应有重大变更。"**
+
+DevTrail 确保每一个有意义的变更——无论是人工还是 AI 做出的——都被记录、归属和可审计。采用 DevTrail 的团队能产出兼容 **ISO/IEC 42001 认证**和 **EU AI Act 合规**的证据。
+
+### 为什么是现在？
+
+**EU AI Act 将于 2026 年 8 月起强制执行**。ISO/IEC 42001 是 AI 管理系统的国际标准。使用 AI 进行开发的组织需要有据可查的治理——这不是锦上添花，而是法规要求。DevTrail 从第一天起就将这些要求运营化。
+
+### DevTrail 不是什么
+
+- 它不是文档生成器——它提供结构、模板和治理规则
+- 它不是代码注释或 API 文档的替代品
+- 它不是项目管理工具或版本控制系统
+- 它不是完整的 ISO 42001 实现——它在其范围内产出兼容的证据
+
+---
+
+## 适用对象
+
+### 目标用户
+
+| 用户类型 | 采用驱动因素 |
+|----------|--------------|
+| **使用 AI 编码助手的团队** | 为法规审计和质量保证证明治理 |
+| **高风险 AI 系统** | EU AI Act 要求文档化的风险管理和透明度 |
+| **寻求 ISO 42001 的组织** | DevTrail 产出可认证的证据 |
+| **受监管行业**（金融、医疗、欧盟） | 2026 年 8 月起强制法规合规 |
+| **独立开发者** | 以结构化方式跟踪决策和 AI 辅助变更 |
+| **开源维护者** | 透明地记录贡献决策 |
+
+### 兼容的开发环境
+
+DevTrail 提供以下平台的配置文件：
+
+| 平台 | 配置文件 | 状态 |
+|------|----------|------|
+| **Claude Code** (Anthropic) | `CLAUDE.md` | ✅ 已支持 |
+| **Cursor** | `.cursorrules` | ✅ 已支持 |
+| **GitHub Copilot CLI** | `.github/copilot-instructions.md` | ✅ 已支持 |
+| **Gemini CLI** (Google) | `GEMINI.md` | ✅ 已支持 |
+| **其他 AI 工具** | 从任意配置文件复制规则 | ✅ 可适配 |
+
+### 兼容的方法论
+
+DevTrail 适用于任何开发方法论：
+
+| 方法论 | DevTrail 如何融入 |
+|--------|-------------------|
+| **Agile/Scrum** | REQ 文档映射到用户故事；ADR 记录 Sprint 决策 |
+| **瀑布模型** | 从需求到实现的完整可追溯性 |
+| **DevOps/SRE** | INC 文档用于事后复盘；TDE 用于技术债务跟踪 |
+| **Domain-Driven Design** | ADR 记录限界上下文决策 |
+| **Test-Driven Development** | TES 文档记录测试策略 |
+
+---
+
+## 收益
+
+### 法规合规方面
+
+| 收益 | 描述 |
+|------|------|
+| **EU AI Act 就绪** | 内置风险分类、事件报告和透明度模板 |
+| **ISO 42001 兼容** | 文档结构符合认证审计要求 |
+| **NIST AI RMF 映射** | 明确覆盖 12 个 GenAI 风险类别和治理功能 |
+| **完整的审计跟踪** | `devtrail audit` 生成可导出的时间线和可追溯性报告 |
+| **合规评分** | `devtrail compliance` 提供基于百分比的法规差距分析 |
+
+### 开发团队方面
+
+| 收益 | 描述 |
+|------|------|
+| **组织记忆** | 决策在团队成员变动后依然存续 |
+| **加速新人上手** | 新成员通过 ADR 和 AIDEC 理解"为什么" |
+| **减少返工** | 保留的上下文防止重复犯错 |
+| **清晰的问责** | 知道谁（或什么）做了每个变更 |
+
+### AI 辅助开发方面
+
+| 收益 | 描述 |
+|------|------|
+| **AI 透明度** | 每个 AI 操作都带有置信度级别记录 |
+| **人工监督** | 关键决策需要人工批准 |
+| **伦理保障** | ETH 和 DPIA 文档确保负责任地使用 AI |
+| **治理指标** | `devtrail metrics` 跟踪审查率、风险分布和趋势 |
+
+---
+
+## 标准合规
+
+DevTrail 对齐并支持以下标准的合规：
+
+### 软件工程标准
+
+| 标准 | DevTrail 如何帮助 |
+|------|-------------------|
+| **ISO/IEC/IEEE 29148:2018** | REQ 文档遵循结构化需求格式，包含外部接口和可追溯性 |
+| **ISO/IEC 25010:2023** | 在 ADR 和 REQ 非功能性需求中评估 9 个质量特性 |
+| **ISO/IEC/IEEE 29119-3:2021** | TES 文档遵循测试文档层次结构（策略 → 策略 → 计划） |
+| **ISO/IEC 12207** | 生命周期文档覆盖 |
+
+### AI 管理与治理
+
+| 标准 | DevTrail 如何帮助 |
+|------|-------------------|
+| **ISO/IEC 42001:2023** | 核心标准 — AI-GOVERNANCE-POLICY.md 将所有附录 A 控制项映射到 DevTrail 文档 |
+| **EU AI Act** | ETH 中的风险分类、INC 中的事件报告时间线、AILOG 中的法规字段 |
+| **NIST AI RMF 1.0 / 600-1** | ETH/AILOG 中的 12 个 GenAI 风险类别，MAP/MEASURE/MANAGE/GOVERN 覆盖 |
+| **ISO/IEC 23894:2023** | AI 风险管理与 ETH 和 AI-RISK-CATALOG 对齐 |
+| **GDPR** | ETH 文档含 GDPR 法律依据部分，DPIA 用于隐私影响评估 |
+
+### 架构文档
+
+| 标准 | DevTrail 如何帮助 |
+|------|-------------------|
+| **ADR (Architecture Decision Records)** | 原生 ADR 支持，含扩展元数据和不可变规则 |
+| **arc42** | ADR 补充 arc42 决策文档 |
+| **C4 Model** | ADR 在 C4 每个层级记录决策 |
+
+### 合规与治理
+
+| 法规 | DevTrail 如何帮助 |
+|------|-------------------|
+| **GDPR** | ETH 文档用于隐私评估，DPIA 用于数据保护影响 |
+| **SOC 2** | 通过 AILOG 进行变更文档和访问记录 |
+| **ISO 27001** | 通过 SEC 评估进行安全决策文档 |
+| **HIPAA** | 医疗应用的审计跟踪 |
+
+### 可观测性（可选）
+
+| 标准 | DevTrail 如何帮助 |
+|------|-------------------|
+| **OpenTelemetry** | REQ、TES、INC 中的可选可观测性部分；`observabilidad` 标签用于仪表化变更 |
+
+---
+
+## 采用路径 A：新项目
+
+### 选项 1：CLI（推荐）
+
+**快速安装（预编译二进制文件）：**
+
+```bash
+# Linux / macOS
+curl -fsSL https://raw.githubusercontent.com/StrangeDaysTech/devtrail/main/install.sh | sh
+```
+
+```powershell
+# Windows (PowerShell)
+irm https://raw.githubusercontent.com/StrangeDaysTech/devtrail/main/install.ps1 | iex
+```
+
+或从源码通过 Cargo 安装：
+
+```bash
+cargo install devtrail-cli
+```
+
+然后初始化并提交：
+
+```bash
+cd your-project
+devtrail init .
+
+git add .devtrail/ DEVTRAIL.md
+git commit -m "chore: adopt DevTrail"
+```
+
+CLI 自动完成：
+- 从 GitHub 下载最新的 DevTrail 版本
+- 设置 `.devtrail/` 目录结构
+- 创建包含治理规则的 `DEVTRAIL.md`
+- 配置 AI Agent 指令（`CLAUDE.md`、`GEMINI.md`、`.cursorrules` 等）
+- 复制 CI/CD 工作流
+
+### 选项 2：手动设置
+
+1. **下载最新版本**
+
+   前往 [GitHub Releases](https://github.com/StrangeDaysTech/devtrail/releases)，下载最新的 `fw-*` 版本 ZIP（例如 `fw-4.1.1`）。
+
+2. **解压到你的项目**
+   ```bash
+   unzip devtrail-fw-*.zip -d your-project/
+   ```
+
+3. **提交结构**
+   ```bash
+   git add .devtrail/ DEVTRAIL.md
+   git commit -m "chore: adopt DevTrail for documentation governance"
+   ```
+
+---
+
+## 采用路径 B：现有项目
+
+### 阶段 1：评估（第 1 天）
+
+1. **评估当前文档**
+
+   回答以下问题：
+   - 你有现有的 ADR 吗？它们在哪里？
+   - 你有 `docs/` 文件夹吗？里面有什么？
+   - 是否已有命名规范？
+   - 你使用 AI 编码助手吗？
+
+2. **规划迁移**
+
+   | 当前状态 | 建议操作 |
+   |----------|----------|
+   | 没有文档 | 从零开始使用 DevTrail |
+   | `docs/` 文件夹中有文档 | 保留 `docs/` 存放面向用户的文档，添加 `.devtrail/` 存放开发文档 |
+   | 已有 ADR | 迁移到 `.devtrail/02-design/decisions/`，使用新命名 |
+   | 混合文档 | 分类并逐步迁移 |
+
+### 阶段 2：安装（第 1-2 天）
+
+1. **添加 DevTrail 结构**
+   ```bash
+   # 使用 CLI（推荐）
+   devtrail init .
+
+   # 或手动：从 GitHub Releases 下载最新的 fw-* 版本
+   # https://github.com/StrangeDaysTech/devtrail/releases
+   ```
+
+2. **解决与现有 `docs/` 的冲突**
+
+   DevTrail 专门使用 `.devtrail/` 以避免冲突：
+
+   ```
+   your-project/
+   ├── docs/                    ← 保留用于 API 文档、用户指南等
+   │   ├── api/
+   │   └── user-guide/
+   ├── .devtrail/              ← 添加用于开发文档
+   │   ├── 00-governance/
+   │   ├── 01-requirements/
+   │   └── ...
+   └── src/
+   ```
+
+### 阶段 3：迁移（第 1-2 周）
+
+1. **迁移现有 ADR**
+
+   对于每个现有 ADR：
+   ```bash
+   # 旧：docs/adr/001-use-postgresql.md
+   # 新：.devtrail/02-design/decisions/ADR-2024-01-15-001-use-postgresql.md
+   ```
+
+   在 front-matter 中添加 DevTrail 元数据：
+   ```yaml
+   ---
+   id: ADR-2024-01-15-001
+   title: Use PostgreSQL for primary database
+   status: accepted
+   created: 2024-01-15
+   agent: human
+   confidence: high
+   review_required: false
+   risk_level: high
+   # 保留原始元数据
+   original_id: "001"
+   migrated_from: "docs/adr/001-use-postgresql.md"
+   ---
+   ```
+
+2. **记录迁移**
+
+   创建 AILOG 记录迁移过程：
+   ```
+   .devtrail/07-ai-audit/agent-logs/AILOG-2025-01-27-001-devtrail-adoption.md
+   ```
+
+### 阶段 4：团队采用（第 2-4 周）
+
+1. **更新贡献指南**
+
+   在你的 `CONTRIBUTING.md` 中添加：
+   ```markdown
+   ## Documentation
+
+   This project uses [DevTrail](https://github.com/StrangeDaysTech/devtrail) for documentation governance.
+
+   - All significant changes must be documented in `.devtrail/`
+   - AI-assisted changes require AILOG entries
+   - Architectural decisions require ADR documents
+
+   See `.devtrail/QUICK-REFERENCE.md` for document types and naming.
+   ```
+
+2. **启用 pre-commit 钩子（可选）**
+   ```bash
+   # 安装 pre-commit 钩子
+   echo 'devtrail validate --staged' > .git/hooks/pre-commit
+   chmod +x .git/hooks/pre-commit
+
+   # 或使用 Husky
+   npx husky add .husky/pre-commit "devtrail validate --staged"
+   ```
+
+3. **启用 GitHub Actions（可选）**
+
+   `.github/workflows/docs-validation.yml` 工作流将自动在 PR 中验证文档。
+
+### 阶段 5：渐进推广
+
+| 周次 | 重点 |
+|------|------|
+| 第 1 周 | 核心团队开始为新决策使用 DevTrail |
+| 第 2 周 | 迁移关键的现有 ADR |
+| 第 3 周 | 在 CI/CD 中启用验证 |
+| 第 4 周 | 全团队采用；记录现有技术债务 |
+
+---
+
+## 配置
+
+### 自定义 Agent 标识符
+
+每个 AI 平台都有自己的配置文件，用于：
+
+1. 标识 Agent（例如 `claude-code-v1.0`）
+2. 定义何时需要文档（>10 行、安全变更等）
+3. 设置自主权限制
+4. 指定模板位置
+5. 要求文档报告
+6. **强制 Git 工作流**（分支命名、约定式提交、不直接提交到 `main`）
+
+更新 Agent 标识符以匹配你的版本：
+
+```yaml
+# 在任意 Agent 配置文件中
+agent: claude-code-v1.0      # 默认
+agent: claude-code-v2.1      # 你的自定义版本
+agent: acme-corp-claude-v1   # 组织特定
+```
+
+### 自定义文档类型
+
+要添加新的文档类型：
+
+1. **创建模板**
+   ```
+   .devtrail/templates/TEMPLATE-NEWTYPE.md
+   ```
+
+2. **更新治理文档**
+
+   在以下文件中添加新类型：
+   - `.devtrail/00-governance/DOCUMENTATION-POLICY.md`
+   - `.devtrail/00-governance/AGENT-RULES.md`
+   - `.devtrail/QUICK-REFERENCE.md`
+
+3. **更新 Agent 配置**
+
+   在所有 Agent 配置文件中添加新类型。
+
+4. **更新验证**
+
+   在以下位置添加新类型：
+   - CLI 验证逻辑（`devtrail validate`）
+   - `.github/workflows/docs-validation.yml`
+
+### 自定义文件夹结构
+
+编号的文件夹结构（`00-governance`、`01-requirements` 等）设计目的是：
+- 在文件浏览器中逻辑排序
+- 清晰的关注点分离
+- 便于导航
+
+你可以重命名文件夹，但需更新以下位置的所有引用：
+- Agent 配置文件
+- 治理文档
+
+---
+
+## 验证
+
+### 使用 Skills 验证（Claude Code）
+
+如果使用 Claude Code，可以用内置 Skill 验证文档合规性：
+
+```bash
+/devtrail-status
+```
+
+此 Skill 显示：
+- 最近创建了哪些 DevTrail 文档
+- 哪些修改过的文件可能需要文档
+- 整体文档合规状态
+
+### 手动验证
+
+采用后，验证你的设置：
+
+```bash
+# 运行验证（跨平台）
+devtrail validate
+```
+
+### 检查清单
+
+- [ ] `.devtrail/` 文件夹结构存在
+- [ ] 至少有一个 Agent 配置文件（`CLAUDE.md`、`GEMINI.md` 等）
+- [ ] 治理文档存在于 `.devtrail/00-governance/`
+- [ ] 模板存在于 `.devtrail/templates/`
+- [ ] Git 分支策略记录在 `.devtrail/03-implementation/`
+- [ ] `QUICK-REFERENCE.md` 可访问
+- [ ] `devtrail validate` 无错误运行
+- [ ] （可选）Pre-commit 钩子已安装
+- [ ] （可选）GitHub Actions 工作流已启用
+
+---
+
+## 常见问题
+
+### 通用问题
+
+**问：DevTrail 会替代我现有的文档吗？**
+
+答：不会。DevTrail 用于*开发过程文档*（决策、变更、审查）。保留你现有的 `docs/` 文件夹存放面向用户的文档、API 参考和指南。
+
+**问：我不使用 AI 编码助手也能从 DevTrail 受益吗？**
+
+答：可以。DevTrail 同样适用于纯人工团队。AI 审计功能（AILOG、AIDEC、ETH）在使用 AI 助手时特别有价值，但 ADR、REQ、TDE 和其他文档类型对任何团队都有用。
+
+**问：DevTrail 增加多少额外开销？**
+
+答：DevTrail 遵循"最小可行文档"原则。只有重大变更需要文档。微小变更（错别字、格式）被明确排除在外。
+
+### 技术问题
+
+**问：为什么使用 `.devtrail/` 而不是 `docs/`？**
+
+答：`docs/` 文件夹通常用于面向用户的文档、GitHub Pages 或生成的 API 文档。使用 `.devtrail/` 避免冲突，并清晰地将开发文档与用户文档分开。
+
+**问：可以在 Monorepo 中使用 DevTrail 吗？**
+
+答：可以。你可以：
+- 在根目录放一个 `.devtrail/`，覆盖整个 Monorepo
+- 在每个包/服务中放单独的 `.devtrail/` 文件夹
+- 使用混合方案，在根目录共享治理
+
+**问：如何处理敏感信息？**
+
+答：DevTrail 明确禁止记录凭据、令牌或密钥。验证脚本会检测常见的敏感模式并发出警告。对于确实敏感的决策，记录决策的*存在*而不包含敏感细节。
+
+### 采用问题
+
+**问：我的团队抗拒更多文档，怎么说服他们？**
+
+答：从小处开始：
+1. 先只用 ADR 记录架构决策
+2. 通过加速新成员上手展示价值
+3. 展示回顾旧决策时节省的时间
+4. 逐步扩展到其他文档类型
+
+**问：如何处理采用 DevTrail 之前创建的文档？**
+
+答：有三种选择：
+1. **迁移**：将旧文档转换为 DevTrail 格式（推荐用于重要文档）
+2. **引用**：保留旧文档，从 DevTrail 文档中引用它们
+3. **归档**：将旧文档移至归档文件夹，使用 DevTrail 重新开始
+
+**问：如果我的 AI 助手不遵守规则怎么办？**
+
+答：DevTrail 规则是指令，而非强制执行。如果 AI 助手创建了不合规的文档：
+1. Pre-commit 钩子（`devtrail validate --staged`）会捕获验证错误
+2. CI/CD 会在 PR 中标记问题
+3. 你可以手动修正并在下一次提示中指导 AI
+
+---
+
+## 获取帮助
+
+- **CLI 参考手册**: [CLI-REFERENCE.md](CLI-REFERENCE.md) — 详细的命令参考
+- **工作流**: [WORKFLOWS.md](WORKFLOWS.md) — 推荐的日常使用模式
+- **Issues**: [GitHub Issues](https://github.com/StrangeDaysTech/devtrail/issues)
+- **讨论**: [GitHub Discussions](https://github.com/StrangeDaysTech/devtrail/discussions)
+- **贡献**: 参见 [CONTRIBUTING.md](../CONTRIBUTING.md)
+
+---
+
+---
+
+<div align="center">
+
+**DevTrail** — 因为每一次变更都值得被记录。
+
+[返回 README](../README.md) • [Strange Days Tech](https://strangedays.tech)
+
+</div>

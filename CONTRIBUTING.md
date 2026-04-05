@@ -2,7 +2,7 @@
 
 Thank you for your interest in contributing to DevTrail! This document provides guidelines and information for contributors.
 
-**Languages**: English | [Español](docs/i18n/es/CONTRIBUTING.md)
+**Languages**: English | [Español](docs/i18n/es/CONTRIBUTING.md) | [简体中文](docs/i18n/zh-CN/CONTRIBUTING.md)
 
 ## Table of Contents
 

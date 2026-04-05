@@ -4,7 +4,7 @@
 
 [![Strange Days Tech](https://img.shields.io/badge/by-Strange_Days_Tech-purple.svg)](https://strangedays.tech)
 
-**Languages**: English
+**Languages**: English | [Español](../i18n/es/adopters/CLI-REFERENCE.md) | [简体中文](../i18n/zh-CN/adopters/CLI-REFERENCE.md)
 
 ---
 

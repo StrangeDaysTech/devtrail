@@ -15,7 +15,7 @@
 [Documentación](#documentación) •
 [Contribuir](#contribuir)
 
-**Idiomas**: [English](../../../README.md) | Español
+**Idiomas**: [English](../../../README.md) | Español | [简体中文](../zh-CN/README.md)
 
 </div>
 

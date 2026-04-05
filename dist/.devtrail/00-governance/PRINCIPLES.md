@@ -2,6 +2,8 @@
 
 > These principles guide all documentation decisions in the project.
 
+**Languages**: English | [Español](i18n/es/PRINCIPLES.md) | [简体中文](i18n/zh-CN/PRINCIPLES.md)
+
 ---
 
 ## 1. Total Traceability

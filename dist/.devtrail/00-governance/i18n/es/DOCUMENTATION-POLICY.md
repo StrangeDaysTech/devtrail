@@ -1,6 +1,6 @@
 # Política de Documentación - DevTrail
 
-**Idiomas**: [English](../../DOCUMENTATION-POLICY.md) | Español
+**Idiomas**: [English](../../DOCUMENTATION-POLICY.md) | Español | [简体中文](../zh-CN/DOCUMENTATION-POLICY.md)
 
 ## Marco de Gobernanza
 

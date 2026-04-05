@@ -15,7 +15,7 @@
 [Documentation](#documentation) •
 [Contributing](#contributing)
 
-**Languages**: English | [Español](docs/i18n/es/README.md)
+**Languages**: English | [Español](docs/i18n/es/README.md) | [简体中文](docs/i18n/zh-CN/README.md)
 
 </div>
 

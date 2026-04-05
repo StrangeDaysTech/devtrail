@@ -4,7 +4,7 @@
 >
 > **This is a derived document** — DOCUMENTATION-POLICY.md is the authoritative source.
 
-**Languages**: English | [Español](i18n/es/QUICK-REFERENCE.md)
+**Languages**: English | [Español](i18n/es/QUICK-REFERENCE.md) | [简体中文](i18n/zh-CN/QUICK-REFERENCE.md)
 
 ---
 

@@ -2,7 +2,7 @@
 
 > Este documento define las reglas que todos los agentes de IA deben seguir cuando trabajan en proyectos bajo DevTrail.
 
-**Idiomas**: [English](../../AGENT-RULES.md) | Español
+**Idiomas**: [English](../../AGENT-RULES.md) | Español | [简体中文](../zh-CN/AGENT-RULES.md)
 
 ---
 

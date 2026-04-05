@@ -2,7 +2,7 @@
 
 > Estos principios guían todas las decisiones de documentación en el proyecto.
 
-**Idiomas**: [English](../../PRINCIPLES.md) | Español
+**Idiomas**: [English](../../PRINCIPLES.md) | Español | [简体中文](../zh-CN/PRINCIPLES.md)
 
 ---
 
