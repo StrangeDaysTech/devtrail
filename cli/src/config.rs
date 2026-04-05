@@ -5,7 +5,7 @@ use std::path::Path;
 /// DevTrail project configuration from .devtrail/config.yml
 #[derive(Debug, Deserialize, Serialize)]
 pub struct DevTrailConfig {
-    /// Language setting: "en" or "es"
+    /// Language setting: "en", "es", or "zh-CN"
     #[serde(default = "default_language")]
     pub language: String,
     /// Complexity analysis settings

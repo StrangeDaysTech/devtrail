@@ -2,7 +2,7 @@
 
 > This guide explains how to use the C4 Model with Mermaid syntax in DevTrail documents, particularly in ADR (Architecture Decision Record) documents.
 
-**Languages**: English | [Español](i18n/es/C4-DIAGRAM-GUIDE.md)
+**Languages**: English | [Español](i18n/es/C4-DIAGRAM-GUIDE.md) | [简体中文](i18n/zh-CN/C4-DIAGRAM-GUIDE.md)
 
 ---
 

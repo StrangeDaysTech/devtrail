@@ -24,7 +24,7 @@ DevTrail uses a configuration file to set the project's language:
 
 ```yaml
 # Language setting for templates and documentation
-# Supported values: en, es
+# Supported values: en, es, zh-CN
 # Default: en (English)
 language: en
 ```
@@ -38,6 +38,7 @@ language: en
 |----------|---------------|
 | `en` (default) | `.devtrail/templates/TEMPLATE-*.md` |
 | `es` | `.devtrail/templates/i18n/es/TEMPLATE-*.md` |
+| `zh-CN` | `.devtrail/templates/i18n/zh-CN/TEMPLATE-*.md` |
 
 3. If the config file doesn't exist or `language` is not set, English is used as default
 
@@ -252,20 +253,30 @@ devtrail/
 │       │   ├── CODE_OF_CONDUCT.md
 │       │   └── adopters/
 │       │       └── ADOPTION-GUIDE.md
+│       ├── zh-CN/                   # Chinese Simplified translations
+│       │   ├── README.md
+│       │   ├── CONTRIBUTING.md
+│       │   ├── CODE_OF_CONDUCT.md
+│       │   └── adopters/
+│       │       └── ADOPTION-GUIDE.md
 │       └── [other-lang]/            # Future languages
 │
 └── .devtrail/
     ├── templates/
     │   ├── TEMPLATE-*.md            # English (default)
     │   └── i18n/
-    │       └── es/
-    │           └── TEMPLATE-*.md    # Spanish templates
+    │       ├── es/
+    │       │   └── TEMPLATE-*.md    # Spanish templates
+    │       └── zh-CN/
+    │           └── TEMPLATE-*.md    # Chinese Simplified templates
     │
     └── 00-governance/
         ├── *.md                     # English (default)
         └── i18n/
-            └── es/
-                └── *.md             # Spanish governance docs
+            ├── es/
+            │   └── *.md             # Spanish governance docs
+            └── zh-CN/
+                └── *.md             # Chinese Simplified governance docs
 ```
 
 ### File Naming
@@ -342,7 +353,7 @@ Before submitting a translation, verify:
 |------|----------|--------|
 | `es` | Spanish (Español) | Available |
 | `pt` | Portuguese (Português) | Planned |
-| `zh-CN` | Chinese Simplified (简体中文) | Planned |
+| `zh-CN` | Chinese Simplified (简体中文) | Available |
 
 ---
 

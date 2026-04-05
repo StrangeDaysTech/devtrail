@@ -2,7 +2,7 @@
 
 ¡Gracias por tu interés en contribuir a DevTrail! Este documento proporciona guías e información para contribuidores.
 
-**Idiomas**: [English](../../../CONTRIBUTING.md) | Español
+**Idiomas**: [English](../../../CONTRIBUTING.md) | Español | [简体中文](../zh-CN/CONTRIBUTING.md)
 
 ## Tabla de Contenidos
 

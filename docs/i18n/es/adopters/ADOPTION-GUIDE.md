@@ -4,7 +4,7 @@
 
 [![Strange Days Tech](https://img.shields.io/badge/by-Strange_Days_Tech-purple.svg)](https://strangedays.tech)
 
-**Idiomas**: [English](../../../adopters/ADOPTION-GUIDE.md) | Español
+**Idiomas**: [English](../../../adopters/ADOPTION-GUIDE.md) | Español | [简体中文](../../zh-CN/adopters/ADOPTION-GUIDE.md)
 
 ---
 

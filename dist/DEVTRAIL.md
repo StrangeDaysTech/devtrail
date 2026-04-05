@@ -29,7 +29,7 @@ These rules operationalize **ISO/IEC 42001:2023** (AI Management System) — Dev
 Check `.devtrail/config.yml` for the project's language setting:
 
 ```yaml
-language: en  # Options: en, es (default: en)
+language: en  # Options: en, es, zh-CN (default: en)
 ```
 
 **Template paths based on language:**
@@ -38,6 +38,7 @@ language: en  # Options: en, es (default: en)
 |----------|---------------|
 | `en` (default) | `.devtrail/templates/TEMPLATE-*.md` |
 | `es` | `.devtrail/templates/i18n/es/TEMPLATE-*.md` |
+| `zh-CN` | `.devtrail/templates/i18n/zh-CN/TEMPLATE-*.md` |
 
 If the config file doesn't exist or `language` is not set, use English (`en`) as default.
 

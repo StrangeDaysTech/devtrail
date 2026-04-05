@@ -1,6 +1,6 @@
 # Código de Conducta del Pacto del Contribuidor
 
-**Idiomas**: [English](../../../CODE_OF_CONDUCT.md) | Español
+**Idiomas**: [English](../../../CODE_OF_CONDUCT.md) | Español | [简体中文](../zh-CN/CODE_OF_CONDUCT.md)
 
 ## Nuestro Compromiso
 

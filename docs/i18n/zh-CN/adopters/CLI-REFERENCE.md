@@ -1,0 +1,670 @@
+# DevTrail CLI 参考手册
+
+**`devtrail` 命令行工具的完整参考。**
+
+[![Strange Days Tech](https://img.shields.io/badge/by-Strange_Days_Tech-purple.svg)](https://strangedays.tech)
+
+**语言**: [English](../../../adopters/CLI-REFERENCE.md) | [Español](../../es/adopters/CLI-REFERENCE.md) | 简体中文
+
+---
+
+## 目录
+
+1. [安装](#安装)
+2. [版本管理](#版本管理)
+3. [命令](#命令) — init, update, remove, status, repair, validate, new, compliance, metrics, analyze, audit, explore, about
+4. [环境变量](#环境变量)
+5. [退出码](#退出码)
+
+---
+
+## 安装
+
+使用以下方法之一安装 DevTrail CLI。完整安装说明参见 [README](../README.md#快速开始)。
+
+**快速安装（预编译二进制文件）：**
+
+```bash
+# Linux / macOS
+curl -fsSL https://raw.githubusercontent.com/StrangeDaysTech/devtrail/main/install.sh | sh
+```
+
+```powershell
+# Windows (PowerShell)
+irm https://raw.githubusercontent.com/StrangeDaysTech/devtrail/main/install.ps1 | iex
+```
+
+**从源码安装：**
+
+```bash
+cargo install devtrail-cli
+```
+
+---
+
+## 版本管理
+
+DevTrail 为每个组件使用**独立的版本标签**：
+
+| 组件 | 标签前缀 | 示例 | 包含内容 |
+|------|----------|------|----------|
+| Framework | `fw-` | `fw-4.1.1` | 模板（12 种类型）、治理文档、指令 |
+| CLI | `cli-` | `cli-3.1.1` | `devtrail` 二进制文件 |
+
+Framework 和 CLI 独立发布。Framework 更新不需要 CLI 更新，反之亦然。
+
+**检查已安装的版本：**
+
+```bash
+devtrail about    # 显示 CLI 版本 + Framework 版本（如已安装）
+devtrail status   # 显示完整的安装状态，包括版本
+```
+
+---
+
+## 命令
+
+### `devtrail init [path]`
+
+在项目目录中初始化 DevTrail。
+
+**参数：**
+
+| 参数 | 默认值 | 描述 |
+|------|--------|------|
+| `path` | `.`（当前目录） | 目标项目目录 |
+
+**功能：**
+
+1. 从 GitHub 下载最新的 Framework 版本（`fw-*`）
+2. 创建 `.devtrail/` 目录结构
+3. 创建包含治理规则的 `DEVTRAIL.md`
+4. 配置 AI Agent 指令文件（`CLAUDE.md`、`GEMINI.md`、`.cursorrules` 等）
+5. 复制 CI/CD 工作流
+
+**示例：**
+
+```bash
+$ devtrail init .
+✔ Downloaded DevTrail fw-4.1.1
+✔ Created .devtrail/ directory structure
+✔ Created DEVTRAIL.md
+✔ Configured AI agent directives
+
+DevTrail initialized successfully!
+Next: git add .devtrail/ DEVTRAIL.md && git commit -m "chore: adopt DevTrail"
+```
+
+---
+
+### `devtrail update`
+
+将 Framework 和 CLI **同时**更新到最新版本。等同于依次运行 `update-framework` 和 `update-cli`。
+
+如果当前目录中不存在 `.devtrail/`，Framework 更新将被跳过并显示警告。
+
+**示例：**
+
+```bash
+$ devtrail update
+Updating framework...
+✔ Framework updated to fw-4.1.1
+Updating CLI...
+✔ CLI updated to cli-3.1.1
+```
+
+---
+
+### `devtrail update-framework`
+
+仅更新 Framework 文件。在 GitHub 上查找最新的 `fw-*` 版本。
+
+**冲突处理：** 如果你修改了 Framework 文件（例如治理文档或模板），更新会保留你的修改并报告冲突以便手动解决。
+
+**示例：**
+
+```bash
+$ devtrail update-framework
+✔ Framework updated to fw-4.1.1
+```
+
+---
+
+### `devtrail update-cli`
+
+自动更新 `devtrail` 二进制文件。自动检测安装方式并使用相应的更新机制：
+
+- **预编译二进制文件**（通过 `install.sh` / `install.ps1` 安装）：从 GitHub Releases 下载最新二进制文件
+- **Cargo**（通过 `cargo install` 安装）：运行 `cargo install --force devtrail-cli`
+
+使用 `--method` 覆盖自动检测：`--method=github` 或 `--method=cargo`。
+
+**示例：**
+
+```bash
+$ devtrail update-cli
+✔ CLI updated to cli-3.1.1
+
+$ devtrail update-cli --method=cargo
+Compiling from source, this may take a few minutes...
+✔ CLI updated to cli-3.1.1
+```
+
+---
+
+### `devtrail remove [--full]`
+
+从当前项目中移除 DevTrail。
+
+**标志：**
+
+| 标志 | 描述 |
+|------|------|
+| `--full` | 移除所有内容，包括你在 `.devtrail/` 中创建的文档。会请求确认。 |
+
+**默认行为**（不带 `--full`）：移除 Framework 结构但保留你在 `.devtrail/` 中创建的文档。
+
+**示例：**
+
+```bash
+$ devtrail remove
+✔ DevTrail framework removed. User documents preserved in .devtrail/.
+
+$ devtrail remove --full
+⚠ This will delete all DevTrail files including your documents.
+Continue? [y/N]: y
+✔ DevTrail completely removed.
+```
+
+---
+
+### `devtrail status [path]`
+
+显示安装状态和文档统计。
+
+**参数：**
+
+| 参数 | 默认值 | 描述 |
+|------|--------|------|
+| `path` | `.`（当前目录） | 目标项目目录 |
+
+**输出包含：**
+
+- 项目路径
+- Framework 版本
+- CLI 版本
+- 配置的语言
+- 目录结构完整性
+- 文档统计（按类型计数）
+
+**示例：**
+
+```
+$ devtrail status
+
+  ╔════════════════════════════════════════════════╗
+  ║ DevTrail Status                                ║
+  ╚════════════════════════════════════════════════╝
+
+  Project
+  ┌───────────┬──────────────────────────┐
+  │ Path      │ /home/user/my-project    │
+  │ Framework │ fw-4.1.1                 │
+  │ CLI       │ cli-3.1.1                │
+  │ Language  │ en                       │
+  └───────────┴──────────────────────────┘
+
+  Structure
+  ✓ All 15 items present
+  ┌──────────────────────────────┬────────┐
+  │ Directory / File             │ Status │
+  ├──────────────────────────────┼────────┤
+  │ 00-governance/               │ ✓ OK   │
+  │ ...                          │ ...    │
+  └──────────────────────────────┴────────┘
+
+  Documentation
+  ┌──────────────────────────────┬───────┐
+  │ Type                         │ Count │
+  ├──────────────────────────────┼───────┤
+  │ AILOG AI Action Logs         │    12 │
+  │ ADR   Architecture Decisions │     7 │
+  │ ...                          │   ... │
+  ├──────────────────────────────┼───────┤
+  │ Total                        │    30 │
+  └──────────────────────────────┴───────┘
+
+  → Run devtrail explore to browse documentation interactively
+```
+
+---
+
+### `devtrail repair [path]`
+
+通过恢复缺失的目录和 Framework 文件来修复损坏的 DevTrail 安装。
+
+**参数：**
+
+| 参数 | 默认值 | 描述 |
+|------|--------|------|
+| `path` | `.`（当前目录） | 目标项目目录 |
+
+**功能：**
+
+1. 检查缺失的目录并使用 `.gitkeep` 恢复
+2. 如果需要恢复文件（模板、治理文档、配置），**一次性**下载 Framework 版本
+3. 如果 `DEVTRAIL.md` 缺失，重新注入指令
+4. 修复后重新计算校验和
+5. 不会修改或删除用户生成的文档
+
+**示例：**
+
+```bash
+$ devtrail repair
+Repairing DevTrail in /home/user/my-project
+  → Found 1 issue(s) to repair
+→ Restoring 1 missing directory...
+✓ Restored .devtrail/templates/
+→ Downloading framework to restore missing files...
+  Using version: fw-4.1.1
+✓ Restored 16 file(s) from framework
+→ Updating checksums...
+
+✓ DevTrail repaired successfully!
+```
+
+---
+
+### `devtrail validate [path] [--fix] [--staged]`
+
+验证 DevTrail 文档的合规性和正确性。
+
+**参数和标志：**
+
+| 参数/标志 | 默认值 | 描述 |
+|-----------|--------|------|
+| `path` | `.`（当前目录） | 目标项目目录 |
+| `--fix` | — | 自动修复简单问题（例如为高风险文档添加缺失的 `review_required: true`） |
+| `--staged` | — | 仅验证已暂存（git add）的文件。适合 pre-commit 钩子。 |
+
+**检查项目：**
+
+- 命名规范（`TYPE-YYYY-MM-DD-NNN-description.md`）
+- 必需的元数据字段（id、title、status、created、agent、confidence、review_required、risk_level、tags、related）
+- 跨字段一致性（例如高风险必须有 review_required）
+- 类型特定字段（例如 INC 需要 severity，SEC 需要 threat_model_methodology）
+- 敏感信息检测（API 密钥、密码）
+- 关联文档存在性
+
+**示例：**
+
+```bash
+$ devtrail validate
+  DevTrail Validate
+  All 15 document(s) passed validation
+  0 error(s), 0 warning(s) in 15 document(s)
+
+$ devtrail validate --fix
+  DevTrail Validate
+  Auto-fixing 2 issue(s)...
+  ✓ Fixed 2 issue(s)
+```
+
+---
+
+### `devtrail new [path] [-t <type>] [--title <title>]`
+
+从模板创建新的 DevTrail 文档。
+
+**参数和标志：**
+
+| 参数/标志 | 默认值 | 描述 |
+|-----------|--------|------|
+| `path` | `.`（当前目录） | 目标项目目录 |
+| `--doc-type`, `-t` | — | 文档类型：`ailog`、`aidec`、`adr`、`eth`、`req`、`tes`、`inc`、`tde`、`sec`、`mcard`、`sbom`、`dpia` |
+| `--title` | — | 新文档的标题 |
+
+如果未指定 `--doc-type` 或 `--title`，将以交互方式提示。
+
+**示例：**
+
+```bash
+# 交互式 — 提示输入类型和标题
+$ devtrail new
+
+# 创建带标题的 AILOG（非交互式）
+$ devtrail new -t ailog --title "Implement JWT authentication"
+
+# 创建 ADR
+$ devtrail new --doc-type adr --title "Use PostgreSQL for persistence"
+```
+
+**输出示例：**
+
+```
+$ devtrail new -t ailog --title "Implement JWT authentication"
+
+  ✔ Created: .devtrail/07-ai-audit/agent-logs/AILOG-2026-04-01-001-implement-jwt-authentication.md
+
+  Next steps:
+    1. Edit the document to fill in details
+    2. Commit: git add .devtrail/07-ai-audit/agent-logs/AILOG-2026-04-01-001-implement-jwt-authentication.md
+```
+
+---
+
+### `devtrail compliance [path] [--standard <name>] [--all] [--output <format>]`
+
+检查 EU AI Act、ISO/IEC 42001 和 NIST AI RMF 的法规合规状态。
+
+**参数和标志：**
+
+| 参数/标志 | 默认值 | 描述 |
+|-----------|--------|------|
+| `path` | `.`（当前目录） | 目标项目目录 |
+| `--standard` | — | 检查特定标准：`eu-ai-act`、`iso-42001` 或 `nist-ai-rmf` |
+| `--all` | — | 检查全部三个标准 |
+| `--output` | `text` | 输出格式：`text`、`markdown` 或 `json` |
+
+如果未指定 `--standard` 或 `--all`，默认执行 `--all`。
+
+**检查内容：**
+
+- **EU AI Act**：风险分类、伦理审查关联、DPIA 存在性、事件报告
+- **ISO/IEC 42001**：治理策略、风险规划（ETH）、运营文档（AILOG/AIDEC）、附录 A 覆盖
+- **NIST AI RMF**：MAP（AILOG）、MEASURE（TES）、MANAGE（ETH/INC）、GOVERN（策略 + ADR）、GenAI 风险覆盖（12 个 NIST 600-1 类别）
+
+**示例：**
+
+```bash
+$ devtrail compliance --all
+  DevTrail Compliance
+  /home/user/my-project
+  12 document(s) analyzed
+
+  ■ EU AI Act 75%
+    ✓ [EU-001] AI systems have EU AI Act risk classification
+    ~ [EU-002] High-risk AI systems have ethical review (ETH) linked
+    ✓ [EU-003] Data Protection Impact Assessment (DPIA) exists where required
+    ✓ [EU-004] Incident reporting compliant with EU AI Act Art. 73
+
+  ■ ISO/IEC 42001 100%
+    ✓ [ISO-001] AI Governance Policy exists (Clauses 4-5)
+    ✓ [ISO-002] Risk planning documented — ETH reviews exist (Clause 6)
+    ✓ [ISO-003] AI lifecycle operations documented — AILOG + AIDEC (Clause 8)
+    ✓ [ISO-004] Annex A control coverage (6/6 groups)
+
+  ■ NIST AI RMF 60%
+    ✓ [NIST-MAP-001] MAP function — AI actions documented (AILOG)
+    ✓ [NIST-MEASURE-001] MEASURE function — Test plans exist (TES)
+    ✓ [NIST-MANAGE-001] MANAGE function — Risk management documented (ETH + INC)
+    ✓ [NIST-GOVERN-001] GOVERN function — Governance policy and decisions documented
+    ~ [NIST-GENAI-001] GenAI risk coverage — NIST AI 600-1 (4/12 categories)
+
+  Overall compliance: 78%
+
+$ devtrail compliance --standard eu-ai-act --output json
+[{"standard":"EuAiAct","checks":[...],"score":75.0}]
+```
+
+---
+
+### `devtrail metrics [path] [--period <period>] [--output <format>]`
+
+显示治理指标和文档统计。
+
+**参数和标志：**
+
+| 参数/标志 | 默认值 | 描述 |
+|-----------|--------|------|
+| `path` | `.`（当前目录） | 目标项目目录 |
+| `--period` | `last-30-days` | 时间段：`last-7-days`、`last-30-days`、`last-90-days` 或 `all` |
+| `--output` | `text` | 输出格式：`text`、`markdown` 或 `json` |
+
+**包含的指标：**
+
+- 指定时间段内按类型统计的文档数量
+- 审查合规率（需要审查的文档中已达到 accepted/superseded 状态的百分比）
+- 风险分布（low/medium/high/critical）
+- Agent 活动（每个 Agent 的文档数）
+- 与上一时期的趋势对比（↑/↓/→）
+
+**示例：**
+
+```bash
+$ devtrail metrics --period last-30-days
+  DevTrail Metrics
+  /home/user/my-project
+  Period: Last 30 days — 2026-02-25 to 2026-03-27
+
+  Documents by Type
+     AILOG   8 ████████
+       ETH   3 ███
+       ADR   2 ██
+       INC   1 █
+
+  Summary
+    → Total documents: 14
+    → Review compliance: 80% (4/5 reviewed)
+
+  Risk Distribution
+          low 8
+       medium 4
+         high 2
+
+  Agent Activity
+    claude-code 10
+    gemini-cli 4
+
+  Trends
+    ↑ Total documents 14 (was 9)
+    ↑ Reviews completed 4 (was 2)
+    → High/critical risk 2 (was 2)
+```
+
+---
+
+### `devtrail analyze [path] [--threshold <N>] [--output <format>] [--top <N>]`
+
+使用认知复杂度和圈复杂度指标分析代码复杂度，由 [arborist-metrics](https://crates.io/crates/arborist-metrics) 驱动。
+
+**参数和标志：**
+
+| 参数/标志 | 默认值 | 描述 |
+|-----------|--------|------|
+| `path` | `.`（当前目录） | 待分析的目标目录 |
+| `--threshold` | `8`（或来自配置） | 认知复杂度阈值 |
+| `--output` | `text` | 输出格式：`text`、`json` 或 `markdown` |
+| `--top` | — | 仅显示复杂度最高的前 N 个函数 |
+
+**支持的语言：** Rust, Python, JavaScript, TypeScript, Java, Go, C, C++, C#, PHP, Kotlin, Swift
+
+**阈值解析顺序：** CLI 标志 → `.devtrail/config.yml` → 默认值 (8)
+
+**配置**（可选，在 `.devtrail/config.yml` 中）：
+
+```yaml
+complexity:
+  threshold: 8
+```
+
+**示例：**
+
+```bash
+# 分析当前目录
+$ devtrail analyze
+
+# 自定义阈值并显示前 10 名
+$ devtrail analyze --threshold 5 --top 10
+
+# JSON 输出用于 CI 集成
+$ devtrail analyze --output json
+
+# 分析指定项目
+$ devtrail analyze /path/to/project
+```
+
+**输出示例：**
+
+```
+  DevTrail Analyze
+  /home/user/project
+  Threshold: cognitive complexity > 8
+
+  Functions exceeding threshold (3 of 42 total)
+
+    FILE                                     FUNCTION                  LINE  COGN  CYCL  SLOC
+    src/parser.rs                            parse_expression            42    18    12    45
+    src/compiler.rs                          Compiler::emit             128    15     9    38
+    src/eval.rs                              evaluate                    67    12     8    29
+
+  Summary
+    → Files analyzed: 12
+    → Total functions: 42
+    → Above threshold: 3 (7.1%)
+    → Max cognitive complexity: 18 (src/parser.rs:parse_expression)
+    → Average cognitive complexity: 3.8
+```
+
+> **注意：** 此命令无需 `devtrail init` 即可工作。它操作源文件，而非 DevTrail 文档。`analyze` 功能可在编译时通过 `--no-default-features` 禁用。
+
+> **文档触发：** AI Agent 使用 `devtrail analyze --output json` 作为确定何时创建 AILOG 文档的主要方法。如果 JSON 输出中 `summary.above_threshold > 0`，Agent 应创建 AILOG。当 CLI 不可用时，Agent 回退到 >20 行业务逻辑的启发式规则。
+
+---
+
+### `devtrail audit [path] [--from <date>] [--to <date>] [--system <name>] [--output <format>]`
+
+生成包含时间线、可追溯性映射和合规摘要的审计跟踪报告。
+
+**参数和标志：**
+
+| 参数/标志 | 默认值 | 描述 |
+|-----------|--------|------|
+| `path` | `.`（当前目录） | 目标项目目录 |
+| `--from` | — | 审计期间的开始日期（YYYY-MM-DD） |
+| `--to` | — | 审计期间的结束日期（YYYY-MM-DD） |
+| `--system` | — | 按系统/组件名称过滤（匹配 tags 和 title） |
+| `--output` | `text` | 输出格式：`text`、`markdown`、`json` 或 `html` |
+
+**报告包含：**
+
+- 所有文档的时间顺序时间线，含类型、标题、Agent 和风险级别
+- 显示文档关系链的可追溯性映射（例如 REQ → ADR → AILOG → TES）
+- 风险分布（low/medium/high/critical）
+- 合规摘要（EU AI Act、ISO 42001、NIST AI RMF 评分）
+
+**输出格式：**
+
+| 格式 | 用途 |
+|------|------|
+| `text` | 终端查看（带颜色和格式） |
+| `markdown` | 包含在 PR、Wiki 或报告中 |
+| `json` | 与外部工具集成 |
+| `html` | 独立报告，含样式表格和 SVG 风险图表 |
+
+**示例：**
+
+```bash
+# 完整审计报告
+$ devtrail audit
+
+# 2026 年 Q1 审计
+$ devtrail audit --from 2026-01-01 --to 2026-03-31
+
+# 按系统过滤审计
+$ devtrail audit --system auth-service
+
+# 生成 HTML 报告
+$ devtrail audit --from 2026-01-01 --to 2026-03-31 --output html > audit-q1.html
+
+# 为 PR 生成 Markdown
+$ devtrail audit --output markdown
+```
+
+---
+
+### `devtrail explore [path]`
+
+在终端界面（TUI）中交互式浏览和阅读 DevTrail 文档。
+
+**参数：**
+
+| 参数 | 默认值 | 描述 |
+|------|--------|------|
+| `path` | `.`（当前目录） | 目标项目目录 |
+
+**功能特性：**
+
+- 双面板布局：导航树 + 文档查看器
+- 元数据面板，显示状态、置信度、风险、标签和关联链接
+- Markdown 渲染，支持颜色、表格、代码块和标题缩进
+- 通过超链接在关联文档间导航
+- 按文件名、标题、标签或日期搜索
+- 全屏文档模式，vim 风格快捷键
+
+**快捷键：**
+
+| 按键 | 操作 |
+|------|------|
+| `↑↓` / `j/k` | 导航 / 滚动 |
+| `Enter` | 展开分组 / 打开文档 |
+| `Tab` | 切换面板：导航 → 元数据 → 文档 |
+| `f` | 切换全屏文档 |
+| `/` | 搜索 |
+| `Esc` | 返回 / 折叠 / 清除搜索 |
+| `?` | 帮助弹窗，显示所有快捷键 |
+| `q` | 退出 |
+
+**示例：**
+
+```bash
+$ devtrail explore
+```
+
+> **注意：** `explore` 命令需要 `tui` feature（默认启用）。如需不含此功能编译：`cargo build --no-default-features`。
+
+---
+
+### `devtrail about`
+
+显示版本、作者和许可证信息。
+
+**示例：**
+
+```bash
+$ devtrail about
+DevTrail CLI
+  CLI version:       cli-3.1.1
+  Framework version: fw-4.1.1
+  Author:            Strange Days Tech, S.A.S.
+  License:           MIT
+  Repository:        https://github.com/StrangeDaysTech/devtrail
+  Website:           https://strangedays.tech
+```
+
+---
+
+## 环境变量
+
+| 变量 | 描述 |
+|------|------|
+| `GITHUB_TOKEN` | GitHub 个人访问令牌，用于经过身份验证的 API 请求。在下载版本时有助于避免速率限制。 |
+
+---
+
+## 退出码
+
+| 代码 | 含义 |
+|------|------|
+| `0` | 成功 |
+| `1` | 错误（详情输出到 stderr） |
+
+---
+
+<div align="center">
+
+**DevTrail** — 因为每一次变更都值得被记录。
+
+[返回文档](../../README.md) • [README](../README.md) • [Strange Days Tech](https://strangedays.tech)
+
+</div>

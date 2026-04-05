@@ -64,8 +64,10 @@ Run `cargo check` in `cli/` to update `Cargo.lock`.
 Update version references in all docs that mention version numbers:
 - `docs/adopters/CLI-REFERENCE.md` (EN — versioning table + example outputs)
 - `docs/i18n/es/adopters/CLI-REFERENCE.md` (ES — same)
+- `docs/i18n/zh-CN/adopters/CLI-REFERENCE.md` (zh-CN — same)
 - `README.md` (versioning table)
 - `docs/i18n/es/README.md` (ES — versioning table)
+- `docs/i18n/zh-CN/README.md` (zh-CN — versioning table)
 
 Update `CHANGELOG.md` (root) following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format:
 - Add a new `## CLI X.Y.Z` section at the top (below the header)
@@ -128,11 +130,12 @@ version: "X.Y.Z"
 Update version references in docs:
 - `docs/adopters/CLI-REFERENCE.md` (EN — versioning table)
 - `docs/i18n/es/adopters/CLI-REFERENCE.md` (ES — versioning table)
-- `README.md` and `docs/i18n/es/README.md` (versioning tables)
-- `dist/.devtrail/00-governance/QUICK-REFERENCE.md` (EN + ES footer)
-- `dist/.devtrail/00-governance/AGENT-RULES.md` (EN + ES footer)
-- `dist/.devtrail/00-governance/DOCUMENTATION-POLICY.md` (EN + ES footer)
-- `dist/.devtrail/00-governance/C4-DIAGRAM-GUIDE.md` (EN + ES footer)
+- `docs/i18n/zh-CN/adopters/CLI-REFERENCE.md` (zh-CN — versioning table)
+- `README.md`, `docs/i18n/es/README.md`, and `docs/i18n/zh-CN/README.md` (versioning tables)
+- `dist/.devtrail/00-governance/QUICK-REFERENCE.md` (EN + ES + zh-CN footer)
+- `dist/.devtrail/00-governance/AGENT-RULES.md` (EN + ES + zh-CN footer)
+- `dist/.devtrail/00-governance/DOCUMENTATION-POLICY.md` (EN + ES + zh-CN footer)
+- `dist/.devtrail/00-governance/C4-DIAGRAM-GUIDE.md` (EN + ES + zh-CN footer)
 
 Update `CHANGELOG.md` (root) following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format:
 - Add a new `## Framework X.Y.Z` section at the top (below the header)

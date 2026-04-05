@@ -2,6 +2,8 @@
 
 > This document defines the rules that all AI agents must follow when working on projects under DevTrail.
 
+**Languages**: English | [Español](i18n/es/AGENT-RULES.md) | [简体中文](i18n/zh-CN/AGENT-RULES.md)
+
 ---
 
 ## 1. Mandatory Identification
