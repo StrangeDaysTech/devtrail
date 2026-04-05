@@ -4,10 +4,10 @@
 
 **AI Governance Platform for Responsible Software Development**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/StrangeDaysTech/devtrail/blob/main/LICENSE)
 [![Crates.io](https://img.shields.io/crates/v/devtrail-cli.svg)](https://crates.io/crates/devtrail-cli)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Handbook](https://img.shields.io/badge/docs-Handbook-orange.svg)](dist/.devtrail/QUICK-REFERENCE.md)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/StrangeDaysTech/devtrail/blob/main/CONTRIBUTING.md)
+[![Handbook](https://img.shields.io/badge/docs-Handbook-orange.svg)](https://github.com/StrangeDaysTech/devtrail/blob/main/dist/.devtrail/QUICK-REFERENCE.md)
 [![Strange Days Tech](https://img.shields.io/badge/by-Strange_Days_Tech-purple.svg)](https://strangedays.tech)
 
 [Getting Started](#getting-started) •
@@ -150,7 +150,7 @@ DevTrail uses independent version tags for each component:
 | Component | Tag prefix | Example | Includes |
 |-----------|-----------|---------|----------|
 | Framework | `fw-` | `fw-4.2.0` | Templates (12 types), governance, directives |
-| CLI | `cli-` | `cli-3.2.1` | The `devtrail` binary |
+| CLI | `cli-` | `cli-3.2.2` | The `devtrail` binary |
 
 Check installed versions with `devtrail status` or `devtrail about`.
 
@@ -173,7 +173,7 @@ Check installed versions with `devtrail status` or `devtrail about`.
 | `devtrail explore [path]` | Browse documentation interactively in a TUI |
 | `devtrail about` | Show version and license info |
 
-See [CLI Reference](docs/adopters/CLI-REFERENCE.md) for detailed usage.
+See [CLI Reference](https://github.com/StrangeDaysTech/devtrail/blob/main/docs/adopters/CLI-REFERENCE.md) for detailed usage.
 
 ### Option 2: Manual Setup
 
@@ -191,7 +191,7 @@ git add .devtrail/ DEVTRAIL.md
 git commit -m "chore: adopt DevTrail"
 ```
 
-📖 **See [ADOPTION-GUIDE.md](docs/adopters/ADOPTION-GUIDE.md) for detailed instructions, migration strategies, and team rollout plans.**
+📖 **See [ADOPTION-GUIDE.md](https://github.com/StrangeDaysTech/devtrail/blob/main/docs/adopters/ADOPTION-GUIDE.md) for detailed instructions, migration strategies, and team rollout plans.**
 
 ---
 
@@ -201,22 +201,22 @@ DevTrail documentation is organized by audience:
 
 | Track | For | Start here |
 |-------|-----|------------|
-| [**Adopters**](docs/adopters/) | Teams adopting DevTrail in their projects | [ADOPTION-GUIDE.md](docs/adopters/ADOPTION-GUIDE.md) |
-| [**Contributors**](docs/contributors/) | Developers contributing to DevTrail | [TRANSLATION-GUIDE.md](docs/contributors/TRANSLATION-GUIDE.md) |
+| [**Adopters**](https://github.com/StrangeDaysTech/devtrail/tree/main/docs/adopters) | Teams adopting DevTrail in their projects | [ADOPTION-GUIDE.md](https://github.com/StrangeDaysTech/devtrail/blob/main/docs/adopters/ADOPTION-GUIDE.md) |
+| [**Contributors**](https://github.com/StrangeDaysTech/devtrail/tree/main/docs/contributors) | Developers contributing to DevTrail | [TRANSLATION-GUIDE.md](https://github.com/StrangeDaysTech/devtrail/blob/main/docs/contributors/TRANSLATION-GUIDE.md) |
 
-**Adopters**: Follow the [Adoption Guide](docs/adopters/ADOPTION-GUIDE.md) for step-by-step instructions, the [CLI Reference](docs/adopters/CLI-REFERENCE.md) for command details, and the [Workflows Guide](docs/adopters/WORKFLOWS.md) for daily usage patterns.
+**Adopters**: Follow the [Adoption Guide](https://github.com/StrangeDaysTech/devtrail/blob/main/docs/adopters/ADOPTION-GUIDE.md) for step-by-step instructions, the [CLI Reference](https://github.com/StrangeDaysTech/devtrail/blob/main/docs/adopters/CLI-REFERENCE.md) for command details, and the [Workflows Guide](https://github.com/StrangeDaysTech/devtrail/blob/main/docs/adopters/WORKFLOWS.md) for daily usage patterns.
 
-**Contributors**: See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines, and the [Translation Guide](docs/contributors/TRANSLATION-GUIDE.md) for adding new languages.
+**Contributors**: See [CONTRIBUTING.md](https://github.com/StrangeDaysTech/devtrail/blob/main/CONTRIBUTING.md) for development guidelines, and the [Translation Guide](https://github.com/StrangeDaysTech/devtrail/blob/main/docs/contributors/TRANSLATION-GUIDE.md) for adding new languages.
 
 ### Key References
 
 | Document | Description |
 |----------|-------------|
-| [**Quick Reference**](dist/.devtrail/QUICK-REFERENCE.md) | One-page overview of document types and naming |
-| [DEVTRAIL.md](dist/DEVTRAIL.md) | Unified governance rules (source of truth) |
-| [ADOPTION-GUIDE.md](docs/adopters/ADOPTION-GUIDE.md) | Adoption guide for new/existing projects |
-| [CLI-REFERENCE.md](docs/adopters/CLI-REFERENCE.md) | Complete CLI command reference |
-| [WORKFLOWS.md](docs/adopters/WORKFLOWS.md) | Recommended daily workflows and team patterns |
+| [**Quick Reference**](https://github.com/StrangeDaysTech/devtrail/blob/main/dist/.devtrail/QUICK-REFERENCE.md) | One-page overview of document types and naming |
+| [DEVTRAIL.md](https://github.com/StrangeDaysTech/devtrail/blob/main/dist/DEVTRAIL.md) | Unified governance rules (source of truth) |
+| [ADOPTION-GUIDE.md](https://github.com/StrangeDaysTech/devtrail/blob/main/docs/adopters/ADOPTION-GUIDE.md) | Adoption guide for new/existing projects |
+| [CLI-REFERENCE.md](https://github.com/StrangeDaysTech/devtrail/blob/main/docs/adopters/CLI-REFERENCE.md) | Complete CLI command reference |
+| [WORKFLOWS.md](https://github.com/StrangeDaysTech/devtrail/blob/main/docs/adopters/WORKFLOWS.md) | Recommended daily workflows and team patterns |
 
 ### Internal Structure
 
@@ -468,7 +468,7 @@ All skill implementations are **functionally identical**—only the format diffe
 
 ## Contributing
 
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+We welcome contributions! See [CONTRIBUTING.md](https://github.com/StrangeDaysTech/devtrail/blob/main/CONTRIBUTING.md) for guidelines.
 
 ### Ways to Contribute
 
@@ -482,7 +482,7 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/StrangeDaysTech/devtrail/blob/main/LICENSE) file for details.
 
 ---
 
