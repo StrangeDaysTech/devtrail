@@ -7,6 +7,24 @@ and this project uses [independent versioning](README.md#versioning) for Framewo
 
 ---
 
+## Framework 4.2.0 / CLI 3.2.0 — Simplified Chinese (zh-CN) Localization
+
+### Added (Framework)
+- **Simplified Chinese (zh-CN)**: Complete localization as the third supported language alongside English and Spanish
+  - 12 document templates (AILOG, ADR, AIDEC, DPIA, ETH, INC, MCARD, REQ, SBOM, SEC, TDE, TES)
+  - 12 governance documents (AGENT-RULES, AI-GOVERNANCE-POLICY, AI-KPIS, AI-LIFECYCLE-TRACKER, AI-RISK-CATALOG, C4-DIAGRAM-GUIDE, DOCUMENTATION-POLICY, GIT-BRANCHING-STRATEGY, MANAGEMENT-REVIEW-TEMPLATE, OBSERVABILITY-GUIDE, PRINCIPLES, QUICK-REFERENCE)
+  - 5 NIST implementation guides (AI RMF Govern/Map/Measure/Manage + GenAI Risks)
+  - 6 user-facing docs (README, CONTRIBUTING, CODE_OF_CONDUCT, ADOPTION-GUIDE, CLI-REFERENCE, WORKFLOWS)
+
+### Added (CLI)
+- **Generic language support**: Template resolution now supports any configured language, not just hardcoded `es`
+
+### Changed (Framework)
+- Language navigation links updated across all three languages (EN, ES, zh-CN) in governance and documentation files
+- Language navigation links added to English governance files (PRINCIPLES, DOCUMENTATION-POLICY, AGENT-RULES) that previously lacked them
+
+---
+
 ## CLI 3.1.1 — crates.io README Fix
 
 ### Fixed (CLI)

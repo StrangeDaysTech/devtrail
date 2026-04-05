@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag (e.g., cli-3.0.0)'
+        description: 'Release tag (e.g., cli-3.2.0)'
         required: true
 
 permissions:

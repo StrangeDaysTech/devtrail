@@ -249,4 +249,4 @@ Ver también [ADR-2025-01-20-001] para contexto arquitectónico.
 
 ---
 
-*DevTrail v4.1.1 | [Strange Days Tech](https://strangedays.tech)*
+*DevTrail v4.2.0 | [Strange Days Tech](https://strangedays.tech)*

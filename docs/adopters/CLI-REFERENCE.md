@@ -48,8 +48,8 @@ DevTrail uses **independent version tags** for each component:
 
 | Component | Tag prefix | Example | What it includes |
 |-----------|-----------|---------|------------------|
-| Framework | `fw-` | `fw-4.1.1` | Templates (12 types), governance docs, directives |
-| CLI | `cli-` | `cli-3.1.1` | The `devtrail` binary |
+| Framework | `fw-` | `fw-4.2.0` | Templates (12 types), governance docs, directives |
+| CLI | `cli-` | `cli-3.2.0` | The `devtrail` binary |
 
 Framework and CLI are released independently. A framework update does not require a CLI update, and vice versa.
 
@@ -86,7 +86,7 @@ Initialize DevTrail in a project directory.
 
 ```bash
 $ devtrail init .
-✔ Downloaded DevTrail fw-4.1.1
+✔ Downloaded DevTrail fw-4.2.0
 ✔ Created .devtrail/ directory structure
 ✔ Created DEVTRAIL.md
 ✔ Configured AI agent directives
@@ -108,9 +108,9 @@ If `.devtrail/` does not exist in the current directory, the framework update is
 ```bash
 $ devtrail update
 Updating framework...
-✔ Framework updated to fw-4.1.1
+✔ Framework updated to fw-4.2.0
 Updating CLI...
-✔ CLI updated to cli-3.1.1
+✔ CLI updated to cli-3.2.0
 ```
 
 ---
@@ -125,7 +125,7 @@ Update only the framework files. Looks for the latest `fw-*` release on GitHub.
 
 ```bash
 $ devtrail update-framework
-✔ Framework updated to fw-4.1.1
+✔ Framework updated to fw-4.2.0
 ```
 
 ---
@@ -143,11 +143,11 @@ Use `--method` to override auto-detection: `--method=github` or `--method=cargo`
 
 ```bash
 $ devtrail update-cli
-✔ CLI updated to cli-3.1.1
+✔ CLI updated to cli-3.2.0
 
 $ devtrail update-cli --method=cargo
 Compiling from source, this may take a few minutes...
-✔ CLI updated to cli-3.1.1
+✔ CLI updated to cli-3.2.0
 ```
 
 ---
@@ -209,8 +209,8 @@ $ devtrail status
   Project
   ┌───────────┬──────────────────────────┐
   │ Path      │ /home/user/my-project    │
-  │ Framework │ fw-4.1.1                 │
-  │ CLI       │ cli-3.1.1                │
+  │ Framework │ fw-4.2.0                 │
+  │ CLI       │ cli-3.2.0                │
   │ Language  │ en                       │
   └───────────┴──────────────────────────┘
 
@@ -266,7 +266,7 @@ Repairing DevTrail in /home/user/my-project
 → Restoring 1 missing directory...
 ✓ Restored .devtrail/templates/
 → Downloading framework to restore missing files...
-  Using version: fw-4.1.1
+  Using version: fw-4.2.0
 ✓ Restored 16 file(s) from framework
 → Updating checksums...
 
@@ -634,8 +634,8 @@ Show version, authorship, and license information.
 ```bash
 $ devtrail about
 DevTrail CLI
-  CLI version:       cli-3.1.1
-  Framework version: fw-4.1.1
+  CLI version:       cli-3.2.0
+  Framework version: fw-4.2.0
   Author:            Strange Days Tech, S.A.S.
   License:           MIT
   Repository:        https://github.com/StrangeDaysTech/devtrail
