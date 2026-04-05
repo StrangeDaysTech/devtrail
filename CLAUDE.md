@@ -43,7 +43,7 @@ DevTrail uses **independent versions** for framework and CLI:
 | Component | Tag format | Current | Example |
 |-----------|-----------|---------|---------|
 | Framework | `fw-X.Y.Z` | fw-4.2.0 | `fw-4.2.0` |
-| CLI | `cli-X.Y.Z` | cli-3.2.1 | `cli-3.2.1` |
+| CLI | `cli-X.Y.Z` | cli-3.2.2 | `cli-3.2.2` |
 
 Follow [semver](https://semver.org/):
 - **Major**: breaking changes

@@ -7,6 +7,13 @@ and this project uses [independent versioning](README.md#versioning) for Framewo
 
 ---
 
+## CLI 3.2.2 — crates.io README Broken Links Fix
+
+### Fixed (CLI)
+- Convert all relative links in README to absolute GitHub URLs so badges, documentation links, and language switcher all resolve correctly on crates.io
+
+---
+
 ## CLI 3.2.1 — crates.io README Language Links Fix
 
 ### Fixed (CLI)
