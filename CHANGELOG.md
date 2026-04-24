@@ -7,6 +7,13 @@ and this project uses [independent versioning](README.md#versioning) for Framewo
 
 ---
 
+## CLI 3.2.5 — Smarter Table Column Allocation in `explore`
+
+### Fixed (CLI)
+- Table column widths in `devtrail explore` are now allocated with a water-fill strategy: narrow columns (e.g. `CWE`, `Severity`) receive exactly their natural width and the excess flows to the columns that need it (e.g. `Description`, `Remediation`). Previously, a proportional pass gave every column a slice of the terminal budget regardless of need, which caused the narrow columns to hoard space and the wide ones to wrap unnecessarily. This is what produced the "fixes itself, breaks, fixes itself again" behavior users saw while resizing the terminal.
+
+---
+
 ## CLI 3.2.4 — Unicode-Safe Rendering Across TUI and Commands
 
 ### Fixed (CLI)

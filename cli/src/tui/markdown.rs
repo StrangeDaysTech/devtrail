@@ -354,8 +354,9 @@ fn compute_column_widths(
             }
         }
     }
+    const MIN_COL: usize = 3;
     for w in &mut natural {
-        *w = (*w).max(3);
+        *w = (*w).max(MIN_COL);
     }
 
     // Overhead: indent is handled outside; here we account for borders
@@ -368,32 +369,36 @@ fn compute_column_widths(
         return natural;
     }
 
-    // Distribute available width proportionally
-    let mut widths = vec![0usize; num_cols];
-    for (i, &nat) in natural.iter().enumerate() {
-        widths[i] = ((nat as f64 / total_natural as f64) * content_budget as f64).floor() as usize;
-        widths[i] = widths[i].max(3);
-    }
+    // Water-fill allocation (classic: assign in ascending order of demand).
+    // For each column in order of natural width ascending, give it the
+    // smaller of its natural width and a fair share of the remaining
+    // budget. Narrow columns settle early with exactly what they need; the
+    // leftover rolls over to the wider columns that still have deficit.
+    // The old proportional pass gave every column a slice of the budget
+    // regardless of need, so narrow columns hoarded space while wide ones
+    // wrapped unnecessarily — exactly the "growing then shrinking" behavior
+    // users saw when resizing the terminal.
+    let mut order: Vec<usize> = (0..num_cols).collect();
+    order.sort_by_key(|&i| natural[i]);
 
-    // Distribute any remaining space to the largest columns
-    let assigned: usize = widths.iter().sum();
-    let mut remaining = content_budget.saturating_sub(assigned);
-    while remaining > 0 {
-        // Find column with largest deficit
-        let mut best = 0;
-        let mut best_deficit = 0usize;
-        for (i, (&nat, &w)) in natural.iter().zip(widths.iter()).enumerate() {
-            let deficit = nat.saturating_sub(w);
-            if deficit > best_deficit {
-                best_deficit = deficit;
-                best = i;
-            }
-        }
-        if best_deficit == 0 {
-            break;
-        }
-        widths[best] += 1;
-        remaining -= 1;
+    let mut widths = vec![0usize; num_cols];
+    let mut remaining_budget = content_budget;
+    let mut cols_left = num_cols;
+
+    for &i in &order {
+        let fair_share = if cols_left > 0 { remaining_budget / cols_left } else { 0 };
+        let alloc = if natural[i] <= fair_share {
+            // Column fits in its fair share — give it the full natural width.
+            natural[i]
+        } else {
+            // Column wants more than fair share — give it the fair share,
+            // but never less than MIN_COL (so it stays visible) and never
+            // more than its natural width.
+            fair_share.max(MIN_COL).min(natural[i])
+        };
+        widths[i] = alloc;
+        remaining_budget = remaining_budget.saturating_sub(alloc);
+        cols_left -= 1;
     }
 
     widths
@@ -715,5 +720,78 @@ mod tests {
         let border_overhead = 2 + (widths.len() - 1) * 3 + 2;
         let content: usize = widths.iter().sum();
         assert!(content + border_overhead <= available);
+    }
+
+    /// Regression test for the "wide column starves" bug. With a mix of one
+    /// very wide column and several narrow ones, the old proportional
+    /// allocator gave every column a share of the budget regardless of
+    /// need, so narrow columns ended up with more space than they could
+    /// use while the wide one still wrapped. Water-fill should give each
+    /// narrow column exactly its natural width and pour the rest into the
+    /// wide column.
+    #[test]
+    fn water_fill_narrow_columns_do_not_hoard() {
+        let header: Vec<String> = vec![
+            "Vuln ID".to_string(),
+            "CWE".to_string(),
+            "Severity".to_string(),
+            "Description".to_string(),
+        ];
+        let body: Vec<Vec<String>> = vec![
+            vec![
+                "VULN-001".to_string(),
+                "CWE-863".to_string(),
+                "7.1".to_string(),
+                // Very long description that demands most of the budget.
+                "RevokeAPIKey does not validate that key_id belongs to the service_id parameter. SQL query UpdateAPIKeyStatus filters only by key_id.".to_string(),
+            ],
+        ];
+        let available = 120;
+        let widths = compute_column_widths(&header, &body, available);
+        assert_eq!(widths.len(), 4);
+
+        // Natural widths: Vuln=max("Vuln ID"=7, "VULN-001"=8)=8, CWE=7,
+        // Severity=8, Description≈137. Narrow columns must receive exactly
+        // their natural width; the rest flows to Description.
+        assert_eq!(widths[0], 8, "Vuln ID column got {} cols, expected 8", widths[0]);
+        assert_eq!(widths[1], 7, "CWE column got {} cols, expected 7", widths[1]);
+        assert_eq!(widths[2], 8, "Severity column got {} cols, expected 8", widths[2]);
+
+        let border_overhead = 2 + (4 - 1) * 3 + 2; // 13
+        let expected_desc = available - border_overhead - (8 + 7 + 8);
+        assert_eq!(
+            widths[3], expected_desc,
+            "Description got {} cols, expected {} (all leftover)",
+            widths[3], expected_desc,
+        );
+    }
+
+    #[test]
+    fn water_fill_tight_budget_does_not_overflow() {
+        // Budget smaller than sum of naturals; no column should exceed its
+        // natural width and the total must fit in the content budget.
+        let header: Vec<String> = vec!["A".into(), "B".into(), "C".into(), "D".into()];
+        let body: Vec<Vec<String>> = vec![vec![
+            "short".into(),
+            "mediumtext".into(),
+            "wide column content here".into(),
+            "xxx".into(),
+        ]];
+        let available = 40;
+        let widths = compute_column_widths(&header, &body, available);
+        let border_overhead = 2 + (widths.len() - 1) * 3 + 2;
+        let total: usize = widths.iter().sum();
+        assert!(
+            total + border_overhead <= available,
+            "total {} + overhead {} exceeds budget {}",
+            total,
+            border_overhead,
+            available,
+        );
+        // No column exceeds its natural width.
+        let naturals = [5usize, 10, 24, 3];
+        for (i, w) in widths.iter().enumerate() {
+            assert!(*w <= naturals[i].max(3), "col {i} exceeded its natural");
+        }
     }
 }
