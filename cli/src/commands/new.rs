@@ -137,8 +137,12 @@ fn slugify(title: &str) -> String {
         .filter(|s| !s.is_empty())
         .collect();
     let slug = parts.join("-");
-    if slug.len() > 50 {
-        slug[..50].trim_end_matches('-').to_string()
+    // `slug` is built exclusively from ASCII alphanumerics joined by '-',
+    // so every char is 1 byte and byte-slicing the first 50 is safe. The
+    // `chars().take(50)` form keeps us robust if the filter ever changes.
+    if slug.chars().count() > 50 {
+        let truncated: String = slug.chars().take(50).collect();
+        truncated.trim_end_matches('-').to_string()
     } else {
         slug
     }
@@ -154,8 +158,11 @@ fn next_sequence_number(doc_dir: &std::path::Path, doc_type: DocType, today: &st
                 let name = entry.file_name();
                 let name = name.to_str().unwrap_or("");
                 if let Some(rest) = name.strip_prefix(&prefix_pattern) {
-                    if rest.len() >= 3 {
-                        if let Ok(n) = rest[..3].parse::<u32>() {
+                    // Take the first 3 chars safely; they must all be ASCII
+                    // digits for the sequence to be valid.
+                    let head: String = rest.chars().take(3).collect();
+                    if head.chars().count() == 3 {
+                        if let Ok(n) = head.parse::<u32>() {
                             max_seq = max_seq.max(n);
                         }
                     }

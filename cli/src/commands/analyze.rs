@@ -4,7 +4,7 @@ use std::path::PathBuf;
 
 use crate::analysis_engine::{self, AnalysisReport, FunctionEntry};
 use crate::config::DevTrailConfig;
-use crate::utils;
+use crate::utils::{self, pad_right_visual, truncate_visual, visual_width};
 
 pub fn run(path: &str, threshold: Option<u32>, output: &str, top: Option<usize>) -> Result<()> {
     let target = PathBuf::from(path)
@@ -73,9 +73,9 @@ fn print_text(report: &AnalysisReport, target: &std::path::Path) {
         );
         println!();
         println!(
-            "    {:<40} {:<25} {:>5} {:>5} {:>5} {:>5}",
-            "FILE".dimmed(),
-            "FUNCTION".dimmed(),
+            "    {} {} {:>5} {:>5} {:>5} {:>5}",
+            pad_right_visual("FILE", 40).dimmed(),
+            pad_right_visual("FUNCTION", 25).dimmed(),
             "LINE".dimmed(),
             "COGN".dimmed(),
             "CYCL".dimmed(),
@@ -90,9 +90,9 @@ fn print_text(report: &AnalysisReport, target: &std::path::Path) {
                 cogn_str.yellow().bold()
             };
             println!(
-                "    {:<40} {:<25} {:>5} {:>5} {:>5} {:>5}",
+                "    {} {} {:>5} {:>5} {:>5} {:>5}",
                 truncate_path(&func.file, 40),
-                truncate_str(&func.name, 25),
+                pad_right_visual(&truncate_visual(&func.name, 25), 25),
                 func.line,
                 cogn_colored,
                 func.cyclomatic,
@@ -216,21 +216,31 @@ fn print_markdown(report: &AnalysisReport, target: &std::path::Path) {
     }
 }
 
-/// Truncate a path string to fit within a given width
+/// Truncate a path string to exactly `max` visual columns, preserving the
+/// tail (most meaningful part of a path) with a leading "…". The result is
+/// right-padded so the column is always `max` columns wide.
 fn truncate_path(s: &str, max: usize) -> String {
-    if s.len() <= max {
-        format!("{:<width$}", s, width = max)
-    } else {
-        let truncated = &s[s.len() - (max - 2)..];
-        format!("..{:<width$}", truncated, width = max - 2)
+    if max == 0 {
+        return String::new();
     }
-}
-
-/// Truncate a string to fit within a given width
-fn truncate_str(s: &str, max: usize) -> String {
-    if s.len() <= max {
-        format!("{:<width$}", s, width = max)
-    } else {
-        format!("{:.width$}", s, width = max - 2)
+    if visual_width(s) <= max {
+        return pad_right_visual(s, max);
     }
+    // Walk the string from the end, accumulating chars until we've consumed
+    // `max - 1` columns (leaving 1 column for the leading "…").
+    let budget = max.saturating_sub(1);
+    let mut used = 0usize;
+    let mut keep_from = s.len();
+    for (byte_idx, ch) in s.char_indices().rev() {
+        let w = unicode_width::UnicodeWidthChar::width(ch).unwrap_or(0);
+        if used + w > budget {
+            break;
+        }
+        used += w;
+        keep_from = byte_idx;
+    }
+    let mut out = String::with_capacity(s.len() - keep_from + 3);
+    out.push('…');
+    out.push_str(&s[keep_from..]);
+    pad_right_visual(&out, max)
 }

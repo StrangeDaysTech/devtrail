@@ -4,7 +4,7 @@ use std::path::PathBuf;
 
 use crate::config::DevTrailConfig;
 use crate::manifest::DistManifest;
-use crate::utils;
+use crate::utils::{self, pad_right_visual, visual_width};
 
 /// Expected directories inside .devtrail/
 const EXPECTED_DIRS: &[&str] = &[
@@ -90,14 +90,22 @@ pub fn run(path: &str) -> Result<()> {
         ("CLI", format!("cli-{}", cli_version)),
         ("Language", language.clone()),
     ];
-    let label_w = project_rows.iter().map(|(l, _)| l.len()).max().unwrap_or(5);
-    let value_w = project_rows.iter().map(|(_, v)| v.len()).max().unwrap_or(10);
+    let label_w = project_rows
+        .iter()
+        .map(|(l, _)| visual_width(l))
+        .max()
+        .unwrap_or(5);
+    let value_w = project_rows
+        .iter()
+        .map(|(_, v)| visual_width(v))
+        .max()
+        .unwrap_or(10);
     print_border("  ┌", label_w, "┬", value_w, "┐");
     for (label, value) in &project_rows {
         println!(
-            "  │ {:<label_w$} │ {:<value_w$} │",
-            format!("{label}").dimmed(),
-            value
+            "  │ {} │ {} │",
+            pad_right_visual(label, label_w).dimmed(),
+            pad_right_visual(value, value_w),
         );
     }
     print_border("  └", label_w, "┴", value_w, "┘");
@@ -137,21 +145,21 @@ pub fn run(path: &str) -> Result<()> {
         );
     }
 
-    // Calculate column widths dynamically
+    // Calculate column widths dynamically, measured in visual columns.
     let name_w = struct_items
         .iter()
-        .map(|(name, _)| name.len())
+        .map(|(name, _)| visual_width(name))
         .max()
         .unwrap_or(10)
-        .max("Directory / File".len());
+        .max(visual_width("Directory / File"));
     let status_w = 6; // "✓ OK " or "✗ -- "
 
     println!();
     println!(
-        "  {:<name_w$} {} {:<status_w$}",
-        "Directory / File".dimmed(),
+        "  {} {} {}",
+        pad_right_visual("Directory / File", name_w).dimmed(),
         "│".dimmed(),
-        "Status".dimmed()
+        pad_right_visual("Status", status_w).dimmed(),
     );
     println!(
         "  {}",
@@ -160,16 +168,12 @@ pub fn run(path: &str) -> Result<()> {
 
     for (name, exists) in &struct_items {
         let status_text = if *exists { "✓ OK" } else { "✗ --" };
-        let plain_row = format!("  {:<name_w$} │ {:<status_w$}", name, status_text);
+        let name_cell = pad_right_visual(name, name_w);
+        let status_cell = pad_right_visual(status_text, status_w);
         if *exists {
-            println!("{}", plain_row.replace(status_text, &status_text.green().to_string()));
+            println!("  {} │ {}", name_cell, status_cell.green());
         } else {
-            println!(
-                "{}",
-                plain_row
-                    .replace(name.as_str(), &name.yellow().to_string())
-                    .replace(status_text, &status_text.yellow().to_string())
-            );
+            println!("  {} │ {}", name_cell.yellow(), status_cell.yellow());
         }
     }
 
@@ -182,18 +186,18 @@ pub fn run(path: &str) -> Result<()> {
 
     let type_w = DOC_TYPES
         .iter()
-        .map(|(p, l)| format!("{:<6}{}", p, l).len())
+        .map(|(p, l)| visual_width(&format!("{p:<6}{l}")))
         .max()
         .unwrap_or(20)
-        .max("Type".len());
+        .max(visual_width("Type"));
     let count_w = 5;
 
     println!();
     println!(
-        "  {:<type_w$} {} {:<count_w$}",
-        "Type".dimmed(),
+        "  {} {} {}",
+        pad_right_visual("Type", type_w).dimmed(),
         "│".dimmed(),
-        "Count".dimmed()
+        pad_right_visual("Count", count_w).dimmed(),
     );
     println!(
         "  {}",
@@ -203,26 +207,19 @@ pub fn run(path: &str) -> Result<()> {
     for (prefix, label, count) in &counts {
         let display = format!("{prefix:<6}{label}");
         let count_str = format!("{count:>count_w$}");
+        let padded = pad_right_visual(&display, type_w);
         if *count > 0 {
-            println!(
-                "  {:<type_w$} │ {}",
-                display,
-                count_str.green().bold()
-            );
+            println!("  {} │ {}", padded, count_str.green().bold());
         } else {
-            println!(
-                "  {} │ {}",
-                format!("{:<type_w$}", display).dimmed(),
-                count_str.dimmed()
-            );
+            println!("  {} │ {}", padded.dimmed(), count_str.dimmed());
         }
     }
 
     let total_str = format!("{total:>count_w$}");
     println!(
-        "  {:<type_w$} │ {}",
-        "TOTAL".bold(),
-        total_str.cyan().bold()
+        "  {} │ {}",
+        pad_right_visual("TOTAL", type_w).bold(),
+        total_str.cyan().bold(),
     );
     println!();
 

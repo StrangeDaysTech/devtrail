@@ -7,6 +7,7 @@ use ratatui::widgets::{Block, Borders, Paragraph, Widget, Wrap};
 use crate::tui::app::{ActivePanel, App, MetaSelection};
 use crate::tui::document::{ConfidenceLevel, DocStatus, RiskLevel};
 use crate::tui::theme;
+use crate::utils::truncate_visual;
 
 pub struct MetadataPanel<'a> {
     app: &'a App,
@@ -204,7 +205,7 @@ impl Widget for MetadataPanel<'_> {
                         .fg(theme::TEXT)
                         .add_modifier(Modifier::UNDERLINED)
                 };
-                let display = truncate_str(rel, max_link_width);
+                let display = truncate_visual(rel, max_link_width);
                 lines.push(Line::from(vec![
                     Span::styled(marker, l),
                     Span::styled(display, style),
@@ -270,14 +271,3 @@ fn risk_bar(level: &RiskLevel) -> (usize, usize, Color, &'static str) {
     }
 }
 
-fn truncate_str(s: &str, max: usize) -> String {
-    let char_count: usize = s.chars().count();
-    if char_count <= max {
-        s.to_string()
-    } else if max > 3 {
-        let truncated: String = s.chars().take(max - 3).collect();
-        format!("{truncated}...")
-    } else {
-        s.chars().take(max).collect()
-    }
-}

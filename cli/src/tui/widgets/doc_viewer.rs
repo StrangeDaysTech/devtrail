@@ -3,6 +3,7 @@ use ratatui::layout::Rect;
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span, Text};
 use ratatui::widgets::{Block, Borders, Paragraph, Scrollbar, ScrollbarOrientation, ScrollbarState, StatefulWidget, Widget, Wrap};
+use unicode_width::UnicodeWidthStr;
 
 use crate::tui::app::{ActivePanel, App};
 use crate::tui::markdown::markdown_to_lines;
@@ -60,20 +61,50 @@ impl<'a> DocViewer<'a> {
 
         let doc = self.app.current_doc.as_ref().unwrap();
 
-        // Render markdown body only (metadata is in separate panel)
-        let mut all_lines = vec![Line::from(""); 2];
-        all_lines.extend(markdown_to_lines(&doc.body, inner.width as usize));
+        // Reserve 1 column on the right for the scrollbar so it doesn't
+        // overlap the document text. Without this, the uncovered track
+        // leaks the underlying text through where there is no thumb.
+        let reserve_scrollbar = inner.width >= 2;
+        let body_area = if reserve_scrollbar {
+            Rect {
+                x: inner.x,
+                y: inner.y,
+                width: inner.width - 1,
+                height: inner.height,
+            }
+        } else {
+            inner
+        };
+        let scrollbar_area = if reserve_scrollbar {
+            Rect {
+                x: inner.x + inner.width - 1,
+                y: inner.y,
+                width: 1,
+                height: inner.height,
+            }
+        } else {
+            inner
+        };
 
-        // Estimate total lines accounting for wrapping
-        let width = inner.width.max(1) as usize;
+        // Render markdown body only (metadata is in separate panel)
+        let body_width = body_area.width.max(1) as usize;
+        let mut all_lines = vec![Line::from(""); 2];
+        all_lines.extend(markdown_to_lines(&doc.body, body_width));
+
+        // Estimate total lines accounting for wrapping, measured in visual
+        // columns (CJK and other double-wide chars count as 2).
         let wrapped_count: usize = all_lines
             .iter()
             .map(|line| {
-                let line_width: usize = line.spans.iter().map(|s| s.content.len()).sum();
+                let line_width: usize = line
+                    .spans
+                    .iter()
+                    .map(|s| UnicodeWidthStr::width(s.content.as_ref()))
+                    .sum();
                 if line_width == 0 {
                     1
                 } else {
-                    (line_width + width - 1) / width
+                    line_width.div_ceil(body_width)
                 }
             })
             .sum();
@@ -83,16 +114,17 @@ impl<'a> DocViewer<'a> {
         let paragraph = Paragraph::new(text)
             .wrap(Wrap { trim: false })
             .scroll((self.app.doc_scroll, 0));
-        paragraph.render(inner, buf);
+        paragraph.render(body_area, buf);
 
-        // Render scrollbar
-        if self.app.doc_total_lines > inner.height as usize {
+        // Render scrollbar in the reserved column.
+        if self.app.doc_total_lines > body_area.height as usize {
             let mut scrollbar_state = ScrollbarState::new(self.app.doc_total_lines)
+                .viewport_content_length(body_area.height as usize)
                 .position(self.app.doc_scroll as usize);
             let scrollbar = Scrollbar::new(ScrollbarOrientation::VerticalRight)
                 .begin_symbol(Some("↑"))
                 .end_symbol(Some("↓"));
-            scrollbar.render(inner, buf, &mut scrollbar_state);
+            scrollbar.render(scrollbar_area, buf, &mut scrollbar_state);
         }
     }
 }
