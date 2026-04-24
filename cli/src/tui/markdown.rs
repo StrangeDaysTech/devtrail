@@ -153,10 +153,10 @@ pub fn markdown_to_lines(markdown: &str, available_width: usize) -> Vec<Line<'st
                 }
                 TagEnd::CodeBlock => {
                     in_code_block = false;
-                    // Calculate uniform width: max line length + padding
-                    let max_len = code_block_lines
+                    // Measure in visual columns so CJK/emoji don't break alignment.
+                    let max_cols = code_block_lines
                         .iter()
-                        .map(|l| l.len())
+                        .map(|l| UnicodeWidthStr::width(l.as_str()))
                         .max()
                         .unwrap_or(0);
                     let code_bg = Style::default()
@@ -164,7 +164,9 @@ pub fn markdown_to_lines(markdown: &str, available_width: usize) -> Vec<Line<'st
                         .bg(Color::Rgb(45, 45, 60));
 
                     for code_line in &code_block_lines {
-                        let padded = format!("  {:<width$}  ", code_line, width = max_len);
+                        let w = UnicodeWidthStr::width(code_line.as_str());
+                        let pad = max_cols.saturating_sub(w);
+                        let padded = format!("  {}{}  ", code_line, " ".repeat(pad));
                         let mut spans: Vec<Span<'static>> = Vec::new();
                         if content_indent > 0 {
                             spans.push(Span::raw(" ".repeat(content_indent)));

@@ -6,6 +6,7 @@ use ratatui::widgets::Widget;
 
 use crate::tui::app::App;
 use crate::tui::theme;
+use crate::utils::visual_width;
 
 pub struct StatusBar<'a> {
     app: &'a App,
@@ -93,10 +94,11 @@ impl Widget for StatusBar<'_> {
             .and_then(|n| n.to_str())
             .unwrap_or("?");
         let right_str = format!(" {}  │  {} docs ", path_display, self.app.index.total_docs);
-        let used_width: usize = spans.iter().map(|s| s.content.len()).sum();
-        let remaining = area.width as usize - used_width.min(area.width as usize);
-        if remaining > right_str.len() {
-            let padding = remaining - right_str.len();
+        let used_width: usize = spans.iter().map(|s| visual_width(s.content.as_ref())).sum();
+        let remaining = (area.width as usize).saturating_sub(used_width);
+        let right_cols = visual_width(&right_str);
+        if remaining > right_cols {
+            let padding = remaining - right_cols;
             spans.push(Span::styled(" ".repeat(padding), Style::default()));
             spans.push(Span::styled(
                 format!(" {} ", path_display),

@@ -230,8 +230,10 @@ fn check_naming(result: &mut ValidationResult, doc: &DevTrailDocument) {
         }
     };
 
-    // Check date part
-    if after_prefix.len() < 10 {
+    // Check date part. We only slice by bytes once we've confirmed the
+    // first 10 characters are ASCII, so this is always UTF-8-safe.
+    let head: String = after_prefix.chars().take(10).collect();
+    if head.chars().count() < 10 {
         result.add(ValidationIssue {
             file: doc.path.clone(),
             rule: "NAMING-001".to_string(),
@@ -241,13 +243,24 @@ fn check_naming(result: &mut ValidationResult, doc: &DevTrailDocument) {
         });
         return;
     }
+    if !head.is_ascii() {
+        result.add(ValidationIssue {
+            file: doc.path.clone(),
+            rule: "NAMING-001".to_string(),
+            message: format!("Invalid date in filename: '{}'", head),
+            severity: Severity::Error,
+            fix_hint: None,
+        });
+        return;
+    }
 
-    let date_part = &after_prefix[..10];
-    let valid_date = date_part.chars().nth(4) == Some('-')
-        && date_part.chars().nth(7) == Some('-')
-        && date_part[..4].chars().all(|c| c.is_ascii_digit())
-        && date_part[5..7].chars().all(|c| c.is_ascii_digit())
-        && date_part[8..10].chars().all(|c| c.is_ascii_digit());
+    let date_part = head.as_str(); // exactly 10 ASCII bytes
+    let bytes = date_part.as_bytes();
+    let valid_date = bytes[4] == b'-'
+        && bytes[7] == b'-'
+        && date_part[..4].bytes().all(|b| b.is_ascii_digit())
+        && date_part[5..7].bytes().all(|b| b.is_ascii_digit())
+        && date_part[8..10].bytes().all(|b| b.is_ascii_digit());
 
     if !valid_date {
         result.add(ValidationIssue {
@@ -260,7 +273,7 @@ fn check_naming(result: &mut ValidationResult, doc: &DevTrailDocument) {
         return;
     }
 
-    // Check sequence number after date
+    // Skip past the 10-byte date prefix (safe: we validated it's ASCII).
     let after_date = &after_prefix[10..];
     if !after_date.starts_with('-') {
         result.add(ValidationIssue {
@@ -543,18 +556,17 @@ fn check_date_consistency(result: &mut ValidationResult, doc: &DevTrailDocument)
     // Extract date from filename: after prefix dash, take 10 chars (YYYY-MM-DD)
     let prefix = doc.doc_type.prefix();
     let after_prefix = match doc.filename.strip_prefix(&format!("{}-", prefix)) {
-        Some(rest) if rest.len() >= 10 => rest,
+        Some(rest) => rest,
         _ => return,
     };
+    let filename_date: String = after_prefix.chars().take(10).collect();
+    if filename_date.chars().count() < 10 {
+        return;
+    }
 
-    let filename_date = &after_prefix[..10];
-
-    // The created field may be a full datetime or just a date — compare the first 10 chars
-    let created_date = if created.len() >= 10 {
-        &created[..10]
-    } else {
-        created.as_str()
-    };
+    // The created field may be a full datetime or just a date — take the
+    // first 10 chars safely (never slice by bytes on arbitrary input).
+    let created_date: String = created.chars().take(10).collect();
 
     if filename_date != created_date {
         result.add(ValidationIssue {
@@ -569,6 +581,8 @@ fn check_date_consistency(result: &mut ValidationResult, doc: &DevTrailDocument)
         });
     }
 }
+
+
 
 /// Search for a document whose filename starts with the given id
 fn find_document_by_id(devtrail_dir: &Path, id: &str) -> bool {
@@ -671,12 +685,16 @@ pub fn apply_fixes(doc: &DevTrailDocument) -> Option<String> {
     if let Some(id) = &doc.frontmatter.id {
         let expected_prefix = doc.doc_type.prefix();
         if !id.starts_with(expected_prefix) {
-            // Extract date-seq from filename
+            // Extract date-seq from filename. `dash_pos` comes from `find`
+            // so it's a valid char boundary; the 14-char slice below is
+            // taken via `chars().take()` to stay safe if `after_type`
+            // contains multi-byte characters.
             let name_no_ext = doc.filename.strip_suffix(".md").unwrap_or(&doc.filename);
             if let Some(dash_pos) = name_no_ext.find('-') {
                 let after_type = &name_no_ext[dash_pos + 1..];
-                if after_type.len() >= 14 {
-                    let new_id = format!("{}-{}", expected_prefix, &after_type[..14]);
+                let head: String = after_type.chars().take(14).collect();
+                if head.chars().count() == 14 {
+                    let new_id = format!("{}-{}", expected_prefix, head);
                     let old_id_line = format!("id: {}", id);
                     let new_id_line = format!("id: {}", new_id);
                     if new_content.contains(&old_id_line) {

@@ -1,6 +1,7 @@
 use colored::Colorize;
 use sha2::{Digest, Sha256};
 use std::path::Path;
+use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
 
 /// Print a success message
 pub fn success(msg: &str) {
@@ -101,4 +102,130 @@ pub fn resolve_project_root(path: &str) -> Option<ResolvedPath> {
     }
 
     None
+}
+
+/// Visual width of a string in terminal columns, accounting for double-wide
+/// characters (CJK, some emoji). This is the unit every TUI layout should
+/// use — `.len()` measures bytes and `.chars().count()` measures code points,
+/// neither of which matches how a terminal renders text.
+pub fn visual_width(s: &str) -> usize {
+    UnicodeWidthStr::width(s)
+}
+
+/// Truncate `s` to fit within `max_cols` visual columns, appending "…"
+/// (1 column) when truncation happens. Guarantees the returned string's
+/// `visual_width()` is `<= max_cols` and that every byte offset used is a
+/// valid UTF-8 char boundary.
+#[cfg_attr(not(any(feature = "tui", feature = "analyze")), allow(dead_code))]
+pub fn truncate_visual(s: &str, max_cols: usize) -> String {
+    if max_cols == 0 {
+        return String::new();
+    }
+    if visual_width(s) <= max_cols {
+        return s.to_string();
+    }
+    // Reserve 1 column for the ellipsis when there's room for it.
+    let budget = max_cols.saturating_sub(1);
+    let mut used = 0usize;
+    let mut cut_at = 0usize;
+    for (byte_idx, ch) in s.char_indices() {
+        let w = UnicodeWidthChar::width(ch).unwrap_or(0);
+        if used + w > budget {
+            cut_at = byte_idx;
+            break;
+        }
+        used += w;
+        cut_at = byte_idx + ch.len_utf8();
+    }
+    let mut out = String::with_capacity(cut_at + 3);
+    out.push_str(&s[..cut_at]);
+    out.push('…');
+    out
+}
+
+/// Right-pad `s` with ASCII spaces so its visual width is exactly `cols`.
+/// If `s` is already at least that wide, return it unchanged. Unlike
+/// `format!("{:<N$}", ...)`, this counts terminal columns, not chars.
+pub fn pad_right_visual(s: &str, cols: usize) -> String {
+    let w = visual_width(s);
+    if w >= cols {
+        return s.to_string();
+    }
+    let mut out = String::with_capacity(s.len() + (cols - w));
+    out.push_str(s);
+    out.extend(std::iter::repeat_n(' ', cols - w));
+    out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn visual_width_ascii() {
+        assert_eq!(visual_width("hello"), 5);
+        assert_eq!(visual_width(""), 0);
+    }
+
+    #[test]
+    fn visual_width_accents_one_col_each() {
+        assert_eq!(visual_width("áéíóú"), 5);
+    }
+
+    #[test]
+    fn visual_width_cjk_two_cols_each() {
+        assert_eq!(visual_width("数据"), 4);
+    }
+
+    #[test]
+    fn truncate_visual_short_returns_as_is() {
+        assert_eq!(truncate_visual("hello", 10), "hello");
+    }
+
+    #[test]
+    fn truncate_visual_ascii_truncates_with_ellipsis() {
+        let out = truncate_visual("hello world", 8);
+        assert!(visual_width(&out) <= 8);
+        assert!(out.ends_with('…'));
+    }
+
+    #[test]
+    fn truncate_visual_cjk_respects_double_width() {
+        // 数据表格 (4 ideograms, visual width 8). Budget 5 → must fit with ellipsis.
+        let out = truncate_visual("数据表格", 5);
+        assert!(visual_width(&out) <= 5);
+        assert!(std::str::from_utf8(out.as_bytes()).is_ok());
+    }
+
+    #[test]
+    fn truncate_visual_em_dash_no_panic() {
+        let s = "Partially mitigated — RLS is not active until middleware";
+        for w in [5usize, 10, 20, 67] {
+            let out = truncate_visual(s, w);
+            assert!(visual_width(&out) <= w, "{out:?} too wide for {w}");
+        }
+    }
+
+    #[test]
+    fn truncate_visual_zero_width() {
+        assert_eq!(truncate_visual("anything", 0), "");
+    }
+
+    #[test]
+    fn pad_right_visual_ascii() {
+        assert_eq!(pad_right_visual("hi", 5), "hi   ");
+    }
+
+    #[test]
+    fn pad_right_visual_cjk_counts_two_columns() {
+        // "数" has visual width 2. Padding to 5 should add 3 spaces.
+        let out = pad_right_visual("数", 5);
+        assert_eq!(visual_width(&out), 5);
+        assert!(out.ends_with("   "));
+    }
+
+    #[test]
+    fn pad_right_visual_already_wider_returns_as_is() {
+        assert_eq!(pad_right_visual("hello", 3), "hello");
+    }
 }

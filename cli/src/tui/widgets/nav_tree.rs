@@ -7,6 +7,7 @@ use ratatui::widgets::{Block, Borders, Paragraph, Widget};
 use crate::tui::app::{ActivePanel, App, NavSelection, SortOrder};
 use crate::tui::index::DocEntry;
 use crate::tui::theme;
+use crate::utils::{truncate_visual, visual_width};
 
 pub struct NavTree<'a> {
     app: &'a App,
@@ -235,23 +236,26 @@ fn file_entry_line(entry: &DocEntry, indent: &str, max_width: usize, selected: b
     let date_style = Style::default().fg(theme::TEXT_DIM);
 
     let has_badge = !entry.doc_type.is_empty();
-    let badge_len = if has_badge { entry.doc_type.len() + 1 } else { 0 }; // badge + space
+    // Badge (`doc_type`) is drawn from hardcoded ASCII prefixes, so its
+    // visual width equals its char count; `+ 1` accounts for the trailing
+    // space between badge and title.
+    let badge_cols = if has_badge { visual_width(&entry.doc_type) + 1 } else { 0 };
 
-    // Compact date: show MM-DD from YYYY-MM-DD
-    let date = if entry.created.len() >= 10 {
-        format!(" {}", &entry.created[5..10])
-    } else {
-        String::new()
-    };
-    let date_len = date.len();
+    // Compact date: show MM-DD from YYYY-MM-DD. Only render the slice when
+    // the prefix is ASCII so we never cut through a multi-byte boundary —
+    // anything else is treated as missing.
+    let date = extract_mmdd(&entry.created).map(|d| format!(" {d}")).unwrap_or_default();
+    let date_cols = visual_width(&date);
 
-    let indent_len = indent.len();
+    // `indent` is hardcoded ASCII spaces, so byte len == visual cols here,
+    // but we use visual_width for consistency.
+    let indent_cols = visual_width(indent);
     let title_budget = max_width
-        .saturating_sub(indent_len)
-        .saturating_sub(badge_len)
-        .saturating_sub(date_len);
+        .saturating_sub(indent_cols)
+        .saturating_sub(badge_cols)
+        .saturating_sub(date_cols);
 
-    let title = truncate_str(&entry.title, title_budget);
+    let title = truncate_visual(&entry.title, title_budget);
 
     let mut spans = vec![Span::raw(indent.to_string())];
     if has_badge {
@@ -287,16 +291,22 @@ fn count_group_docs(group: &crate::tui::index::DocGroup) -> usize {
     direct + sub
 }
 
-fn truncate_str(name: &str, max_width: usize) -> String {
-    let char_count: usize = name.chars().count();
-    if char_count <= max_width {
-        name.to_string()
-    } else if max_width > 3 {
-        let truncated: String = name.chars().take(max_width - 3).collect();
-        format!("{truncated}...")
-    } else {
-        name.chars().take(max_width).collect()
+/// Extract the "MM-DD" slice from an ISO-8601 "YYYY-MM-DD[...]" string.
+/// Returns `None` if the input is shorter than 10 chars, contains any
+/// non-ASCII character in the first 10 positions, or the shape doesn't
+/// match (dashes at positions 4 and 7). This keeps us safe even if the
+/// `created` field came from user-edited frontmatter with exotic input.
+fn extract_mmdd(created: &str) -> Option<String> {
+    let mut chars = created.chars();
+    let head: String = (&mut chars).take(10).collect();
+    if head.chars().count() < 10 || !head.is_ascii() {
+        return None;
     }
+    let bytes = head.as_bytes();
+    if bytes[4] != b'-' || bytes[7] != b'-' {
+        return None;
+    }
+    Some(format!("{}-{}", &head[5..7], &head[8..10]))
 }
 
 fn subgroup_has_search_matches(
