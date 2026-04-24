@@ -7,6 +7,13 @@ and this project uses [independent versioning](README.md#versioning) for Framewo
 
 ---
 
+## CLI 3.2.3 — UTF-8 Crash Fix in `explore` Tables
+
+### Fixed (CLI)
+- Fix panic in `devtrail explore` when rendering Markdown tables whose cells contain multi-byte UTF-8 characters (em-dash `—`, CJK ideograms, accented characters, emoji). Cell wrapping now uses `char_indices()` for safe slicing and measures text in visual columns via `unicode-width`, so table borders also stay aligned with Chinese and double-wide content.
+
+---
+
 ## CLI 3.2.2 — crates.io README Broken Links Fix
 
 ### Fixed (CLI)

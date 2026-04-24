@@ -1,6 +1,6 @@
 [package]
 name = "devtrail-cli"
-version = "3.2.2"
+version = "3.2.3"
 edition = "2021"
 description = "CLI tool for DevTrail - Documentation Governance for AI-Assisted Development"
 license = "MIT"
@@ -36,11 +36,12 @@ tar = "0.4"
 ratatui = { version = "0.29", optional = true, default-features = false, features = ["crossterm"] }
 crossterm = { version = "0.28", optional = true }
 pulldown-cmark = { version = "0.12", optional = true }
+unicode-width = { version = "0.2", optional = true }
 arborist-metrics = { version = "0.1", optional = true, features = ["all"] }
 
 [features]
 default = ["tui", "analyze"]
-tui = ["ratatui", "crossterm", "pulldown-cmark"]
+tui = ["ratatui", "crossterm", "pulldown-cmark", "unicode-width"]
 analyze = ["arborist-metrics"]
 
 [dev-dependencies]

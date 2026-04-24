@@ -1,6 +1,7 @@
 use pulldown_cmark::{Event, HeadingLevel, Options, Parser, Tag, TagEnd};
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
+use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
 
 use crate::tui::theme;
 
@@ -339,15 +340,15 @@ fn compute_column_widths(
         return Vec::new();
     }
 
-    // Calculate natural (max content) width per column
+    // Calculate natural (max content) width per column, measured in visual columns
     let mut natural = vec![0usize; num_cols];
     for (i, cell) in header.iter().enumerate() {
-        natural[i] = natural[i].max(cell.len());
+        natural[i] = natural[i].max(UnicodeWidthStr::width(cell.as_str()));
     }
     for row in body {
         for (i, cell) in row.iter().enumerate() {
             if i < num_cols {
-                natural[i] = natural[i].max(cell.len());
+                natural[i] = natural[i].max(UnicodeWidthStr::width(cell.as_str()));
             }
         }
     }
@@ -396,12 +397,16 @@ fn compute_column_widths(
     widths
 }
 
-/// Wrap text into lines of at most `width` characters, breaking at word boundaries
+/// Wrap text into lines whose visual width is at most `width` columns,
+/// breaking at word boundaries when possible. Safe for any UTF-8 input:
+/// slice offsets are always taken at `char_indices()` boundaries, and
+/// widths are measured with `unicode-width` so CJK and other double-wide
+/// characters account for two visual columns.
 fn wrap_cell_text(text: &str, width: usize) -> Vec<String> {
     if width == 0 {
         return vec![text.to_string()];
     }
-    if text.len() <= width {
+    if UnicodeWidthStr::width(text) <= width {
         return vec![text.to_string()];
     }
 
@@ -409,16 +414,51 @@ fn wrap_cell_text(text: &str, width: usize) -> Vec<String> {
     let mut remaining = text;
 
     while !remaining.is_empty() {
-        if remaining.len() <= width {
+        if UnicodeWidthStr::width(remaining) <= width {
             result.push(remaining.to_string());
             break;
         }
-        // Find last space within width
-        let chunk = &remaining[..width];
-        let break_at = chunk.rfind(' ').unwrap_or(width);
-        let break_at = if break_at == 0 { width } else { break_at };
-        result.push(remaining[..break_at].to_string());
-        remaining = remaining[break_at..].trim_start();
+
+        let mut used = 0usize;
+        let mut last_space_byte: Option<usize> = None;
+        let mut break_byte: Option<usize> = None;
+        let mut first_char_end: Option<usize> = None;
+
+        for (byte_idx, ch) in remaining.char_indices() {
+            let char_w = UnicodeWidthChar::width(ch).unwrap_or(0);
+            if first_char_end.is_none() {
+                first_char_end = Some(byte_idx + ch.len_utf8());
+            }
+            if used + char_w > width {
+                break_byte = Some(byte_idx);
+                break;
+            }
+            if ch == ' ' {
+                last_space_byte = Some(byte_idx);
+            }
+            used += char_w;
+        }
+
+        let (chunk_end, resume_start) = match break_byte {
+            Some(bb) => match last_space_byte {
+                Some(sb) if sb > 0 => (sb, sb + 1),
+                _ => {
+                    // No usable space: break mid-word at the char boundary.
+                    // If nothing fit (e.g. width=1 and a double-wide char),
+                    // force-consume the first char to guarantee progress.
+                    if bb == 0 {
+                        let end = first_char_end.unwrap_or(remaining.len());
+                        (end, end)
+                    } else {
+                        (bb, bb)
+                    }
+                }
+            },
+            None => (remaining.len(), remaining.len()),
+        };
+
+        result.push(remaining[..chunk_end].to_string());
+        remaining = remaining[resume_start..].trim_start();
     }
 
     if result.is_empty() {
@@ -471,10 +511,17 @@ fn render_table_row(
                 .and_then(|w| w.get(line_idx))
                 .map(|s| s.as_str())
                 .unwrap_or("");
-            spans.push(Span::styled(
-                format!("{:<width$}", text, width = width),
-                style,
-            ));
+            // Pad by visual columns, not by chars: Rust's `{:<width$}` counts
+            // chars, which misaligns borders when cells contain double-wide
+            // characters (CJK, emoji).
+            let visual = UnicodeWidthStr::width(text);
+            let pad = width.saturating_sub(visual);
+            let mut cell = String::with_capacity(text.len() + pad);
+            cell.push_str(text);
+            if pad > 0 {
+                cell.push_str(&" ".repeat(pad));
+            }
+            spans.push(Span::styled(cell, style));
         }
         spans.push(Span::styled(" │", border));
         lines.push(Line::from(spans));
@@ -500,4 +547,171 @@ fn render_table_separator(
     }
     s.push_str("─┤");
     lines.push(Line::from(Span::styled(s, sep_style)));
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn visual_width(s: &str) -> usize {
+        UnicodeWidthStr::width(s)
+    }
+
+    #[test]
+    fn ascii_short_returns_as_is() {
+        assert_eq!(wrap_cell_text("hello", 10), vec!["hello".to_string()]);
+    }
+
+    #[test]
+    fn ascii_wrap_at_space() {
+        let out = wrap_cell_text("the quick brown fox jumps", 10);
+        for line in &out {
+            assert!(visual_width(line) <= 10, "line {line:?} exceeds width");
+        }
+        assert!(out.len() >= 2);
+        assert!(out.iter().all(|l| !l.starts_with(' ') && !l.ends_with(' ')));
+    }
+
+    #[test]
+    fn ascii_no_space_forced_break() {
+        let out = wrap_cell_text("abcdefghij", 5);
+        assert_eq!(out, vec!["abcde".to_string(), "fghij".to_string()]);
+    }
+
+    #[test]
+    fn empty_input() {
+        assert_eq!(wrap_cell_text("", 10), vec!["".to_string()]);
+    }
+
+    #[test]
+    fn zero_width_returns_input() {
+        assert_eq!(wrap_cell_text("hola", 0), vec!["hola".to_string()]);
+    }
+
+    /// Regression test for the crash reported against `devtrail explore`:
+    /// width offset landing inside a 3-byte em-dash used to panic with
+    /// "byte index is not a char boundary".
+    #[test]
+    fn em_dash_no_panic() {
+        let prefix = "middleware adds tenant isolation at DB layer. Partially m"; // 57 bytes
+        let text = format!("{prefix}itigated — RLS is not active until middleware is connected.");
+        // Width smaller than the text in visual columns, near the em-dash.
+        for w in [30usize, 50, 60, 67, 80] {
+            let out = wrap_cell_text(&text, w);
+            assert!(!out.is_empty());
+            for line in &out {
+                assert!(std::str::from_utf8(line.as_bytes()).is_ok());
+                assert!(visual_width(line) <= w, "{line:?} exceeds width {w}");
+            }
+        }
+    }
+
+    #[test]
+    fn accents_counted_as_one_column() {
+        // "áéíóú" is 5 code points, each width 1.
+        assert_eq!(wrap_cell_text("áéíóú", 5), vec!["áéíóú".to_string()]);
+    }
+
+    #[test]
+    fn cjk_double_width() {
+        // Each ideogram has visual width 2, so width=6 fits 3 chars per line.
+        let out = wrap_cell_text("数据表格示例", 6);
+        assert_eq!(out.len(), 2);
+        for line in &out {
+            assert!(visual_width(line) <= 6);
+        }
+        assert_eq!(out[0].chars().count(), 3);
+        assert_eq!(out[1].chars().count(), 3);
+    }
+
+    #[test]
+    fn emoji_no_panic() {
+        let out = wrap_cell_text("hola 🚀 mundo feliz", 6);
+        assert!(!out.is_empty());
+        for line in &out {
+            assert!(std::str::from_utf8(line.as_bytes()).is_ok());
+        }
+    }
+
+    #[test]
+    fn word_longer_than_width_breaks_mid_word() {
+        let out = wrap_cell_text("supercalifragilistic", 5);
+        assert!(out.len() >= 4);
+        for line in &out {
+            assert!(visual_width(line) <= 5);
+        }
+        let joined: String = out.concat();
+        assert_eq!(joined, "supercalifragilistic");
+    }
+
+    #[test]
+    fn leading_trailing_spaces_trimmed_between_chunks() {
+        let out = wrap_cell_text("alpha beta gamma delta", 6);
+        for line in &out {
+            assert!(!line.starts_with(' '));
+            assert!(!line.ends_with(' '));
+        }
+    }
+
+    #[test]
+    fn width_one_with_cjk_terminates() {
+        // A width-2 ideogram into width=1: guarantees forward progress by
+        // force-consuming one char per iteration. Must not loop forever.
+        let out = wrap_cell_text("数据", 1);
+        assert_eq!(out.len(), 2);
+    }
+
+    #[test]
+    fn natural_widths_measure_visual() {
+        let header: Vec<String> = vec!["数据".to_string()];
+        let body: Vec<Vec<String>> = vec![];
+        // Large available width so we return natural widths directly.
+        let widths = compute_column_widths(&header, &body, 100);
+        assert_eq!(widths.len(), 1);
+        // "数据" has visual width 4; minimum clamp is 3, so result is 4.
+        assert_eq!(widths[0], 4);
+    }
+
+    #[test]
+    fn cjk_fits_without_scaling() {
+        let header: Vec<String> = vec!["列1".to_string(), "列2".to_string()];
+        let body: Vec<Vec<String>> = vec![vec!["数据".to_string(), "テスト".to_string()]];
+        let widths = compute_column_widths(&header, &body, 100);
+        assert_eq!(widths.len(), 2);
+        // Col0: max of "列1" (3) and "数据" (4) = 4.
+        assert_eq!(widths[0], 4);
+        // Col1: max of "列2" (3) and "テスト" (6) = 6.
+        assert_eq!(widths[1], 6);
+    }
+
+    /// End-to-end regression: the exact table row that crashed
+    /// `devtrail explore` must render through the full pipeline
+    /// (parser + renderer + cell wrapping) without panicking.
+    #[test]
+    fn full_pipeline_em_dash_table_no_panic() {
+        let md = "\
+| Risk | Prob | Impact | Score | Mitigation |
+|------|------|--------|-------|------------|
+| E-003 | 2 | 3 | 6 | Admin/SuperAdmin role required. RLS middleware adds tenant isolation at DB layer. **Partially mitigated** — RLS is not active until Auth middleware is connected (Etapa 4). |
+";
+        // Widths near the one that triggered the original panic.
+        for w in [60usize, 80, 100, 120, 160] {
+            let lines = markdown_to_lines(md, w);
+            assert!(!lines.is_empty());
+        }
+    }
+
+    #[test]
+    fn proportional_distribution_respects_budget() {
+        let header: Vec<String> = vec!["A".to_string(), "B".to_string()];
+        let body: Vec<Vec<String>> = vec![vec![
+            "数据数据数据数据".to_string(),
+            "テストテストテスト".to_string(),
+        ]];
+        let available = 30;
+        let widths = compute_column_widths(&header, &body, available);
+        let border_overhead = 2 + (widths.len() - 1) * 3 + 2;
+        let content: usize = widths.iter().sum();
+        assert!(content + border_overhead <= available);
+    }
 }
