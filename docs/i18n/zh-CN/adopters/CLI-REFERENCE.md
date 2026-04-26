@@ -49,7 +49,7 @@ DevTrail 为每个组件使用**独立的版本标签**：
 | 组件 | 标签前缀 | 示例 | 包含内容 |
 |------|----------|------|----------|
 | Framework | `fw-` | `fw-4.3.0` | 模板（12 种类型）、治理文档、指令 |
-| CLI | `cli-` | `cli-3.5.0` | `devtrail` 二进制文件 |
+| CLI | `cli-` | `cli-3.5.1` | `devtrail` 二进制文件 |
 
 Framework 和 CLI 独立发布。Framework 更新不需要 CLI 更新，反之亦然。
 
@@ -110,7 +110,7 @@ $ devtrail update
 Updating framework...
 ✔ Framework updated to fw-4.3.0
 Updating CLI...
-✔ CLI updated to cli-3.5.0
+✔ CLI updated to cli-3.5.1
 ```
 
 ---
@@ -143,11 +143,11 @@ $ devtrail update-framework
 
 ```bash
 $ devtrail update-cli
-✔ CLI updated to cli-3.5.0
+✔ CLI updated to cli-3.5.1
 
 $ devtrail update-cli --method=cargo
 Compiling from source, this may take a few minutes...
-✔ CLI updated to cli-3.5.0
+✔ CLI updated to cli-3.5.1
 ```
 
 ---
@@ -210,7 +210,7 @@ $ devtrail status
   ┌───────────┬──────────────────────────┐
   │ Path      │ /home/user/my-project    │
   │ Framework │ fw-4.3.0                 │
-  │ CLI       │ cli-3.5.0                │
+  │ CLI       │ cli-3.5.1                │
   │ Language  │ en                       │
   └───────────┴──────────────────────────┘
 
@@ -636,7 +636,7 @@ $ devtrail audit --output markdown
 |------|--------|------|
 | `--lang <代码>` | 从项目解析（见下方） | TUI 界面与框架治理文档的显示语言（`en`、`es`、`zh-CN`）。缺少翻译时静默回退到英文。 |
 
-**语言解析顺序**（自 cli-3.5.0 起）：
+**语言解析顺序**（自 cli-3.5.1 起）：
 
 1. 提供 `--lang <代码>` 标志时优先
 2. `.devtrail/config.yml` 文件存在时使用其中的 `language` 字段（即便是显式的 `language: en` 也视为用户的明确选择）
@@ -688,7 +688,7 @@ $ devtrail explore --lang es             # 会话内切换到西班牙语
 ```bash
 $ devtrail about
 DevTrail CLI
-  CLI version:       cli-3.5.0
+  CLI version:       cli-3.5.1
   Framework version: fw-4.3.0
   Author:            Strange Days Tech, S.A.S.
   License:           MIT

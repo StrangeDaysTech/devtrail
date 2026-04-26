@@ -6,6 +6,7 @@ use ratatui::widgets::{Block, Borders, Paragraph, Scrollbar, ScrollbarOrientatio
 use unicode_width::UnicodeWidthStr;
 
 use crate::tui::app::{ActivePanel, App};
+use crate::tui::i18n_strings::t;
 use crate::tui::markdown::markdown_to_lines;
 use crate::tui::theme;
 
@@ -26,9 +27,10 @@ impl<'a> DocViewer<'a> {
             Style::default().fg(theme::SUBTLE)
         };
 
+        let lang = self.app.language.as_str();
         let title = match &self.app.current_doc {
             Some(doc) => format!(" {} ", doc.filename),
-            None => " Document ".to_string(),
+            None => format!(" {} ", t("Document", lang)),
         };
 
         let block = Block::default()
@@ -53,7 +55,7 @@ impl<'a> DocViewer<'a> {
             } else {
                 None
             };
-            let welcome = render_welcome(self.app.index.total_docs, fallback_info);
+            let welcome = render_welcome(self.app.index.total_docs, fallback_info, lang);
             let paragraph = Paragraph::new(welcome);
             paragraph.render(inner, buf);
             return;
@@ -129,7 +131,11 @@ impl<'a> DocViewer<'a> {
     }
 }
 
-fn render_welcome(total_docs: usize, fallback_path: Option<String>) -> Vec<Line<'static>> {
+fn render_welcome(
+    total_docs: usize,
+    fallback_path: Option<String>,
+    lang: &str,
+) -> Vec<Line<'static>> {
     let title = Style::default()
         .fg(theme::ACCENT)
         .add_modifier(Modifier::BOLD);
@@ -142,9 +148,13 @@ fn render_welcome(total_docs: usize, fallback_path: Option<String>) -> Vec<Line<
     let mut lines = vec![
         Line::from(""),
         Line::from(""),
+        // Brand name stays English in every locale.
         Line::from(Span::styled("  DevTrail Explorer", title)),
         Line::from(Span::styled(
-            "  Documentation Governance for AI-Assisted Development",
+            format!(
+                "  {}",
+                t("Documentation Governance for AI-Assisted Development", lang)
+            ),
             dim,
         )),
     ];
@@ -152,51 +162,63 @@ fn render_welcome(total_docs: usize, fallback_path: Option<String>) -> Vec<Line<
     if let Some(ref path) = fallback_path {
         lines.push(Line::from(""));
         lines.push(Line::from(vec![
-            Span::styled("  → Using repo root: ", Style::default().fg(Color::Yellow)),
+            Span::styled(
+                format!("  → {}", t("Using repo root: ", lang)),
+                Style::default().fg(Color::Yellow),
+            ),
             Span::styled(path.clone(), text),
         ]));
     }
 
     lines.push(Line::from(""));
     lines.push(Line::from(vec![
-        Span::styled("  Total documents: ", dim),
+        Span::styled(format!("  {}", t("Total documents: ", lang)), dim),
         Span::styled(
             total_docs.to_string(),
             text.add_modifier(Modifier::BOLD),
         ),
     ]));
     lines.push(Line::from(""));
-    lines.push(Line::from(Span::styled("  Quick start", title)));
+    lines.push(Line::from(Span::styled(
+        format!("  {}", t("Quick start", lang)),
+        title,
+    )));
     lines.push(Line::from(""));
     lines.push(Line::from(vec![
         Span::styled("    ↑↓ ", key),
-        Span::styled("Navigate groups in the left panel", text),
+        Span::styled(t("Navigate groups in the left panel", lang).to_string(), text),
     ]));
     lines.push(Line::from(vec![
         Span::styled("  Enter ", key),
-        Span::styled("Expand a group and open a document", text),
+        Span::styled(
+            t("Expand a group and open a document", lang).to_string(),
+            text,
+        ),
     ]));
     lines.push(Line::from(vec![
         Span::styled("   Tab  ", key),
-        Span::styled("Next panel / ", text),
+        Span::styled(t("Next panel / ", lang).to_string(), text),
         Span::styled("Shift+Tab  ", key),
-        Span::styled("Previous panel", text),
+        Span::styled(t("Previous panel", lang).to_string(), text),
     ]));
     lines.push(Line::from(vec![
         Span::styled("     /  ", key),
-        Span::styled("Search by filename, title, tags, or date", text),
+        Span::styled(
+            t("Search by filename, title, tags, or date", lang).to_string(),
+            text,
+        ),
     ]));
     lines.push(Line::from(vec![
         Span::styled("     f  ", key),
-        Span::styled("Toggle document fullscreen", text),
+        Span::styled(t("Toggle document fullscreen", lang).to_string(), text),
     ]));
     lines.push(Line::from(vec![
         Span::styled("     ?  ", key),
-        Span::styled("Show all keyboard shortcuts", text),
+        Span::styled(t("Show all keyboard shortcuts", lang).to_string(), text),
     ]));
     lines.push(Line::from(vec![
         Span::styled("     q  ", key),
-        Span::styled("Quit", text),
+        Span::styled(t("Quit", lang).to_string(), text),
     ]));
     lines.push(Line::from(""));
     lines.push(Line::from(Span::styled(
@@ -204,7 +226,8 @@ fn render_welcome(total_docs: usize, fallback_path: Option<String>) -> Vec<Line<
         dim,
     )));
     lines.push(Line::from(vec![
-        Span::styled("  Developed by ", dim),
+        Span::styled(format!("  {}", t("Developed by ", lang)), dim),
+        // Company name stays in its canonical form.
         Span::styled("Strange Days Tech, S.A.S.", text),
     ]));
     lines.push(Line::from(vec![

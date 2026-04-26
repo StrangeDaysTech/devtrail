@@ -153,6 +153,80 @@ pub fn t<'a>(en: &'a str, lang: &str) -> &'a str {
         ("Cycle display language", "zh-CN") => "切换显示语言",
         ("Language", "es") => "Idioma",
         ("Language", "zh-CN") => "语言",
+
+        // ── Metadata panel ────────────────────────────────────────────
+        ("Metadata", "es") => "Metadatos",
+        ("Metadata", "zh-CN") => "元数据",
+        ("No document selected", "es") => "Sin documento seleccionado",
+        ("No document selected", "zh-CN") => "未选择文档",
+        ("File:", "es") => "Archivo:",
+        ("File:", "zh-CN") => "文件:",
+        ("No frontmatter", "es") => "Sin frontmatter",
+        ("No frontmatter", "zh-CN") => "无 frontmatter",
+        ("Status:", "es") => "Estado:",
+        ("Status:", "zh-CN") => "状态:",
+        ("Created:", "es") => "Creado:",
+        ("Created:", "zh-CN") => "创建:",
+        ("Agent:", "es") => "Agente:",
+        ("Agent:", "zh-CN") => "代理:",
+        ("Confidence:", "es") => "Confianza:",
+        ("Confidence:", "zh-CN") => "可信度:",
+        ("Risk:", "es") => "Riesgo:",
+        ("Risk:", "zh-CN") => "风险:",
+        ("Review:", "es") => "Revisión:",
+        ("Review:", "zh-CN") => "审查:",
+        ("⚠ REQUIRED", "es") => "⚠ REQUERIDA",
+        ("⚠ REQUIRED", "zh-CN") => "⚠ 需要",
+        ("Tags:", "es") => "Etiquetas:",
+        ("Tags:", "zh-CN") => "标签:",
+        ("Related:", "es") => "Relacionados:",
+        ("Related:", "zh-CN") => "关联:",
+        (" (Enter: search)", "es") => " (Enter: buscar)",
+        (" (Enter: search)", "zh-CN") => "（Enter: 搜索）",
+        (" (Enter: follow)", "es") => " (Enter: seguir)",
+        (" (Enter: follow)", "zh-CN") => "（Enter: 跳转）",
+
+        // ── Document panel ────────────────────────────────────────────
+        ("Document", "es") => "Documento",
+        ("Document", "zh-CN") => "文档",
+
+        // ── Welcome screen (empty doc state) ──────────────────────────
+        ("Documentation Governance for AI-Assisted Development", "es") => {
+            "Gobernanza de documentación para desarrollo asistido por IA"
+        }
+        ("Documentation Governance for AI-Assisted Development", "zh-CN") => {
+            "AI 辅助开发的文档治理"
+        }
+        ("Using repo root: ", "es") => "Usando raíz del repo: ",
+        ("Using repo root: ", "zh-CN") => "使用仓库根目录：",
+        ("Total documents: ", "es") => "Total de documentos: ",
+        ("Total documents: ", "zh-CN") => "文档总数：",
+        ("Quick start", "es") => "Inicio rápido",
+        ("Quick start", "zh-CN") => "快速开始",
+        ("Navigate groups in the left panel", "es") => {
+            "Navega grupos en el panel izquierdo"
+        }
+        ("Navigate groups in the left panel", "zh-CN") => "在左侧面板中导航分组",
+        ("Expand a group and open a document", "es") => {
+            "Expande un grupo y abre un documento"
+        }
+        ("Expand a group and open a document", "zh-CN") => "展开分组并打开文档",
+        ("Next panel / ", "es") => "Panel siguiente / ",
+        ("Next panel / ", "zh-CN") => "下一面板 / ",
+        ("Previous panel", "es") => "Panel anterior",
+        ("Previous panel", "zh-CN") => "上一面板",
+        ("Search by filename, title, tags, or date", "es") => {
+            "Buscar por archivo, título, etiquetas o fecha"
+        }
+        ("Search by filename, title, tags, or date", "zh-CN") => {
+            "按文件名、标题、标签或日期搜索"
+        }
+        ("Toggle document fullscreen", "es") => "Alternar pantalla completa",
+        ("Toggle document fullscreen", "zh-CN") => "切换文档全屏",
+        ("Show all keyboard shortcuts", "es") => "Mostrar todos los atajos",
+        ("Show all keyboard shortcuts", "zh-CN") => "显示所有快捷键",
+        ("Developed by ", "es") => "Desarrollado por ",
+        ("Developed by ", "zh-CN") => "由 ",
         ("Quit", "es") => "Salir",
         ("Quit", "zh-CN") => "退出",
         ("Force quit", "es") => "Forzar salida",
