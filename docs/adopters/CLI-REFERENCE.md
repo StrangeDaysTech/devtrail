@@ -49,7 +49,7 @@ DevTrail uses **independent version tags** for each component:
 | Component | Tag prefix | Example | What it includes |
 |-----------|-----------|---------|------------------|
 | Framework | `fw-` | `fw-4.3.0` | Templates (12 types), governance docs, directives |
-| CLI | `cli-` | `cli-3.5.1` | The `devtrail` binary |
+| CLI | `cli-` | `cli-3.5.2` | The `devtrail` binary |
 
 Framework and CLI are released independently. A framework update does not require a CLI update, and vice versa.
 
@@ -110,7 +110,7 @@ $ devtrail update
 Updating framework...
 ✔ Framework updated to fw-4.3.0
 Updating CLI...
-✔ CLI updated to cli-3.5.1
+✔ CLI updated to cli-3.5.2
 ```
 
 ---
@@ -143,11 +143,11 @@ Use `--method` to override auto-detection: `--method=github` or `--method=cargo`
 
 ```bash
 $ devtrail update-cli
-✔ CLI updated to cli-3.5.1
+✔ CLI updated to cli-3.5.2
 
 $ devtrail update-cli --method=cargo
 Compiling from source, this may take a few minutes...
-✔ CLI updated to cli-3.5.1
+✔ CLI updated to cli-3.5.2
 ```
 
 ---
@@ -210,7 +210,7 @@ $ devtrail status
   ┌───────────┬──────────────────────────┐
   │ Path      │ /home/user/my-project    │
   │ Framework │ fw-4.3.0                 │
-  │ CLI       │ cli-3.5.1                │
+  │ CLI       │ cli-3.5.2                │
   │ Language  │ en                       │
   └───────────┴──────────────────────────┘
 
@@ -643,7 +643,7 @@ Browse and read DevTrail documentation interactively in a terminal UI.
 |------|---------|-------------|
 | `--lang <code>` | resolved from project (see below) | Display language for the TUI shell and framework governance docs (`en`, `es`, `zh-CN`). Falls back silently to English when a translation is missing. |
 
-**Language resolution order** (since cli-3.5.1):
+**Language resolution order** (since cli-3.5.2):
 
 1. `--lang <code>` flag, when provided
 2. `language` field in `.devtrail/config.yml`, when the file exists (an explicit value — even `language: en` — is treated as a deliberate user choice)
@@ -657,7 +657,7 @@ Browse and read DevTrail documentation interactively in a terminal UI.
 - Markdown rendering with colors, tables, code blocks, and heading indentation
 - Navigate between related documents via hyperlinks
 - Search by filename, title, tags, or date
-- Fullscreen document mode, vim-style keybindings
+- Fullscreen document mode, with `j` / `k` as alternate keys for `↓` / `↑`
 - Localization-aware: framework docs (`QUICK-REFERENCE`, `AGENT-RULES`, China regulatory guides, etc.) are served in the language set by `language` in `.devtrail/config.yml` or by `--lang`
 
 **Key bindings:**
@@ -695,7 +695,7 @@ Show version, authorship, and license information.
 ```bash
 $ devtrail about
 DevTrail CLI
-  CLI version:       cli-3.5.1
+  CLI version:       cli-3.5.2
   Framework version: fw-4.3.0
   Author:            Strange Days Tech, S.A.S.
   License:           MIT
