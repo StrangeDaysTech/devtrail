@@ -272,13 +272,10 @@ fn load_version(project_root: &std::path::Path) -> String {
 }
 
 fn load_language(project_root: &std::path::Path) -> String {
-    match DevTrailConfig::load(project_root) {
-        Ok(c) => c.language,
-        Err(_) => {
-            utils::warn("Could not read config.yml");
-            "unknown".to_string()
-        }
-    }
+    // Use the same resolver as `explore` / `new` so all three commands
+    // agree on the effective language (config when present, else OS locale,
+    // else "en").
+    DevTrailConfig::resolve_language(project_root)
 }
 
 fn count_documents(devtrail_dir: &std::path::Path) -> Vec<(&'static str, &'static str, usize)> {

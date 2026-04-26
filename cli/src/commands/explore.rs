@@ -13,12 +13,11 @@ pub fn run(path: &str, lang_override: Option<&str>) -> Result<()> {
         }
     };
 
-    // Effective language: --lang flag > config.language > "en".
+    // Effective language: --lang flag > config.language (when config
+    // exists) > $LC_ALL / $LANG > "en".
     let language = match lang_override {
         Some(l) => l.to_string(),
-        None => DevTrailConfig::load(&resolved.path)
-            .map(|c| c.language)
-            .unwrap_or_else(|_| "en".to_string()),
+        None => DevTrailConfig::resolve_language(&resolved.path),
     };
 
     crate::tui::run(&resolved.path, resolved.is_fallback, &language)

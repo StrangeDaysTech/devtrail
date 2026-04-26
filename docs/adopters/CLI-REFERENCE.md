@@ -49,7 +49,7 @@ DevTrail uses **independent version tags** for each component:
 | Component | Tag prefix | Example | What it includes |
 |-----------|-----------|---------|------------------|
 | Framework | `fw-` | `fw-4.3.0` | Templates (12 types), governance docs, directives |
-| CLI | `cli-` | `cli-3.4.1` | The `devtrail` binary |
+| CLI | `cli-` | `cli-3.5.0` | The `devtrail` binary |
 
 Framework and CLI are released independently. A framework update does not require a CLI update, and vice versa.
 
@@ -110,7 +110,7 @@ $ devtrail update
 Updating framework...
 ✔ Framework updated to fw-4.3.0
 Updating CLI...
-✔ CLI updated to cli-3.4.1
+✔ CLI updated to cli-3.5.0
 ```
 
 ---
@@ -143,11 +143,11 @@ Use `--method` to override auto-detection: `--method=github` or `--method=cargo`
 
 ```bash
 $ devtrail update-cli
-✔ CLI updated to cli-3.4.1
+✔ CLI updated to cli-3.5.0
 
 $ devtrail update-cli --method=cargo
 Compiling from source, this may take a few minutes...
-✔ CLI updated to cli-3.4.1
+✔ CLI updated to cli-3.5.0
 ```
 
 ---
@@ -210,7 +210,7 @@ $ devtrail status
   ┌───────────┬──────────────────────────┐
   │ Path      │ /home/user/my-project    │
   │ Framework │ fw-4.3.0                 │
-  │ CLI       │ cli-3.4.1                │
+  │ CLI       │ cli-3.5.0                │
   │ Language  │ en                       │
   └───────────┴──────────────────────────┘
 
@@ -641,7 +641,14 @@ Browse and read DevTrail documentation interactively in a terminal UI.
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--lang <code>` | `language` from `.devtrail/config.yml`, else `en` | Display language for framework governance docs (`en`, `es`, `zh-CN`). Falls back silently to English when a translation is missing. |
+| `--lang <code>` | resolved from project (see below) | Display language for the TUI shell and framework governance docs (`en`, `es`, `zh-CN`). Falls back silently to English when a translation is missing. |
+
+**Language resolution order** (since cli-3.5.0):
+
+1. `--lang <code>` flag, when provided
+2. `language` field in `.devtrail/config.yml`, when the file exists (an explicit value — even `language: en` — is treated as a deliberate user choice)
+3. `$LC_ALL` / `$LANG` env vars, mapped to a supported locale (e.g., `zh_CN.UTF-8` → `zh-CN`, `es_MX.UTF-8` → `es`). Traditional Chinese (`zh_TW` / `zh_HK`) and other unsupported locales fall through.
+4. `en`
 
 **Features:**
 
@@ -662,6 +669,7 @@ Browse and read DevTrail documentation interactively in a terminal UI.
 | `Tab` | Cycle panels: Navigation → Metadata → Document |
 | `f` | Toggle fullscreen document |
 | `/` | Search |
+| `L` | Cycle display language (`en → es → zh-CN`) |
 | `Esc` | Back / Collapse / Clear search |
 | `?` | Help popup with all shortcuts |
 | `q` | Quit |
@@ -687,7 +695,7 @@ Show version, authorship, and license information.
 ```bash
 $ devtrail about
 DevTrail CLI
-  CLI version:       cli-3.4.1
+  CLI version:       cli-3.5.0
   Framework version: fw-4.3.0
   Author:            Strange Days Tech, S.A.S.
   License:           MIT

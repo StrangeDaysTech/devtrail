@@ -15,7 +15,8 @@ pub fn run(path: &str, doc_type_arg: Option<&str>, title_arg: Option<&str>) -> R
     let devtrail_dir = target.join(".devtrail");
 
     let config = DevTrailConfig::load(&target).unwrap_or_default();
-    let lang = &config.language;
+    let resolved_language = DevTrailConfig::resolve_language(&target);
+    let lang = resolved_language.as_str();
     let china = config.has_region("china");
 
     // Select document type
