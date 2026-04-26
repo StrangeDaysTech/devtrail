@@ -278,6 +278,8 @@ Valida documentos DevTrail verificando cumplimiento y corrección.
 - `SEC-001`: No contiene información sensible
 - `OBS-001`: Tag observabilidad requiere sección de alcance
 
+Cuando `regional_scope` incluye `china`, se activan doce reglas adicionales (`CROSS-004` a `CROSS-011`, `TYPE-003` a `TYPE-006`) que cubren escalado de revisión TC260, vínculo PIPIA desde documentos con datos sensibles, cross-references de CACFILE / AILABEL, coherencia severidad-deadline CSL, y retención de 3 años de PIPIA. Sin `china` en scope, estas reglas se omiten — sin falsos positivos.
+
 **Código de salida:** 0 si no hay errores (warnings OK), 1 si hay errores.
 
 ---
@@ -291,10 +293,10 @@ Crea un nuevo documento DevTrail a partir de una plantilla.
 | Argumento/Flag | Default | Descripción |
 |----------------|---------|-------------|
 | `path` | `.` (directorio actual) | Directorio del proyecto |
-| `--doc-type`, `-t` | — | Tipo de documento: `ailog`, `aidec`, `adr`, `eth`, `req`, `tes`, `inc`, `tde`, `sec`, `mcard`, `sbom`, `dpia` |
+| `--doc-type`, `-t` | — | Tipo de documento. Core (12): `ailog`, `aidec`, `adr`, `eth`, `req`, `tes`, `inc`, `tde`, `sec`, `mcard`, `sbom`, `dpia`. China (4, opt-in): `pipia`, `cacfile`, `tc260ra`, `ailabel`. |
 | `--title` | — | Título del documento |
 
-Si no se especifica `--doc-type` o `--title`, se solicitan de forma interactiva.
+Si no se especifica `--doc-type` o `--title`, se solicitan de forma interactiva. Los tipos chinos se filtran del prompt (y se rechazan en `-t`) cuando `regional_scope` no incluye `china`.
 
 **Ejemplos:**
 
@@ -323,20 +325,55 @@ $ devtrail new -t ailog --title "Refactorizar módulo de pagos"
 
 ---
 
-### `devtrail compliance [path] [--standard <nombre>] [--all] [--output <formato>]`
+### `devtrail compliance [path] [--standard <nombre>] [--region <nombre>] [--all] [--output <formato>]`
 
-Verifica cumplimiento regulatorio contra EU AI Act, ISO/IEC 42001 y NIST AI RMF.
+Verifica cumplimiento regulatorio. Por defecto evalúa los estándares cuya región esté incluida en `regional_scope` de `.devtrail/config.yml` (default `[global, eu]`). Seis frameworks chinos disponibles opt-in cuando `china` se añade a `regional_scope`.
 
 **Argumentos y flags:**
 
 | Argumento/Flag | Default | Descripción |
 |----------------|---------|-------------|
 | `path` | `.` (directorio actual) | Directorio del proyecto |
-| `--standard` | — | Verificar estándar específico: `eu-ai-act`, `iso-42001`, o `nist-ai-rmf` |
-| `--all` | — | Verificar los tres estándares |
+| `--standard` | — | Verificar estándar específico: `eu-ai-act`, `iso-42001`, `nist-ai-rmf`, `china-tc260`, `china-pipl`, `china-gb45438`, `china-cac`, `china-gb45652`, `china-csl` |
+| `--region` | — | Ejecutar todos los estándares de una región: `global`, `eu`, `china`, o `all` |
+| `--all` | — | Verificar todos los estándares (ignora `regional_scope`) |
 | `--output` | `text` | Formato de salida: `text`, `markdown`, o `json` |
 
-Si no se especifica `--standard` ni `--all`, por defecto ejecuta `--all`.
+Precedencia: `--standard` > `--all` > `--region` > el `regional_scope` del proyecto.
+
+**Estándares chinos (opt-in vía `regional_scope: china`):**
+
+- **TC260 v2.0**: existe TC260RA; niveles altos requieren review; los tres criterios (escenario × inteligencia × escala) están completos
+- **PIPL**: PIPIA cuando `pipl_applicable: true`; transferencia transfronteriza documentada; retención ≥ 3 años (Art. 56)
+- **GB 45438**: AILABEL para contenido generativo; estrategia explícita + implícita declaradas; campos de metadata mandatorios
+- **CAC**: CACFILE cuando es requerido; `cac_filing_status` explícito; `cac_filing_number` cuando el estado es `*_approved`
+- **GB/T 45652**: SBOM y MCARD declaran cumplimiento de seguridad de datos de entrenamiento
+- **CSL 2026**: cada INC con `csl_severity_level`; horas coherentes con severidad (1h ↔ particularly_serious, 4h ↔ relatively_major); post-mortem 30 días para incidentes major+
+
+**Ejemplos:**
+
+```bash
+# Default: solo estándares cuya región esté en regional_scope
+$ devtrail compliance
+
+# Los seis frameworks chinos (requiere regional_scope: china)
+$ devtrail compliance --region china
+
+# Un solo framework chino
+$ devtrail compliance --standard china-pipl --output json
+
+# Todos los estándares ignorando regional_scope
+$ devtrail compliance --all
+```
+
+> **Activación**: para evaluar los frameworks chinos automáticamente, añadir a `.devtrail/config.yml`:
+>
+> ```yaml
+> regional_scope:
+>   - global
+>   - eu
+>   - china
+> ```
 
 ---
 

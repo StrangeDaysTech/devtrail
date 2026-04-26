@@ -157,6 +157,67 @@ When multiple team members use AI assistants on the same project:
 
 ---
 
+## China Regulatory Workflow *(opt-in)*
+
+If your project operates in mainland China or processes personal information of mainland China users, enable the China scope and follow this workflow.
+
+### One-time Setup
+
+1. Edit `.devtrail/config.yml` and add `china` to `regional_scope`:
+   ```yaml
+   regional_scope:
+     - global
+     - eu      # if also EU-subject
+     - china
+   ```
+2. Run `devtrail compliance --region china` to see the baseline (all checks will fail until you create the supporting documents).
+3. Read the guides installed under `.devtrail/00-governance/`:
+   - `CHINA-REGULATORY-FRAMEWORK.md` — overview and coverage matrix
+   - `TC260-IMPLEMENTATION-GUIDE.md` — five-level risk grading
+   - `PIPL-PIPIA-GUIDE.md` — when a PIPIA is required and what it must contain
+   - `CAC-FILING-GUIDE.md` — single vs dual filing, status lifecycle
+   - `GB-45438-LABELING-GUIDE.md` — explicit + implicit labeling design
+
+### When You Add a Generative AI Model
+
+Bundle of documents to create together (cross-linked via `related:`):
+
+| Document | Purpose | Required when |
+|----------|---------|---------------|
+| `MCARD` | Model card with `cac_filing_required`, `gb45438_applicable`, `tc260_risk_level` | Always for in-scope models |
+| `TC260RA` | Risk grading (scenario × intelligence × scale → 5 levels) | Always |
+| `AILABEL` | Explicit + implicit labeling per GB 45438 | When the model generates content |
+| `CACFILE` | Algorithm filing record | When `cac_filing_required: true` |
+| `PIPIA` | Personal-info impact assessment (Art. 55-56) | When personal info is processed |
+| `SBOM` | Training-data inventory + GB/T 45652 compliance | Always |
+
+`devtrail compliance --region china` confirms the bundle is complete.
+
+### When an Incident Occurs
+
+The `INC` template includes a *CSL 2026 Incident Reporting* section. Set:
+
+```yaml
+csl_severity_level: relatively_major   # or particularly_serious | major | general
+csl_report_deadline_hours: 4           # 1 for particularly_serious, 4 for relatively_major
+```
+
+`devtrail validate` enforces severity-to-deadline coherence (`CROSS-008`, `CROSS-009`). Major+ incidents must be closed (status `accepted`) within 30 days for the `CSL-003` check to pass.
+
+### Cross-Border Data Transfer
+
+When a process involves transferring personal information out of mainland China, set `pipl_cross_border_transfer: true` on the PIPIA and document the chosen mechanism (CAC security assessment / certification / standard contract) in the *Cross-Border Transfer Analysis* section. `CROSS-011` will warn if none is documented.
+
+### Daily Compliance Check
+
+```bash
+# Before merging a feature branch that touches AI services
+devtrail validate                    # cross-rules including CROSS-004..011
+devtrail compliance --region china   # per-framework score
+```
+
+---
+
 ## Understanding Versions
 
 DevTrail uses **independent versioning** for its two components:

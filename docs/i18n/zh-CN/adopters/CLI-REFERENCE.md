@@ -296,6 +296,8 @@ Repairing DevTrail in /home/user/my-project
 - 敏感信息检测（API 密钥、密码）
 - 关联文档存在性
 
+当 `regional_scope` 包含 `china` 时,启用十二条额外规则(`CROSS-004` 至 `CROSS-011`、`TYPE-003` 至 `TYPE-006`),涵盖 TC260 审核升级、敏感数据文档的 PIPIA 关联、CACFILE / AILABEL 交叉引用、CSL 严重程度-时限一致性、PIPIA 三年留存。未启用 `china` 时,这些规则被跳过 — 不会产生误报。
+
 **示例：**
 
 ```bash
@@ -321,10 +323,10 @@ $ devtrail validate --fix
 | 参数/标志 | 默认值 | 描述 |
 |-----------|--------|------|
 | `path` | `.`（当前目录） | 目标项目目录 |
-| `--doc-type`, `-t` | — | 文档类型：`ailog`、`aidec`、`adr`、`eth`、`req`、`tes`、`inc`、`tde`、`sec`、`mcard`、`sbom`、`dpia` |
+| `--doc-type`, `-t` | — | 文档类型。核心(12 种):`ailog`、`aidec`、`adr`、`eth`、`req`、`tes`、`inc`、`tde`、`sec`、`mcard`、`sbom`、`dpia`。中国(4 种,opt-in):`pipia`、`cacfile`、`tc260ra`、`ailabel`。 |
 | `--title` | — | 新文档的标题 |
 
-如果未指定 `--doc-type` 或 `--title`，将以交互方式提示。
+如果未指定 `--doc-type` 或 `--title`,将以交互方式提示。当 `regional_scope` 不包含 `china` 时,中国专属类型从提示中过滤(`-t` 也会拒绝)。
 
 **示例：**
 
@@ -353,20 +355,55 @@ $ devtrail new -t ailog --title "Implement JWT authentication"
 
 ---
 
-### `devtrail compliance [path] [--standard <name>] [--all] [--output <format>]`
+### `devtrail compliance [path] [--standard <name>] [--region <name>] [--all] [--output <format>]`
 
-检查 EU AI Act、ISO/IEC 42001 和 NIST AI RMF 的法规合规状态。
+检查法规合规状态。默认评估 `.devtrail/config.yml` 中 `regional_scope` 所列区域的标准(默认 `[global, eu]`)。在 `regional_scope` 中加入 `china` 后,六个中国法规框架可用。
 
 **参数和标志：**
 
 | 参数/标志 | 默认值 | 描述 |
 |-----------|--------|------|
-| `path` | `.`（当前目录） | 目标项目目录 |
-| `--standard` | — | 检查特定标准：`eu-ai-act`、`iso-42001` 或 `nist-ai-rmf` |
-| `--all` | — | 检查全部三个标准 |
-| `--output` | `text` | 输出格式：`text`、`markdown` 或 `json` |
+| `path` | `.`(当前目录) | 目标项目目录 |
+| `--standard` | — | 检查特定标准:`eu-ai-act`、`iso-42001`、`nist-ai-rmf`、`china-tc260`、`china-pipl`、`china-gb45438`、`china-cac`、`china-gb45652`、`china-csl` |
+| `--region` | — | 运行某区域的全部标准:`global`、`eu`、`china` 或 `all` |
+| `--all` | — | 运行全部标准(忽略 `regional_scope`) |
+| `--output` | `text` | 输出格式:`text`、`markdown` 或 `json` |
 
-如果未指定 `--standard` 或 `--all`，默认执行 `--all`。
+优先级:`--standard` > `--all` > `--region` > 项目的 `regional_scope`。
+
+**中国标准(通过 `regional_scope: china` 启用):**
+
+- **TC260 v2.0**:存在 TC260RA;高/很高/极重等级要求人工审核;三项分级标准(场景 × 智能 × 规模)已填充
+- **PIPL**:`pipl_applicable: true` 时存在 PIPIA;跨境传输已记录;留存 ≥ 3 年(第56条)
+- **GB 45438**:生成式内容存在 AILABEL;声明显式 + 隐式标识策略;必填元数据字段已填充
+- **CAC**:必要时存在 CACFILE;`cac_filing_status` 已显式设置;状态为 `*_approved` 时填写 `cac_filing_number`
+- **GB/T 45652**:SBOM 与 MCARD 声明训练数据安全合规
+- **CSL 2026**:每个 INC 有 `csl_severity_level`;时限与严重程度一致(1h ↔ particularly_serious、4h ↔ relatively_major);major+ 事件 30 天内提交事后审查
+
+**示例:**
+
+```bash
+# 默认:仅运行 regional_scope 中包含的区域的标准
+$ devtrail compliance
+
+# 六个中国框架(需要 regional_scope: china)
+$ devtrail compliance --region china
+
+# 单一中国框架
+$ devtrail compliance --standard china-pipl --output json
+
+# 强制运行全部标准,忽略 regional_scope
+$ devtrail compliance --all
+```
+
+> **启用方式**:在 `.devtrail/config.yml` 中添加:
+>
+> ```yaml
+> regional_scope:
+>   - global
+>   - eu
+>   - china
+> ```
 
 **检查内容：**
 

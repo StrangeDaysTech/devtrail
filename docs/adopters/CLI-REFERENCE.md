@@ -296,6 +296,8 @@ Validate DevTrail documents for compliance and correctness.
 - Sensitive information detection (API keys, passwords)
 - Related document existence
 
+When `regional_scope` includes `china`, twelve additional rules activate (`CROSS-004` to `CROSS-011`, `TYPE-003` to `TYPE-006`) covering TC260 review escalation, PIPIA linkage from sensitive-data documents, CACFILE / AILABEL cross-references, CSL severity-to-deadline coherence, and PIPIA 3-year retention. Without `china` in scope, these rules are skipped — no false positives.
+
 **Example:**
 
 ```bash
@@ -321,10 +323,10 @@ Create a new DevTrail document from a template.
 | Argument/Flag | Default | Description |
 |---------------|---------|-------------|
 | `path` | `.` (current directory) | Target project directory |
-| `--doc-type`, `-t` | — | Document type: `ailog`, `aidec`, `adr`, `eth`, `req`, `tes`, `inc`, `tde`, `sec`, `mcard`, `sbom`, `dpia` |
+| `--doc-type`, `-t` | — | Document type. Core (12): `ailog`, `aidec`, `adr`, `eth`, `req`, `tes`, `inc`, `tde`, `sec`, `mcard`, `sbom`, `dpia`. China (4, opt-in): `pipia`, `cacfile`, `tc260ra`, `ailabel`. |
 | `--title` | — | Title for the new document |
 
-If `--doc-type` or `--title` are omitted, the command prompts interactively.
+If `--doc-type` or `--title` are omitted, the command prompts interactively. China-only types are filtered out of the prompt (and rejected from `-t`) when `regional_scope` does not include `china`.
 
 **Examples:**
 
@@ -353,31 +355,44 @@ $ devtrail new -t ailog --title "Implement JWT authentication"
 
 ---
 
-### `devtrail compliance [path] [--standard <name>] [--all] [--output <format>]`
+### `devtrail compliance [path] [--standard <name>] [--region <name>] [--all] [--output <format>]`
 
-Check regulatory compliance against EU AI Act, ISO/IEC 42001, and NIST AI RMF.
+Check regulatory compliance. By default, evaluates the standards whose region is in `regional_scope` from `.devtrail/config.yml` (default `[global, eu]`). Six Chinese frameworks are available opt-in when `china` is added to `regional_scope`.
 
 **Arguments and flags:**
 
 | Argument/Flag | Default | Description |
 |---------------|---------|-------------|
 | `path` | `.` (current directory) | Target project directory |
-| `--standard` | — | Check a specific standard: `eu-ai-act`, `iso-42001`, or `nist-ai-rmf` |
-| `--all` | — | Check all three standards |
+| `--standard` | — | Check a specific standard: `eu-ai-act`, `iso-42001`, `nist-ai-rmf`, `china-tc260`, `china-pipl`, `china-gb45438`, `china-cac`, `china-gb45652`, `china-csl` |
+| `--region` | — | Run all standards in a region: `global`, `eu`, `china`, or `all` |
+| `--all` | — | Check every standard, regardless of `regional_scope` |
 | `--output` | `text` | Output format: `text`, `markdown`, or `json` |
 
-If neither `--standard` nor `--all` is specified, defaults to `--all`.
+Precedence: `--standard` > `--all` > `--region` > the project's `regional_scope`.
 
 **What it checks:**
+
+Global / EU (always available):
 
 - **EU AI Act**: Risk classification, ethical review linkage, DPIA existence, incident reporting
 - **ISO/IEC 42001**: Governance policy, risk planning (ETH), operations documentation (AILOG/AIDEC), Annex A coverage
 - **NIST AI RMF**: MAP (AILOG), MEASURE (TES), MANAGE (ETH/INC), GOVERN (policy + ADR), GenAI risk coverage (12 NIST 600-1 categories)
 
-**Example:**
+China (opt-in via `regional_scope: china`):
+
+- **TC260 v2.0**: TC260RA exists; high/very-high/extremely-severe levels require review; the three grading criteria (scenario × intelligence × scale) are populated
+- **PIPL**: PIPIA exists when `pipl_applicable`; cross-border transfer documented; retention ≥ 3 years per Art. 56
+- **GB 45438**: AILABEL exists for generative content; both explicit and implicit labeling tracks declared; mandatory metadata fields populated
+- **CAC Algorithm Filing**: CACFILE exists when required; explicit `cac_filing_status`; `cac_filing_number` populated when status is `*_approved`
+- **GB/T 45652**: SBOM and MCARD declare training-data security compliance
+- **CSL 2026**: Every INC has `csl_severity_level`; deadline hours coherent with severity (1h ↔ particularly_serious, 4h ↔ relatively_major); 30-day post-mortem documented for major+ incidents
+
+**Examples:**
 
 ```bash
-$ devtrail compliance --all
+# Default: runs only standards whose region is in regional_scope
+$ devtrail compliance
   DevTrail Compliance
   /home/user/my-project
   12 document(s) analyzed
@@ -395,17 +410,46 @@ $ devtrail compliance --all
     ✓ [ISO-004] Annex A control coverage (6/6 groups)
 
   ■ NIST AI RMF 60%
-    ✓ [NIST-MAP-001] MAP function — AI actions documented (AILOG)
-    ✓ [NIST-MEASURE-001] MEASURE function — Test plans exist (TES)
-    ✓ [NIST-MANAGE-001] MANAGE function — Risk management documented (ETH + INC)
-    ✓ [NIST-GOVERN-001] GOVERN function — Governance policy and decisions documented
     ~ [NIST-GENAI-001] GenAI risk coverage — NIST AI 600-1 (4/12 categories)
 
   Overall compliance: 78%
 
-$ devtrail compliance --standard eu-ai-act --output json
-[{"standard":"EuAiAct","checks":[...],"score":75.0}]
+# Run only the six Chinese frameworks (requires regional_scope: china)
+$ devtrail compliance --region china
+  ■ China TC260 v2.0 67%
+    ✓ [TC260-001] At least one TC260 Risk Assessment (TC260RA) is present
+    ~ [TC260-002] High / very-high / extremely-severe TC260 levels mandate review
+    ✗ [TC260-003] TC260RA documents specify scenario × intelligence × scale
+
+  ■ China PIPL 100%
+    ✓ [PIPL-001] PIPIA exists when pipl_applicable is true
+    ✓ [PIPL-002] Documents handling sensitive personal info link to a PIPIA
+    ✓ [PIPL-003] Cross-border personal info transfer is documented in a PIPIA
+    ✓ [PIPL-004] PIPIA retention is ≥ 3 years per PIPL Art. 56
+
+  ■ China GB 45438 ...
+  ■ China CAC Algorithm Filing ...
+  ■ China GB/T 45652 ...
+  ■ China CSL 2026 ...
+
+# A single Chinese framework
+$ devtrail compliance --standard china-pipl --output json
+[{"standard":"ChinaPipl","standard_label":"China PIPL","checks":[...],"score":100.0}]
+
+# Force every standard, ignoring regional_scope
+$ devtrail compliance --all
 ```
+
+> **Activation note**: Chinese frameworks evaluate only when you opt in. Add to `.devtrail/config.yml`:
+>
+> ```yaml
+> regional_scope:
+>   - global
+>   - eu
+>   - china
+> ```
+>
+> Use `--standard china-*` or `--region china` to run them ad-hoc even when not in scope. See the `CHINA-REGULATORY-FRAMEWORK.md` guide installed under `.devtrail/00-governance/`.
 
 ---
 
