@@ -89,6 +89,7 @@ impl Widget for HelpPopup<'_> {
             help_line("  /           ", t("Search by name, title, tags, date", lang), key_style, desc_style),
             help_line("  s           ", t("Cycle sort order", lang), key_style, desc_style),
             help_line("  r           ", t("Refresh document index", lang), key_style, desc_style),
+            help_line("  L           ", t("Cycle display language", lang), key_style, desc_style),
             help_line("  q           ", t("Quit", lang), key_style, desc_style),
             help_line("  Ctrl+C      ", t("Force quit", lang), key_style, desc_style),
             Line::from(""),

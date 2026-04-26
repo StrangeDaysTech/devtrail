@@ -134,6 +134,9 @@ fn handle_key(app: &mut App, key: KeyEvent) {
             *app = App::new(&root, fallback, &language);
         }
 
+        // Cycle display language (en → es → zh-CN → en)
+        KeyCode::Char('L') => app.cycle_language(),
+
         _ => {}
     }
 }

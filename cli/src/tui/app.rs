@@ -132,6 +132,40 @@ impl App {
         }
     }
 
+    /// Languages the live switcher cycles through. Order matters — this is
+    /// what `cycle_language` walks. New locales should be appended here AND
+    /// have entries in `tui::i18n_strings::t`.
+    pub const SWITCHER_LANGUAGES: &'static [&'static str] = &["en", "es", "zh-CN"];
+
+    /// Cycle to the next supported display language without leaving the TUI.
+    /// Rebuilds the document index in the new locale (so group labels and
+    /// translated docs swap immediately) and shows a status-bar notification
+    /// with the new locale code. Resets the cached document body — file
+    /// paths change with the locale, so the previously-rendered body would
+    /// otherwise stay in the old language.
+    pub fn cycle_language(&mut self) {
+        let current = self.language.as_str();
+        let idx = Self::SWITCHER_LANGUAGES
+            .iter()
+            .position(|l| *l == current)
+            .unwrap_or(0);
+        let next = Self::SWITCHER_LANGUAGES[(idx + 1) % Self::SWITCHER_LANGUAGES.len()];
+        self.language = next.to_string();
+
+        let devtrail_dir = self.project_root.join(".devtrail");
+        self.index = DocIndex::build(&devtrail_dir, &self.language);
+        self.doc_cache.clear();
+        self.current_doc = None;
+        self.doc_scroll = 0;
+        // Selection may now be out of bounds if a group disappeared; clamp.
+        if self.expanded_groups.len() != self.index.groups.len() {
+            self.expanded_groups = vec![false; self.index.groups.len()];
+        }
+
+        let prefix = crate::tui::i18n_strings::t("Language", &self.language);
+        self.notification = Some(format!("{prefix}: {next}"));
+    }
+
     /// Move selection up in the navigation tree
     pub fn nav_up(&mut self) {
         let items = self.build_nav_items();
@@ -778,4 +812,60 @@ fn entry_matches_search(
         || entry.tags.iter().any(|t| t.to_lowercase().contains(&query))
         || (!entry.created.is_empty() && entry.created.contains(&query))
         || entry.id.to_lowercase().contains(&query)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn fixture_app(language: &str) -> App {
+        let tmp = tempfile::TempDir::new().unwrap();
+        let governance = tmp.path().join(".devtrail").join("00-governance");
+        std::fs::create_dir_all(&governance).unwrap();
+        std::fs::write(governance.join("AGENT-RULES.md"), "# Rules").unwrap();
+        // Hold the TempDir alive by leaking — fine for test scope.
+        let path = tmp.keep();
+        App::new(&path, false, language)
+    }
+
+    #[test]
+    fn cycle_language_walks_full_cycle() {
+        let mut app = fixture_app("en");
+        assert_eq!(app.language, "en");
+        app.cycle_language();
+        assert_eq!(app.language, "es");
+        app.cycle_language();
+        assert_eq!(app.language, "zh-CN");
+        app.cycle_language();
+        assert_eq!(app.language, "en");
+    }
+
+    #[test]
+    fn cycle_language_emits_translated_notification() {
+        let mut app = fixture_app("en");
+        app.cycle_language(); // → es
+        let note = app.notification.as_ref().expect("notification set");
+        // Spanish prefix and the locale code must both be present.
+        assert!(note.contains("Idioma"), "notification {note:?} missing es prefix");
+        assert!(note.contains("es"), "notification {note:?} missing locale");
+    }
+
+    #[test]
+    fn cycle_language_unknown_starting_locale_recovers() {
+        // If for some reason `language` was set to something not in the
+        // cycle list, cycling should land on the first known entry instead
+        // of panicking on unwrap.
+        let mut app = fixture_app("fr");
+        app.cycle_language();
+        assert_eq!(app.language, "es", "cycle from unknown should advance from index 0");
+    }
+
+    #[test]
+    fn cycle_language_clears_doc_cache_and_current() {
+        let mut app = fixture_app("en");
+        app.current_doc = None;
+        app.cycle_language();
+        // Cache must be empty so the next open() reads the localized file.
+        assert!(app.current_doc.is_none());
+    }
 }
