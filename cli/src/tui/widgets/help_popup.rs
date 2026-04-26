@@ -4,18 +4,29 @@ use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Clear, Paragraph, Widget};
 
+use crate::tui::i18n_strings::t;
 use crate::tui::theme;
 
-pub struct HelpPopup;
+pub struct HelpPopup<'a> {
+    language: &'a str,
+}
 
-impl Widget for HelpPopup {
+impl<'a> HelpPopup<'a> {
+    pub fn new(language: &'a str) -> Self {
+        Self { language }
+    }
+}
+
+impl Widget for HelpPopup<'_> {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let popup = centered_rect(65, 80, area);
+        let lang = self.language;
 
         Clear.render(popup, buf);
 
+        let title = format!(" {} ", t("Keyboard Shortcuts", lang));
         let block = Block::default()
-            .title(" Keyboard Shortcuts ")
+            .title(title)
             .title_style(
                 Style::default()
                     .fg(theme::ACCENT)
@@ -37,40 +48,52 @@ impl Widget for HelpPopup {
 
         let lines = vec![
             Line::from(""),
-            Line::from(Span::styled("  Navigation panel", section_style)),
-            help_line("  j / ↓       ", "Move selection down", key_style, desc_style),
-            help_line("  k / ↑       ", "Move selection up", key_style, desc_style),
-            help_line("  Enter       ", "Expand group / Open document", key_style, desc_style),
-            help_line("  Esc         ", "Collapse group / Clear search", key_style, desc_style),
-            help_line("  1-8         ", "Jump to group by number", key_style, desc_style),
-            Line::from(""),
-            Line::from(Span::styled("  Metadata panel", section_style)),
-            help_line("  j / ↓       ", "Move between related links", key_style, desc_style),
-            help_line("  k / ↑       ", "Move between related links", key_style, desc_style),
-            help_line("  Enter       ", "Follow selected related link", key_style, desc_style),
-            help_line("  Esc         ", "Back to Navigation", key_style, desc_style),
-            Line::from(""),
-            Line::from(Span::styled("  Document panel", section_style)),
-            help_line("  j / ↓       ", "Scroll down", key_style, desc_style),
-            help_line("  k / ↑       ", "Scroll up", key_style, desc_style),
-            help_line("  g / G       ", "Top / Bottom of document", key_style, desc_style),
-            help_line("  Ctrl+d / u  ", "Half page down / up", key_style, desc_style),
-            help_line("  PgDn / PgUp ", "Page down / up", key_style, desc_style),
-            help_line("  n / N       ", "Next / Previous document", key_style, desc_style),
-            help_line("  f           ", "Toggle fullscreen", key_style, desc_style),
-            help_line("  Esc         ", "Exit fullscreen / Back to Nav", key_style, desc_style),
-            Line::from(""),
-            Line::from(Span::styled("  General", section_style)),
-            help_line("  Tab         ", "Next panel: Nav → Meta → Doc", key_style, desc_style),
-            help_line("  Shift+Tab   ", "Prev panel: Doc → Meta → Nav", key_style, desc_style),
-            help_line("  /           ", "Search by name, title, tags, date", key_style, desc_style),
-            help_line("  s           ", "Cycle sort order", key_style, desc_style),
-            help_line("  r           ", "Refresh document index", key_style, desc_style),
-            help_line("  q           ", "Quit", key_style, desc_style),
-            help_line("  Ctrl+C      ", "Force quit", key_style, desc_style),
+            Line::from(Span::styled(
+                format!("  {}", t("Navigation panel", lang)),
+                section_style,
+            )),
+            help_line("  j / ↓       ", t("Move selection down", lang), key_style, desc_style),
+            help_line("  k / ↑       ", t("Move selection up", lang), key_style, desc_style),
+            help_line("  Enter       ", t("Expand group / Open document", lang), key_style, desc_style),
+            help_line("  Esc         ", t("Collapse group / Clear search", lang), key_style, desc_style),
+            help_line("  1-8         ", t("Jump to group by number", lang), key_style, desc_style),
             Line::from(""),
             Line::from(Span::styled(
-                "  Press any key to close",
+                format!("  {}", t("Metadata panel", lang)),
+                section_style,
+            )),
+            help_line("  j / ↓       ", t("Move between related links", lang), key_style, desc_style),
+            help_line("  k / ↑       ", t("Move between related links", lang), key_style, desc_style),
+            help_line("  Enter       ", t("Follow selected related link", lang), key_style, desc_style),
+            help_line("  Esc         ", t("Back to Navigation", lang), key_style, desc_style),
+            Line::from(""),
+            Line::from(Span::styled(
+                format!("  {}", t("Document panel", lang)),
+                section_style,
+            )),
+            help_line("  j / ↓       ", t("Scroll down", lang), key_style, desc_style),
+            help_line("  k / ↑       ", t("Scroll up", lang), key_style, desc_style),
+            help_line("  g / G       ", t("Top / Bottom of document", lang), key_style, desc_style),
+            help_line("  Ctrl+d / u  ", t("Half page down / up", lang), key_style, desc_style),
+            help_line("  PgDn / PgUp ", t("Page down / up", lang), key_style, desc_style),
+            help_line("  n / N       ", t("Next / Previous document", lang), key_style, desc_style),
+            help_line("  f           ", t("Toggle fullscreen", lang), key_style, desc_style),
+            help_line("  Esc         ", t("Exit fullscreen / Back to Nav", lang), key_style, desc_style),
+            Line::from(""),
+            Line::from(Span::styled(
+                format!("  {}", t("General", lang)),
+                section_style,
+            )),
+            help_line("  Tab         ", t("Next panel: Nav → Meta → Doc", lang), key_style, desc_style),
+            help_line("  Shift+Tab   ", t("Prev panel: Doc → Meta → Nav", lang), key_style, desc_style),
+            help_line("  /           ", t("Search by name, title, tags, date", lang), key_style, desc_style),
+            help_line("  s           ", t("Cycle sort order", lang), key_style, desc_style),
+            help_line("  r           ", t("Refresh document index", lang), key_style, desc_style),
+            help_line("  q           ", t("Quit", lang), key_style, desc_style),
+            help_line("  Ctrl+C      ", t("Force quit", lang), key_style, desc_style),
+            Line::from(""),
+            Line::from(Span::styled(
+                format!("  {}", t("Press any key to close", lang)),
                 dim,
             )),
         ];

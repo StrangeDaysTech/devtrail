@@ -5,6 +5,7 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::Widget;
 
 use crate::tui::app::App;
+use crate::tui::i18n_strings::t;
 use crate::tui::theme;
 use crate::utils::visual_width;
 
@@ -31,6 +32,8 @@ impl Widget for StatusBar<'_> {
         let desc_style = Style::default().fg(theme::TEXT_DIM);
         let info_style = Style::default().fg(theme::ACCENT);
 
+        let lang = self.app.language.as_str();
+
         // Show notification if present
         if let Some(ref msg) = self.app.notification {
             let line = Line::from(vec![
@@ -46,7 +49,7 @@ impl Widget for StatusBar<'_> {
                     Style::default().fg(Color::Yellow),
                 ),
                 Span::styled(
-                    "  (press any key to dismiss)",
+                    format!("  {}", t("(press any key to dismiss)", lang)),
                     Style::default().fg(Color::DarkGray),
                 ),
             ]);
@@ -63,9 +66,9 @@ impl Widget for StatusBar<'_> {
                 ),
                 Span::styled("█", Style::default().fg(theme::TEXT)),
                 Span::styled("  Enter", key_style),
-                Span::styled(" apply  ", desc_style),
+                Span::styled(format!(" {}  ", t("apply", lang)), desc_style),
                 Span::styled("Esc", key_style),
-                Span::styled(" cancel", desc_style),
+                Span::styled(format!(" {}", t("cancel", lang)), desc_style),
             ]);
             buf.set_line(area.x, area.y, &line, area.width);
             return;
@@ -73,19 +76,19 @@ impl Widget for StatusBar<'_> {
 
         let mut spans: Vec<Span> = vec![
             Span::styled(" q ", key_style),
-            Span::styled("quit ", desc_style),
+            Span::styled(format!("{} ", t("quit", lang)), desc_style),
             Span::styled(" / ", key_style),
-            Span::styled("search ", desc_style),
+            Span::styled(format!("{} ", t("search", lang)), desc_style),
             Span::styled(" Tab ", key_style),
-            Span::styled("panel ", desc_style),
+            Span::styled(format!("{} ", t("panel", lang)), desc_style),
             Span::styled(" Enter ", key_style),
-            Span::styled("open ", desc_style),
+            Span::styled(format!("{} ", t("open", lang)), desc_style),
             Span::styled(" f ", key_style),
-            Span::styled("fullscreen ", desc_style),
+            Span::styled(format!("{} ", t("fullscreen", lang)), desc_style),
             Span::styled(" Esc ", key_style),
-            Span::styled("back ", desc_style),
+            Span::styled(format!("{} ", t("back", lang)), desc_style),
             Span::styled(" ? ", key_style),
-            Span::styled("help ", desc_style),
+            Span::styled(format!("{} ", t("help", lang)), desc_style),
         ];
 
         // Right-aligned: path + doc count
@@ -93,7 +96,12 @@ impl Widget for StatusBar<'_> {
             .file_name()
             .and_then(|n| n.to_str())
             .unwrap_or("?");
-        let right_str = format!(" {}  │  {} docs ", path_display, self.app.index.total_docs);
+        let right_str = format!(
+            " {}  │  {} {} ",
+            path_display,
+            self.app.index.total_docs,
+            t("docs", lang)
+        );
         let used_width: usize = spans.iter().map(|s| visual_width(s.content.as_ref())).sum();
         let remaining = (area.width as usize).saturating_sub(used_width);
         let right_cols = visual_width(&right_str);
@@ -106,7 +114,7 @@ impl Widget for StatusBar<'_> {
             ));
             spans.push(Span::styled(" │ ", Style::default().fg(Color::DarkGray)));
             spans.push(Span::styled(
-                format!("{} docs ", self.app.index.total_docs),
+                format!("{} {} ", self.app.index.total_docs, t("docs", lang)),
                 info_style,
             ));
         }

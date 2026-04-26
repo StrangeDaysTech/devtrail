@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use super::document::DocFrontMatter;
+use super::i18n_strings::t;
 use crate::utils;
 
 /// A group in the documentation hierarchy (e.g., "02-design")
@@ -125,10 +126,11 @@ impl DocIndex {
 
         for &(group_name, group_label, subgroup_defs) in GROUP_DEFS {
             let group_path = devtrail_dir.join(group_name);
+            let localized_group_label = t(group_label, language).to_string();
             if !group_path.exists() {
                 groups.push(DocGroup {
                     name: group_name.to_string(),
-                    label: group_label.to_string(),
+                    label: localized_group_label,
                     path: group_path,
                     subgroups: Vec::new(),
                     files: Vec::new(),
@@ -179,7 +181,7 @@ impl DocIndex {
 
                     subgroups.push(DocSubgroup {
                         name: sg_name.to_string(),
-                        label: sg_label.to_string(),
+                        label: t(sg_label, language).to_string(),
                         path: sg_path,
                         files: sg_files,
                         user_dirs,
@@ -187,7 +189,7 @@ impl DocIndex {
                 } else {
                     subgroups.push(DocSubgroup {
                         name: sg_name.to_string(),
-                        label: sg_label.to_string(),
+                        label: t(sg_label, language).to_string(),
                         path: sg_path,
                         files: Vec::new(),
                         user_dirs: Vec::new(),
@@ -197,7 +199,7 @@ impl DocIndex {
 
             groups.push(DocGroup {
                 name: group_name.to_string(),
-                label: group_label.to_string(),
+                label: localized_group_label,
                 path: group_path,
                 subgroups,
                 files,

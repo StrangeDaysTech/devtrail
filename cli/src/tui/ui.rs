@@ -34,7 +34,7 @@ pub fn render(frame: &mut Frame, app: &mut App) {
         }
         ViewMode::Help => {
             render_main_layout(frame, app, main_area, terminal_width);
-            frame.render_widget(HelpPopup, main_area);
+            frame.render_widget(HelpPopup::new(&app.language), main_area);
         }
         ViewMode::Normal => {
             render_main_layout(frame, app, main_area, terminal_width);
