@@ -5,6 +5,7 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Paragraph, Widget};
 
 use crate::tui::app::{ActivePanel, App, NavSelection, SortOrder};
+use crate::tui::i18n_strings::t;
 use crate::tui::index::DocEntry;
 use crate::tui::theme;
 use crate::utils::{truncate_visual, visual_width};
@@ -28,11 +29,16 @@ impl Widget for NavTree<'_> {
             Style::default().fg(theme::SUBTLE)
         };
 
+        let lang = self.app.language.as_str();
         let block = Block::default()
-            .title(format!(" Navigation {} ", match self.app.sort_order {
-                SortOrder::Name => "[s:sort ↓name]",
-                SortOrder::Date => "[s:sort ↓date]",
-            }))
+            .title(format!(
+                " {} {} ",
+                t("Navigation", lang),
+                match self.app.sort_order {
+                    SortOrder::Name => t("[s:sort ↓name]", lang),
+                    SortOrder::Date => t("[s:sort ↓date]", lang),
+                }
+            ))
             .title_style(if is_active {
                 Style::default().fg(theme::ACCENT).add_modifier(Modifier::BOLD)
             } else {

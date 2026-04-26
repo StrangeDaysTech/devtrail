@@ -1,6 +1,7 @@
 pub mod app;
 pub mod document;
 pub mod event;
+pub mod i18n_strings;
 pub mod index;
 pub mod markdown;
 pub mod theme;
