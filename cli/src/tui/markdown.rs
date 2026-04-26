@@ -153,26 +153,39 @@ pub fn markdown_to_lines(markdown: &str, available_width: usize) -> Vec<Line<'st
                 }
                 TagEnd::CodeBlock => {
                     in_code_block = false;
-                    // Measure in visual columns so CJK/emoji don't break alignment.
-                    let max_cols = code_block_lines
+                    // Compute a per-Line target width that fits inside the
+                    // panel after subtracting the heading indent and the
+                    // 2-column gutter we paint on each side. Pre-wrapping
+                    // here (instead of letting `Paragraph::wrap` do it later)
+                    // is what keeps the gray background uniform: ratatui's
+                    // word-wrap drops trailing styled whitespace at the
+                    // wrap point, which leaves the gutter stripes broken on
+                    // narrow terminals.
+                    let usable_width = available_width.saturating_sub(content_indent);
+                    let inner_width = usable_width.saturating_sub(4).max(1);
+                    let max_natural = code_block_lines
                         .iter()
                         .map(|l| UnicodeWidthStr::width(l.as_str()))
                         .max()
                         .unwrap_or(0);
+                    let target_width = max_natural.min(inner_width).max(1);
                     let code_bg = Style::default()
                         .fg(Color::Rgb(210, 215, 235))
                         .bg(Color::Rgb(45, 45, 60));
 
                     for code_line in &code_block_lines {
-                        let w = UnicodeWidthStr::width(code_line.as_str());
-                        let pad = max_cols.saturating_sub(w);
-                        let padded = format!("  {}{}  ", code_line, " ".repeat(pad));
-                        let mut spans: Vec<Span<'static>> = Vec::new();
-                        if content_indent > 0 {
-                            spans.push(Span::raw(" ".repeat(content_indent)));
+                        for chunk in wrap_visual_columns(code_line, inner_width) {
+                            let chunk_width = UnicodeWidthStr::width(chunk.as_str());
+                            let pad = target_width.saturating_sub(chunk_width);
+                            let padded =
+                                format!("  {}{}  ", chunk, " ".repeat(pad));
+                            let mut spans: Vec<Span<'static>> = Vec::new();
+                            if content_indent > 0 {
+                                spans.push(Span::raw(" ".repeat(content_indent)));
+                            }
+                            spans.push(Span::styled(padded, code_bg));
+                            lines.push(Line::from(spans));
                         }
-                        spans.push(Span::styled(padded, code_bg));
-                        lines.push(Line::from(spans));
                     }
                     code_block_lines.clear();
                     lines.push(Line::from(""));
@@ -409,6 +422,42 @@ fn compute_column_widths(
 /// slice offsets are always taken at `char_indices()` boundaries, and
 /// widths are measured with `unicode-width` so CJK and other double-wide
 /// characters account for two visual columns.
+/// Hard-wrap a string into chunks each fitting within `width` visual columns.
+/// Unlike `wrap_cell_text`, this never breaks on word boundaries and never
+/// trims whitespace — preserving leading indentation is essential for code.
+/// UTF-8 safe: every cut lands on a char boundary, and a double-wide char
+/// (CJK / emoji) at the boundary moves whole to the next chunk rather than
+/// being split. Empty input yields a single empty chunk so that a blank
+/// line in the source still gets rendered as one styled line.
+fn wrap_visual_columns(s: &str, width: usize) -> Vec<String> {
+    if width == 0 || s.is_empty() {
+        return vec![s.to_string()];
+    }
+    if UnicodeWidthStr::width(s) <= width {
+        return vec![s.to_string()];
+    }
+
+    let mut chunks: Vec<String> = Vec::new();
+    let mut current = String::new();
+    let mut current_width = 0usize;
+    for ch in s.chars() {
+        let w = UnicodeWidthChar::width(ch).unwrap_or(0);
+        if current_width + w > width && !current.is_empty() {
+            chunks.push(std::mem::take(&mut current));
+            current_width = 0;
+        }
+        current.push(ch);
+        current_width += w;
+    }
+    if !current.is_empty() {
+        chunks.push(current);
+    }
+    if chunks.is_empty() {
+        chunks.push(String::new());
+    }
+    chunks
+}
+
 fn wrap_cell_text(text: &str, width: usize) -> Vec<String> {
     if width == 0 {
         return vec![text.to_string()];
@@ -793,5 +842,108 @@ mod tests {
         for (i, w) in widths.iter().enumerate() {
             assert!(*w <= naturals[i].max(3), "col {i} exceeded its natural");
         }
+    }
+
+    #[test]
+    fn wrap_visual_columns_short_returns_single_chunk() {
+        let out = wrap_visual_columns("hello world", 80);
+        assert_eq!(out, vec!["hello world".to_string()]);
+    }
+
+    #[test]
+    fn wrap_visual_columns_empty_yields_one_empty_chunk() {
+        // A blank line in a code block must still emit one styled line so
+        // the gray gutter is uninterrupted; otherwise the renderer would
+        // skip it and the bg would have a one-row gap.
+        let out = wrap_visual_columns("", 40);
+        assert_eq!(out, vec![String::new()]);
+    }
+
+    #[test]
+    fn wrap_visual_columns_hard_wraps_long_line() {
+        let out = wrap_visual_columns(
+            "System(ecommerce, \"E-Commerce Platform\", \"Allows customers\")",
+            20,
+        );
+        for chunk in &out {
+            assert!(
+                UnicodeWidthStr::width(chunk.as_str()) <= 20,
+                "chunk {chunk:?} exceeds 20 cols",
+            );
+        }
+        assert_eq!(out.concat().len(), "System(ecommerce, \"E-Commerce Platform\", \"Allows customers\")".len());
+    }
+
+    #[test]
+    fn wrap_visual_columns_preserves_leading_indentation() {
+        // Code indentation must survive: a 4-space-indented line should
+        // not be trimmed (which would corrupt Python/YAML/etc. semantics).
+        let out = wrap_visual_columns("    indented_call(arg)", 40);
+        assert!(out[0].starts_with("    "));
+    }
+
+    #[test]
+    fn wrap_visual_columns_cjk_does_not_split_double_wide_chars() {
+        // Width=3 with three double-wide chars: each chunk should hold one
+        // ideogram (visual width 2), never half of one. Forward progress
+        // is guaranteed even when no char fits within a strict width<2.
+        let out = wrap_visual_columns("数据表", 3);
+        for chunk in &out {
+            // Every chunk must be a valid UTF-8 string with whole ideograms.
+            assert!(std::str::from_utf8(chunk.as_bytes()).is_ok());
+            assert!(UnicodeWidthStr::width(chunk.as_str()) <= 3);
+        }
+        assert_eq!(out.concat(), "数据表");
+    }
+
+    /// Regression: a code block whose longest line exceeds the available
+    /// width must produce one Line per visual row, none wider than
+    /// `available_width`. This is what keeps the gray background uniform
+    /// — without pre-wrapping, ratatui's `Paragraph::wrap` re-flows our
+    /// padded line and drops trailing styled spaces, leaving stripes.
+    #[test]
+    fn code_block_wraps_within_panel_width() {
+        let md = "```\nSystem(ecommerce, \"E-Commerce Platform\", \"Allows customers to browse and purchase products\")\n```\n";
+        let body_width = 40;
+        let lines = markdown_to_lines(md, body_width);
+        for line in &lines {
+            let w: usize = line
+                .spans
+                .iter()
+                .map(|s| UnicodeWidthStr::width(s.content.as_ref()))
+                .sum();
+            assert!(
+                w <= body_width,
+                "line wider than panel: {w} > {body_width} ({:?})",
+                line.spans
+                    .iter()
+                    .map(|s| s.content.as_ref())
+                    .collect::<Vec<_>>(),
+            );
+        }
+    }
+
+    /// Blank lines inside a code block must still emit a styled Line so the
+    /// gutter background runs continuously. Without this, the screenshot
+    /// the user reported showed truncated stripes between content rows.
+    #[test]
+    fn code_block_blank_lines_keep_background() {
+        let md = "```\nfirst\n\nthird\n```\n";
+        let lines = markdown_to_lines(md, 80);
+        // First, blank, third → 3 styled lines.
+        let styled: Vec<_> = lines
+            .iter()
+            .filter(|l| {
+                l.spans
+                    .iter()
+                    .any(|s| s.style.bg == Some(Color::Rgb(45, 45, 60)))
+            })
+            .collect();
+        assert_eq!(
+            styled.len(),
+            3,
+            "expected 3 styled code lines (incl. the blank), got {}",
+            styled.len()
+        );
     }
 }
