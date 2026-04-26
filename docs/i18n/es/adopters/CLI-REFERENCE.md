@@ -49,7 +49,7 @@ DevTrail usa **tags de versión independientes** para cada componente:
 | Componente | Prefijo de tag | Ejemplo | Qué incluye |
 |------------|---------------|---------|-------------|
 | Framework | `fw-` | `fw-4.3.0` | Plantillas (12 tipos), docs de gobernanza, directivas |
-| CLI | `cli-` | `cli-3.3.0` | El binario `devtrail` |
+| CLI | `cli-` | `cli-3.4.0` | El binario `devtrail` |
 
 Framework y CLI se publican de forma independiente. Una actualización del framework no requiere actualización del CLI, y viceversa.
 
@@ -109,7 +109,7 @@ $ devtrail update
 Updating framework...
 ✔ Framework updated to fw-4.3.0
 Updating CLI...
-✔ CLI updated to cli-3.3.0
+✔ CLI updated to cli-3.4.0
 ```
 
 ---
@@ -142,11 +142,11 @@ Usa `--method` para forzar el método: `--method=github` o `--method=cargo`.
 
 ```bash
 $ devtrail update-cli
-✔ CLI updated to cli-3.3.0
+✔ CLI updated to cli-3.4.0
 
 $ devtrail update-cli --method=cargo
 Compiling from source, this may take a few minutes...
-✔ CLI updated to cli-3.3.0
+✔ CLI updated to cli-3.4.0
 ```
 
 ---
@@ -204,7 +204,7 @@ DevTrail Status
 ───────────────
 Path:              /home/user/my-project
 Framework version: fw-4.3.0
-CLI version:       cli-3.3.0
+CLI version:       cli-3.4.0
 Language:          en
 Structure:         ✔ Complete
 
@@ -509,6 +509,12 @@ Explora y lee la documentación de DevTrail interactivamente en una interfaz de 
 |-----------|---------|-------------|
 | `path` | `.` (directorio actual) | Directorio del proyecto |
 
+**Flags:**
+
+| Flag | Default | Descripción |
+|------|---------|-------------|
+| `--lang <código>` | `language` de `.devtrail/config.yml`, si no `en` | Idioma de los docs de gobernanza del framework (`en`, `es`, `zh-CN`). Cae silenciosamente al inglés si falta la traducción. |
+
 **Características:**
 
 - Layout de dos paneles: árbol de navegación + visor de documentos
@@ -517,6 +523,7 @@ Explora y lee la documentación de DevTrail interactivamente en una interfaz de 
 - Navegación entre documentos relacionados mediante hipervínculos
 - Búsqueda por nombre de archivo, título, tags o fecha
 - Modo pantalla completa, atajos estilo vim
+- Consciente de localización: los docs del framework (`QUICK-REFERENCE`, `AGENT-RULES`, guías regulatorias de China, etc.) se sirven en el idioma definido por `language` en `.devtrail/config.yml` o por `--lang`
 
 **Atajos de teclado:**
 
@@ -531,10 +538,12 @@ Explora y lee la documentación de DevTrail interactivamente en una interfaz de 
 | `?` | Popup de ayuda con todos los atajos |
 | `q` | Salir |
 
-**Ejemplo:**
+**Ejemplos:**
 
 ```bash
-$ devtrail explore
+$ devtrail explore                       # usa config.language (default en)
+$ devtrail explore --lang zh-CN          # navegar docs del framework en chino simplificado
+$ devtrail explore --lang es             # override de sesión a español
 ```
 
 > **Nota:** El comando `explore` requiere la feature `tui` (habilitada por defecto). Para compilar sin ella: `cargo build --no-default-features`.
@@ -550,7 +559,7 @@ Muestra información de versión, autoría y licencia.
 ```bash
 $ devtrail about
 DevTrail CLI
-  CLI version:       cli-3.3.0
+  CLI version:       cli-3.4.0
   Framework version: fw-4.3.0
   Author:            Strange Days Tech, S.A.S.
   License:           MIT
