@@ -2,11 +2,18 @@ use anyhow::Result;
 use colored::Colorize;
 use std::path::PathBuf;
 
-use crate::compliance::{self, CheckStatus, ComplianceReport};
+use crate::compliance::{self, CheckStatus, ComplianceReport, Standard};
+use crate::config::DevTrailConfig;
 use crate::document;
 use crate::utils;
 
-pub fn run(path: &str, standard: Option<&str>, all: bool, output: &str) -> Result<()> {
+pub fn run(
+    path: &str,
+    standard: Option<&str>,
+    region: Option<&str>,
+    all: bool,
+    output: &str,
+) -> Result<()> {
     let resolved = match utils::resolve_project_root(path) {
         Some(r) => r,
         None => {
@@ -39,26 +46,33 @@ pub fn run(path: &str, standard: Option<&str>, all: bool, output: &str) -> Resul
         .filter_map(|p| document::parse_document(p).ok())
         .collect();
 
-    // Determine which standard(s) to check
-    // If neither --standard nor --all, default to --all
-    let run_all = all || standard.is_none();
+    let config = DevTrailConfig::load(&target).unwrap_or_default();
 
-    let mut reports = Vec::new();
+    // Resolve which standards to run.
+    let standards = resolve_standards(&config, standard, region, all);
 
-    if run_all {
-        reports.push(compliance::check_eu_ai_act(&docs, &devtrail_dir));
-        reports.push(compliance::check_iso_42001(&docs, &devtrail_dir));
-        reports.push(compliance::check_nist_ai_rmf(&docs, &devtrail_dir));
-    } else if let Some(std_name) = standard {
-        match std_name {
-            "eu-ai-act" => reports.push(compliance::check_eu_ai_act(&docs, &devtrail_dir)),
-            "iso-42001" => reports.push(compliance::check_iso_42001(&docs, &devtrail_dir)),
-            "nist-ai-rmf" => reports.push(compliance::check_nist_ai_rmf(&docs, &devtrail_dir)),
-            _ => {
-                utils::warn(&format!("Unknown standard: {}", std_name));
-                return Ok(());
-            }
-        }
+    if standards.is_empty() {
+        utils::warn(&format!(
+            "No standards selected. regional_scope is {:?}. Use --standard, --region, or set regional_scope in .devtrail/config.yml.",
+            config.regional_scope
+        ));
+        return Ok(());
+    }
+
+    let mut reports: Vec<ComplianceReport> = Vec::new();
+    for s in &standards {
+        let r = match s {
+            Standard::EuAiAct => compliance::check_eu_ai_act(&docs, &devtrail_dir),
+            Standard::Iso42001 => compliance::check_iso_42001(&docs, &devtrail_dir),
+            Standard::NistAiRmf => compliance::check_nist_ai_rmf(&docs, &devtrail_dir),
+            Standard::ChinaTc260 => compliance::check_china_tc260(&docs, &devtrail_dir),
+            Standard::ChinaPipl => compliance::check_china_pipl(&docs, &devtrail_dir),
+            Standard::ChinaGb45438 => compliance::check_china_gb45438(&docs, &devtrail_dir),
+            Standard::ChinaCac => compliance::check_china_cac(&docs, &devtrail_dir),
+            Standard::ChinaGb45652 => compliance::check_china_gb45652(&docs, &devtrail_dir),
+            Standard::ChinaCsl => compliance::check_china_csl(&docs, &devtrail_dir),
+        };
+        reports.push(r);
     }
 
     // Output
@@ -69,6 +83,71 @@ pub fn run(path: &str, standard: Option<&str>, all: bool, output: &str) -> Resul
     }
 
     Ok(())
+}
+
+/// Decide which standards to run given CLI flags and the project's regional_scope.
+///
+/// Precedence:
+/// 1. `--standard <name>` — single standard, always honored.
+/// 2. `--all` — every standard known to DevTrail (independent of regional_scope).
+/// 3. `--region <name>` — every standard whose `region()` matches the value
+///    (`all` matches every region; `china` requires no opt-in for explicit overrides).
+/// 4. Default — every standard whose region appears in `regional_scope`.
+fn resolve_standards(
+    config: &DevTrailConfig,
+    standard: Option<&str>,
+    region: Option<&str>,
+    all: bool,
+) -> Vec<Standard> {
+    if let Some(name) = standard {
+        return match name {
+            "eu-ai-act" => vec![Standard::EuAiAct],
+            "iso-42001" => vec![Standard::Iso42001],
+            "nist-ai-rmf" => vec![Standard::NistAiRmf],
+            "china-tc260" => vec![Standard::ChinaTc260],
+            "china-pipl" => vec![Standard::ChinaPipl],
+            "china-gb45438" => vec![Standard::ChinaGb45438],
+            "china-cac" => vec![Standard::ChinaCac],
+            "china-gb45652" => vec![Standard::ChinaGb45652],
+            "china-csl" => vec![Standard::ChinaCsl],
+            _ => vec![],
+        };
+    }
+
+    let all_standards = [
+        Standard::EuAiAct,
+        Standard::Iso42001,
+        Standard::NistAiRmf,
+        Standard::ChinaTc260,
+        Standard::ChinaPipl,
+        Standard::ChinaGb45438,
+        Standard::ChinaCac,
+        Standard::ChinaGb45652,
+        Standard::ChinaCsl,
+    ];
+
+    if all {
+        return all_standards.to_vec();
+    }
+
+    if let Some(r) = region {
+        let r_lower = r.to_ascii_lowercase();
+        if r_lower == "all" {
+            return all_standards.to_vec();
+        }
+        return all_standards
+            .iter()
+            .copied()
+            .filter(|s| s.region() == r_lower)
+            .collect();
+    }
+
+    // Default: every standard whose region is in regional_scope.
+    all_standards
+        .iter()
+        .copied()
+        .filter(|s| config.has_region(s.region()))
+        .collect()
 }
 
 fn print_text(reports: &[ComplianceReport], target: &std::path::Path, doc_count: usize) {
@@ -185,5 +264,56 @@ fn print_markdown(reports: &[ComplianceReport], doc_count: usize) {
         println!("---");
         println!();
         println!("**Overall compliance: {:.0}%**", avg_score);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn cfg(scope: &[&str]) -> DevTrailConfig {
+        DevTrailConfig {
+            regional_scope: scope.iter().map(|s| s.to_string()).collect(),
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn standard_flag_overrides_scope() {
+        let resolved = resolve_standards(&cfg(&["global"]), Some("china-pipl"), None, false);
+        assert_eq!(resolved, vec![Standard::ChinaPipl]);
+    }
+
+    #[test]
+    fn region_flag_filters_by_region() {
+        let resolved = resolve_standards(&cfg(&["global"]), None, Some("china"), false);
+        assert!(resolved.contains(&Standard::ChinaTc260));
+        assert!(resolved.contains(&Standard::ChinaCsl));
+        assert!(!resolved.contains(&Standard::EuAiAct));
+    }
+
+    #[test]
+    fn all_flag_includes_china_even_without_scope() {
+        let resolved = resolve_standards(&cfg(&["global", "eu"]), None, None, true);
+        assert_eq!(resolved.len(), 9);
+    }
+
+    #[test]
+    fn default_filters_by_regional_scope_excluding_china() {
+        let resolved = resolve_standards(&cfg(&["global", "eu"]), None, None, false);
+        assert!(resolved.contains(&Standard::EuAiAct));
+        assert!(resolved.contains(&Standard::Iso42001));
+        assert!(resolved.contains(&Standard::NistAiRmf));
+        assert!(!resolved.contains(&Standard::ChinaTc260));
+        assert!(!resolved.contains(&Standard::ChinaPipl));
+    }
+
+    #[test]
+    fn default_includes_china_when_in_scope() {
+        let resolved = resolve_standards(&cfg(&["global", "china"]), None, None, false);
+        assert!(resolved.contains(&Standard::ChinaTc260));
+        assert!(resolved.contains(&Standard::ChinaPipl));
+        assert!(resolved.contains(&Standard::ChinaCsl));
+        assert!(!resolved.contains(&Standard::EuAiAct));
     }
 }

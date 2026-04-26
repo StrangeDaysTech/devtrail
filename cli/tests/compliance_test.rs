@@ -222,3 +222,218 @@ fn test_compliance_output_markdown() {
                 .and(predicate::str::contains("| Check |")),
         );
 }
+
+// ---------------------------------------------------------------------------
+// China regulatory frameworks (regional_scope: china)
+// ---------------------------------------------------------------------------
+
+/// Setup helper that writes a regional_scope including china to config.yml.
+fn setup_devtrail_with_china(dir: &std::path::Path) {
+    setup_devtrail(dir);
+    let config_path = dir.join(".devtrail/config.yml");
+    std::fs::write(
+        &config_path,
+        "language: en\nregional_scope:\n  - global\n  - china\n",
+    )
+    .unwrap();
+}
+
+#[test]
+fn test_compliance_china_tc260_only() {
+    let dir = TempDir::new().unwrap();
+    setup_devtrail_with_china(dir.path());
+
+    let mut cmd = Command::cargo_bin("devtrail").unwrap();
+    cmd.arg("compliance")
+        .arg("--standard")
+        .arg("china-tc260")
+        .arg(dir.path().to_str().unwrap())
+        .assert()
+        .success()
+        .stdout(
+            predicate::str::contains("China TC260")
+                .and(predicate::str::contains("TC260-001")),
+        );
+}
+
+#[test]
+fn test_compliance_china_pipl_only() {
+    let dir = TempDir::new().unwrap();
+    setup_devtrail_with_china(dir.path());
+
+    let mut cmd = Command::cargo_bin("devtrail").unwrap();
+    cmd.arg("compliance")
+        .arg("--standard")
+        .arg("china-pipl")
+        .arg(dir.path().to_str().unwrap())
+        .assert()
+        .success()
+        .stdout(
+            predicate::str::contains("China PIPL")
+                .and(predicate::str::contains("PIPL-001")),
+        );
+}
+
+#[test]
+fn test_compliance_china_gb45438_only() {
+    let dir = TempDir::new().unwrap();
+    setup_devtrail_with_china(dir.path());
+
+    let mut cmd = Command::cargo_bin("devtrail").unwrap();
+    cmd.arg("compliance")
+        .arg("--standard")
+        .arg("china-gb45438")
+        .arg(dir.path().to_str().unwrap())
+        .assert()
+        .success()
+        .stdout(
+            predicate::str::contains("China GB 45438")
+                .and(predicate::str::contains("GB45438-001")),
+        );
+}
+
+#[test]
+fn test_compliance_china_cac_only() {
+    let dir = TempDir::new().unwrap();
+    setup_devtrail_with_china(dir.path());
+
+    let mut cmd = Command::cargo_bin("devtrail").unwrap();
+    cmd.arg("compliance")
+        .arg("--standard")
+        .arg("china-cac")
+        .arg(dir.path().to_str().unwrap())
+        .assert()
+        .success()
+        .stdout(
+            predicate::str::contains("China CAC")
+                .and(predicate::str::contains("CAC-001")),
+        );
+}
+
+#[test]
+fn test_compliance_china_gb45652_only() {
+    let dir = TempDir::new().unwrap();
+    setup_devtrail_with_china(dir.path());
+
+    let mut cmd = Command::cargo_bin("devtrail").unwrap();
+    cmd.arg("compliance")
+        .arg("--standard")
+        .arg("china-gb45652")
+        .arg(dir.path().to_str().unwrap())
+        .assert()
+        .success()
+        .stdout(
+            predicate::str::contains("China GB/T 45652")
+                .and(predicate::str::contains("GB45652-001")),
+        );
+}
+
+#[test]
+fn test_compliance_china_csl_only() {
+    let dir = TempDir::new().unwrap();
+    setup_devtrail_with_china(dir.path());
+
+    let mut cmd = Command::cargo_bin("devtrail").unwrap();
+    cmd.arg("compliance")
+        .arg("--standard")
+        .arg("china-csl")
+        .arg(dir.path().to_str().unwrap())
+        .assert()
+        .success()
+        .stdout(
+            predicate::str::contains("China CSL 2026")
+                .and(predicate::str::contains("CSL-001")),
+        );
+}
+
+#[test]
+fn test_compliance_region_china_runs_six_checkers() {
+    let dir = TempDir::new().unwrap();
+    setup_devtrail_with_china(dir.path());
+
+    let mut cmd = Command::cargo_bin("devtrail").unwrap();
+    let output = cmd
+        .arg("compliance")
+        .arg("--region")
+        .arg("china")
+        .arg("--output")
+        .arg("json")
+        .arg(dir.path().to_str().unwrap())
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let parsed: serde_json::Value = serde_json::from_str(&stdout).expect("valid JSON");
+    let arr = parsed.as_array().expect("array of reports");
+    assert_eq!(arr.len(), 6, "expected 6 china reports, got {}", arr.len());
+}
+
+#[test]
+fn test_compliance_default_excludes_china_when_not_in_scope() {
+    let dir = TempDir::new().unwrap();
+    setup_devtrail(dir.path()); // default scope = [global, eu]
+
+    let mut cmd = Command::cargo_bin("devtrail").unwrap();
+    let output = cmd
+        .arg("compliance")
+        .arg("--output")
+        .arg("json")
+        .arg(dir.path().to_str().unwrap())
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(
+        !stdout.contains("China TC260") && !stdout.contains("ChinaPipl"),
+        "China standards should not appear without china in regional_scope: {}",
+        stdout
+    );
+}
+
+#[test]
+fn test_compliance_all_flag_includes_china() {
+    let dir = TempDir::new().unwrap();
+    setup_devtrail(dir.path()); // default scope (no china)
+
+    let mut cmd = Command::cargo_bin("devtrail").unwrap();
+    let output = cmd
+        .arg("compliance")
+        .arg("--all")
+        .arg("--output")
+        .arg("json")
+        .arg(dir.path().to_str().unwrap())
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let parsed: serde_json::Value = serde_json::from_str(&stdout).expect("valid JSON");
+    assert_eq!(parsed.as_array().unwrap().len(), 9);
+}
+
+#[test]
+fn test_compliance_china_default_when_in_scope() {
+    let dir = TempDir::new().unwrap();
+    setup_devtrail_with_china(dir.path()); // scope = [global, china]
+
+    let mut cmd = Command::cargo_bin("devtrail").unwrap();
+    let output = cmd
+        .arg("compliance")
+        .arg("--output")
+        .arg("json")
+        .arg(dir.path().to_str().unwrap())
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let parsed: serde_json::Value = serde_json::from_str(&stdout).expect("valid JSON");
+    let labels: Vec<String> = parsed
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|r| r["standard_label"].as_str().unwrap().to_string())
+        .collect();
+    // global + china = NIST + ISO + 6 china = 8. EU not in scope.
+    assert!(labels.iter().any(|l| l.contains("China TC260")));
+    assert!(labels.iter().any(|l| l.contains("NIST")));
+    assert!(!labels.iter().any(|l| l.contains("EU AI Act")));
+}

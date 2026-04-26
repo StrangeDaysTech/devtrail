@@ -234,4 +234,4 @@ Use a Level 1 (Context) diagram to illustrate:
 
 ---
 
-*DevTrail v4.2.0 | [Strange Days Tech](https://strangedays.tech)*
+*DevTrail v4.3.0 | [Strange Days Tech](https://strangedays.tech)*

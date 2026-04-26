@@ -25,6 +25,13 @@ pub enum Standard {
     EuAiAct,
     Iso42001,
     NistAiRmf,
+    // China regulatory frameworks (regional_scope: china)
+    ChinaTc260,
+    ChinaPipl,
+    ChinaGb45438,
+    ChinaCac,
+    ChinaGb45652,
+    ChinaCsl,
 }
 
 impl Standard {
@@ -33,6 +40,27 @@ impl Standard {
             Standard::EuAiAct => "EU AI Act",
             Standard::Iso42001 => "ISO/IEC 42001",
             Standard::NistAiRmf => "NIST AI RMF",
+            Standard::ChinaTc260 => "China TC260 v2.0",
+            Standard::ChinaPipl => "China PIPL",
+            Standard::ChinaGb45438 => "China GB 45438",
+            Standard::ChinaCac => "China CAC Algorithm Filing",
+            Standard::ChinaGb45652 => "China GB/T 45652",
+            Standard::ChinaCsl => "China CSL 2026",
+        }
+    }
+
+    /// Region this standard belongs to (used for `regional_scope` filtering).
+    /// "global" = always available; "eu" = EU AI Act + GDPR; "china" = the 6 Chinese frameworks.
+    pub fn region(&self) -> &'static str {
+        match self {
+            Standard::EuAiAct => "eu",
+            Standard::Iso42001 | Standard::NistAiRmf => "global",
+            Standard::ChinaTc260
+            | Standard::ChinaPipl
+            | Standard::ChinaGb45438
+            | Standard::ChinaCac
+            | Standard::ChinaGb45652
+            | Standard::ChinaCsl => "china",
         }
     }
 }
@@ -589,6 +617,1058 @@ pub fn check_nist_ai_rmf(docs: &[DevTrailDocument], governance_dir: &Path) -> Co
     }
 }
 
+// ===========================================================================
+// China regulatory checkers (regional_scope: china)
+// ===========================================================================
+
+/// True if any document in the corpus declares the given doc type.
+fn has_type(docs: &[DevTrailDocument], doc_type: DocType) -> bool {
+    count_type(docs, doc_type) > 0
+}
+
+/// Documents whose `related:` list references at least one of the given prefixes.
+fn related_includes_prefix(doc: &DevTrailDocument, prefix: &str) -> bool {
+    doc.frontmatter
+        .related
+        .as_ref()
+        .is_some_and(|r| r.iter().any(|s| s.starts_with(prefix)))
+}
+
+// ---------------------------------------------------------------------------
+// TC260 v2.0 checker
+// ---------------------------------------------------------------------------
+
+const TC260_HIGH_LEVELS: &[&str] = &["high", "very_high", "extremely_severe"];
+
+pub fn check_china_tc260(
+    docs: &[DevTrailDocument],
+    _governance_dir: &Path,
+) -> ComplianceReport {
+    let mut checks = Vec::new();
+
+    // TC260-001: at least one TC260RA exists
+    {
+        let ids = ids_of_type(docs, DocType::Tc260ra);
+        checks.push(ComplianceCheck {
+            id: "TC260-001".into(),
+            description: "At least one TC260 Risk Assessment (TC260RA) is present".into(),
+            status: if ids.is_empty() {
+                CheckStatus::Fail
+            } else {
+                CheckStatus::Pass
+            },
+            evidence: ids.clone(),
+            remediation: if ids.is_empty() {
+                Some("Run 'devtrail new tc260ra' for each AI system in scope".into())
+            } else {
+                None
+            },
+        });
+    }
+
+    // TC260-002: high / very_high / extremely_severe levels require review_required: true
+    {
+        let high_risk: Vec<&DevTrailDocument> = docs
+            .iter()
+            .filter(|d| {
+                d.frontmatter
+                    .tc260_risk_level
+                    .as_deref()
+                    .is_some_and(|l| TC260_HIGH_LEVELS.contains(&l))
+            })
+            .collect();
+
+        if high_risk.is_empty() {
+            checks.push(ComplianceCheck {
+                id: "TC260-002".into(),
+                description: "High / very-high / extremely-severe TC260 levels mandate review"
+                    .into(),
+                status: CheckStatus::Pass,
+                evidence: vec!["No high-risk TC260 levels declared — check not applicable".into()],
+                remediation: None,
+            });
+        } else {
+            let mut reviewed = Vec::new();
+            let mut unreviewed = Vec::new();
+            for d in &high_risk {
+                let id = d.frontmatter.id.clone().unwrap_or_default();
+                if d.frontmatter.review_required == Some(true) {
+                    reviewed.push(id);
+                } else {
+                    unreviewed.push(id);
+                }
+            }
+            let status = if unreviewed.is_empty() {
+                CheckStatus::Pass
+            } else if !reviewed.is_empty() {
+                CheckStatus::Partial
+            } else {
+                CheckStatus::Fail
+            };
+            checks.push(ComplianceCheck {
+                id: "TC260-002".into(),
+                description: "High / very-high / extremely-severe TC260 levels mandate review"
+                    .into(),
+                status,
+                evidence: reviewed,
+                remediation: if !unreviewed.is_empty() {
+                    Some(format!(
+                        "Set review_required: true on: {}",
+                        unreviewed.join(", ")
+                    ))
+                } else {
+                    None
+                },
+            });
+        }
+    }
+
+    // TC260-003: TC260RA documents have all three grading criteria populated
+    {
+        let tc260_docs: Vec<&DevTrailDocument> =
+            docs.iter().filter(|d| d.doc_type == DocType::Tc260ra).collect();
+        if tc260_docs.is_empty() {
+            checks.push(ComplianceCheck {
+                id: "TC260-003".into(),
+                description: "TC260RA documents specify scenario × intelligence × scale".into(),
+                status: CheckStatus::Fail,
+                evidence: vec![],
+                remediation: Some(
+                    "Create a TC260RA document with the three grading criteria populated".into(),
+                ),
+            });
+        } else {
+            let mut complete = Vec::new();
+            let mut incomplete = Vec::new();
+            for d in &tc260_docs {
+                let id = d.frontmatter.id.clone().unwrap_or_default();
+                let ok = d.frontmatter.tc260_application_scenario.is_some()
+                    && d.frontmatter.tc260_intelligence_level.is_some()
+                    && d.frontmatter.tc260_application_scale.is_some();
+                if ok {
+                    complete.push(id);
+                } else {
+                    incomplete.push(id);
+                }
+            }
+            let status = if incomplete.is_empty() {
+                CheckStatus::Pass
+            } else if !complete.is_empty() {
+                CheckStatus::Partial
+            } else {
+                CheckStatus::Fail
+            };
+            checks.push(ComplianceCheck {
+                id: "TC260-003".into(),
+                description: "TC260RA documents specify scenario × intelligence × scale".into(),
+                status,
+                evidence: complete,
+                remediation: if !incomplete.is_empty() {
+                    Some(format!(
+                        "Populate tc260_application_scenario / intelligence_level / application_scale on: {}",
+                        incomplete.join(", ")
+                    ))
+                } else {
+                    None
+                },
+            });
+        }
+    }
+
+    let score = calculate_score(&checks);
+    ComplianceReport {
+        standard: Standard::ChinaTc260,
+        standard_label: Standard::ChinaTc260.label().into(),
+        checks,
+        score,
+    }
+}
+
+// ---------------------------------------------------------------------------
+// PIPL / PIPIA checker
+// ---------------------------------------------------------------------------
+
+pub fn check_china_pipl(
+    docs: &[DevTrailDocument],
+    _governance_dir: &Path,
+) -> ComplianceReport {
+    let mut checks = Vec::new();
+
+    // PIPL-001: PIPIA exists when any document declares pipl_applicable: true
+    {
+        let need_pipia: Vec<&DevTrailDocument> = docs
+            .iter()
+            .filter(|d| d.frontmatter.pipl_applicable == Some(true))
+            .collect();
+        if need_pipia.is_empty() {
+            checks.push(ComplianceCheck {
+                id: "PIPL-001".into(),
+                description: "PIPIA exists when pipl_applicable is true".into(),
+                status: CheckStatus::Pass,
+                evidence: vec!["No PIPL-applicable documents — check not applicable".into()],
+                remediation: None,
+            });
+        } else {
+            let has_pipia = has_type(docs, DocType::Pipia);
+            checks.push(ComplianceCheck {
+                id: "PIPL-001".into(),
+                description: "PIPIA exists when pipl_applicable is true".into(),
+                status: if has_pipia {
+                    CheckStatus::Pass
+                } else {
+                    CheckStatus::Fail
+                },
+                evidence: ids_of_type(docs, DocType::Pipia),
+                remediation: if !has_pipia {
+                    Some("Run 'devtrail new pipia' to create the PIPL impact assessment".into())
+                } else {
+                    None
+                },
+            });
+        }
+    }
+
+    // PIPL-002: Sensitive personal information requires a PIPIA + linkage
+    {
+        let need_link: Vec<&DevTrailDocument> = docs
+            .iter()
+            .filter(|d| d.frontmatter.pipl_sensitive_data == Some(true))
+            .filter(|d| d.doc_type != DocType::Pipia)
+            .collect();
+        if need_link.is_empty() {
+            checks.push(ComplianceCheck {
+                id: "PIPL-002".into(),
+                description:
+                    "Documents handling sensitive personal info link to a PIPIA via 'related'"
+                        .into(),
+                status: CheckStatus::Pass,
+                evidence: vec!["No sensitive PIPL data declared — check not applicable".into()],
+                remediation: None,
+            });
+        } else {
+            let mut linked = Vec::new();
+            let mut unlinked = Vec::new();
+            for d in &need_link {
+                let id = d.frontmatter.id.clone().unwrap_or_default();
+                if related_includes_prefix(d, "PIPIA-") {
+                    linked.push(id);
+                } else {
+                    unlinked.push(id);
+                }
+            }
+            let status = if unlinked.is_empty() {
+                CheckStatus::Pass
+            } else if !linked.is_empty() {
+                CheckStatus::Partial
+            } else {
+                CheckStatus::Fail
+            };
+            checks.push(ComplianceCheck {
+                id: "PIPL-002".into(),
+                description:
+                    "Documents handling sensitive personal info link to a PIPIA via 'related'"
+                        .into(),
+                status,
+                evidence: linked,
+                remediation: if !unlinked.is_empty() {
+                    Some(format!(
+                        "Add a PIPIA-... entry to 'related' on: {}",
+                        unlinked.join(", ")
+                    ))
+                } else {
+                    None
+                },
+            });
+        }
+    }
+
+    // PIPL-003: Cross-border transfer documents must have a PIPIA addressing it
+    {
+        let cb_docs: Vec<&DevTrailDocument> = docs
+            .iter()
+            .filter(|d| d.frontmatter.pipl_cross_border_transfer == Some(true))
+            .collect();
+        if cb_docs.is_empty() {
+            checks.push(ComplianceCheck {
+                id: "PIPL-003".into(),
+                description: "Cross-border personal info transfer is documented in a PIPIA".into(),
+                status: CheckStatus::Pass,
+                evidence: vec!["No cross-border PIPL transfers declared — check not applicable"
+                    .into()],
+                remediation: None,
+            });
+        } else {
+            let pipia_with_cb: Vec<String> = docs
+                .iter()
+                .filter(|d| d.doc_type == DocType::Pipia)
+                .filter(|d| d.frontmatter.pipl_cross_border_transfer == Some(true))
+                .filter_map(|d| d.frontmatter.id.clone())
+                .collect();
+            let status = if pipia_with_cb.is_empty() {
+                CheckStatus::Fail
+            } else {
+                CheckStatus::Pass
+            };
+            checks.push(ComplianceCheck {
+                id: "PIPL-003".into(),
+                description: "Cross-border personal info transfer is documented in a PIPIA".into(),
+                status,
+                evidence: pipia_with_cb,
+                remediation: if status != CheckStatus::Pass {
+                    Some(
+                        "Create a PIPIA with pipl_cross_border_transfer: true and document the chosen transfer mechanism (security assessment / certification / standard contract)".into(),
+                    )
+                } else {
+                    None
+                },
+            });
+        }
+    }
+
+    // PIPL-004: PIPIA retention is at least 3 years from `created`
+    {
+        let pipia_docs: Vec<&DevTrailDocument> =
+            docs.iter().filter(|d| d.doc_type == DocType::Pipia).collect();
+        if pipia_docs.is_empty() {
+            checks.push(ComplianceCheck {
+                id: "PIPL-004".into(),
+                description: "PIPIA retention is ≥ 3 years per PIPL Art. 56".into(),
+                status: CheckStatus::Pass,
+                evidence: vec!["No PIPIA documents — check not applicable".into()],
+                remediation: None,
+            });
+        } else {
+            let mut compliant = Vec::new();
+            let mut violating = Vec::new();
+            for d in &pipia_docs {
+                let id = d.frontmatter.id.clone().unwrap_or_default();
+                if pipia_retention_ok(
+                    d.frontmatter.created.as_deref(),
+                    d.frontmatter.pipl_retention_until.as_deref(),
+                ) {
+                    compliant.push(id);
+                } else {
+                    violating.push(id);
+                }
+            }
+            let status = if violating.is_empty() {
+                CheckStatus::Pass
+            } else if !compliant.is_empty() {
+                CheckStatus::Partial
+            } else {
+                CheckStatus::Fail
+            };
+            checks.push(ComplianceCheck {
+                id: "PIPL-004".into(),
+                description: "PIPIA retention is ≥ 3 years per PIPL Art. 56".into(),
+                status,
+                evidence: compliant,
+                remediation: if !violating.is_empty() {
+                    Some(format!(
+                        "Set pipl_retention_until ≥ created + 3 years on: {}",
+                        violating.join(", ")
+                    ))
+                } else {
+                    None
+                },
+            });
+        }
+    }
+
+    let score = calculate_score(&checks);
+    ComplianceReport {
+        standard: Standard::ChinaPipl,
+        standard_label: Standard::ChinaPipl.label().into(),
+        checks,
+        score,
+    }
+}
+
+/// True when `until` is at least 3 years after `created` (both ISO YYYY-MM-DD).
+fn pipia_retention_ok(created: Option<&str>, until: Option<&str>) -> bool {
+    let (created, until) = match (created, until) {
+        (Some(c), Some(u)) => (c, u),
+        _ => return false,
+    };
+    let parse_year_month_day = |s: &str| -> Option<(i32, u32, u32)> {
+        if s.len() < 10 {
+            return None;
+        }
+        let y: i32 = s[..4].parse().ok()?;
+        let m: u32 = s[5..7].parse().ok()?;
+        let d: u32 = s[8..10].parse().ok()?;
+        Some((y, m, d))
+    };
+    let (cy, cm, cd) = match parse_year_month_day(created) {
+        Some(t) => t,
+        None => return false,
+    };
+    let (uy, um, ud) = match parse_year_month_day(until) {
+        Some(t) => t,
+        None => return false,
+    };
+    let target = (cy + 3, cm, cd);
+    (uy, um, ud) >= target
+}
+
+// ---------------------------------------------------------------------------
+// GB 45438 checker
+// ---------------------------------------------------------------------------
+
+pub fn check_china_gb45438(
+    docs: &[DevTrailDocument],
+    _governance_dir: &Path,
+) -> ComplianceReport {
+    let mut checks = Vec::new();
+
+    // GB45438-001: AILABEL exists when any document declares gb45438_applicable: true
+    {
+        let need_label: Vec<&DevTrailDocument> = docs
+            .iter()
+            .filter(|d| d.frontmatter.gb45438_applicable == Some(true))
+            .filter(|d| d.doc_type != DocType::Ailabel)
+            .collect();
+        if need_label.is_empty() {
+            checks.push(ComplianceCheck {
+                id: "GB45438-001".into(),
+                description:
+                    "AILABEL exists when generative AI content labeling applies (GB 45438)".into(),
+                status: CheckStatus::Pass,
+                evidence: vec!["No documents declare gb45438_applicable — check not applicable"
+                    .into()],
+                remediation: None,
+            });
+        } else {
+            let mut linked = Vec::new();
+            let mut unlinked = Vec::new();
+            for d in &need_label {
+                let id = d.frontmatter.id.clone().unwrap_or_default();
+                if related_includes_prefix(d, "AILABEL-") {
+                    linked.push(id);
+                } else {
+                    unlinked.push(id);
+                }
+            }
+            let any_ailabel = has_type(docs, DocType::Ailabel);
+            let status = if unlinked.is_empty() {
+                CheckStatus::Pass
+            } else if any_ailabel {
+                CheckStatus::Partial
+            } else {
+                CheckStatus::Fail
+            };
+            checks.push(ComplianceCheck {
+                id: "GB45438-001".into(),
+                description:
+                    "AILABEL exists when generative AI content labeling applies (GB 45438)".into(),
+                status,
+                evidence: linked,
+                remediation: if !unlinked.is_empty() {
+                    Some(format!(
+                        "Create an AILABEL and link via 'related' on: {}",
+                        unlinked.join(", ")
+                    ))
+                } else {
+                    None
+                },
+            });
+        }
+    }
+
+    // GB45438-002: AILABEL declares both an explicit and an implicit labeling track
+    {
+        let ailabels: Vec<&DevTrailDocument> = docs
+            .iter()
+            .filter(|d| d.doc_type == DocType::Ailabel)
+            .collect();
+        if ailabels.is_empty() {
+            checks.push(ComplianceCheck {
+                id: "GB45438-002".into(),
+                description: "AILABEL declares both explicit and implicit label strategy".into(),
+                status: CheckStatus::Pass,
+                evidence: vec!["No AILABEL documents — check not applicable".into()],
+                remediation: None,
+            });
+        } else {
+            let mut complete = Vec::new();
+            let mut partial = Vec::new();
+            for d in &ailabels {
+                let id = d.frontmatter.id.clone().unwrap_or_default();
+                let has_explicit = d
+                    .frontmatter
+                    .gb45438_explicit_label_strategy
+                    .as_deref()
+                    .is_some_and(|v| !v.is_empty());
+                let has_implicit = d
+                    .frontmatter
+                    .gb45438_implicit_metadata_format
+                    .as_deref()
+                    .is_some_and(|v| !v.is_empty() && v != "none");
+                if has_explicit && has_implicit {
+                    complete.push(id);
+                } else {
+                    partial.push(id);
+                }
+            }
+            let status = if partial.is_empty() {
+                CheckStatus::Pass
+            } else if !complete.is_empty() {
+                CheckStatus::Partial
+            } else {
+                CheckStatus::Fail
+            };
+            checks.push(ComplianceCheck {
+                id: "GB45438-002".into(),
+                description: "AILABEL declares both explicit and implicit label strategy".into(),
+                status,
+                evidence: complete,
+                remediation: if !partial.is_empty() {
+                    Some(format!(
+                        "Populate gb45438_explicit_label_strategy and gb45438_implicit_metadata_format on: {}",
+                        partial.join(", ")
+                    ))
+                } else {
+                    None
+                },
+            });
+        }
+    }
+
+    // GB45438-003: AILABEL covers at least one content type
+    {
+        let ailabels: Vec<&DevTrailDocument> = docs
+            .iter()
+            .filter(|d| d.doc_type == DocType::Ailabel)
+            .collect();
+        if ailabels.is_empty() {
+            checks.push(ComplianceCheck {
+                id: "GB45438-003".into(),
+                description: "AILABEL declares at least one content type covered".into(),
+                status: CheckStatus::Pass,
+                evidence: vec!["No AILABEL documents — check not applicable".into()],
+                remediation: None,
+            });
+        } else {
+            let mut ok = Vec::new();
+            let mut empty = Vec::new();
+            for d in &ailabels {
+                let id = d.frontmatter.id.clone().unwrap_or_default();
+                let count = d
+                    .frontmatter
+                    .gb45438_content_types
+                    .as_ref()
+                    .map(|v| v.len())
+                    .unwrap_or(0);
+                if count > 0 {
+                    ok.push(id);
+                } else {
+                    empty.push(id);
+                }
+            }
+            let status = if empty.is_empty() {
+                CheckStatus::Pass
+            } else if !ok.is_empty() {
+                CheckStatus::Partial
+            } else {
+                CheckStatus::Fail
+            };
+            checks.push(ComplianceCheck {
+                id: "GB45438-003".into(),
+                description: "AILABEL declares at least one content type covered".into(),
+                status,
+                evidence: ok,
+                remediation: if !empty.is_empty() {
+                    Some(format!(
+                        "Populate gb45438_content_types on: {}",
+                        empty.join(", ")
+                    ))
+                } else {
+                    None
+                },
+            });
+        }
+    }
+
+    let score = calculate_score(&checks);
+    ComplianceReport {
+        standard: Standard::ChinaGb45438,
+        standard_label: Standard::ChinaGb45438.label().into(),
+        checks,
+        score,
+    }
+}
+
+// ---------------------------------------------------------------------------
+// CAC algorithm filing checker
+// ---------------------------------------------------------------------------
+
+const CAC_APPROVED_STATUSES: &[&str] = &["provincial_approved", "national_approved"];
+
+pub fn check_china_cac(
+    docs: &[DevTrailDocument],
+    _governance_dir: &Path,
+) -> ComplianceReport {
+    let mut checks = Vec::new();
+
+    // CAC-001: CACFILE exists when any document declares cac_filing_required: true
+    {
+        let need_filing: Vec<&DevTrailDocument> = docs
+            .iter()
+            .filter(|d| d.frontmatter.cac_filing_required == Some(true))
+            .filter(|d| d.doc_type != DocType::Cacfile)
+            .collect();
+        if need_filing.is_empty() {
+            checks.push(ComplianceCheck {
+                id: "CAC-001".into(),
+                description: "CACFILE exists when CAC algorithm filing is required".into(),
+                status: CheckStatus::Pass,
+                evidence: vec!["No documents declare cac_filing_required — check not applicable"
+                    .into()],
+                remediation: None,
+            });
+        } else {
+            let mut linked = Vec::new();
+            let mut unlinked = Vec::new();
+            for d in &need_filing {
+                let id = d.frontmatter.id.clone().unwrap_or_default();
+                if related_includes_prefix(d, "CACFILE-") {
+                    linked.push(id);
+                } else {
+                    unlinked.push(id);
+                }
+            }
+            let status = if unlinked.is_empty() {
+                CheckStatus::Pass
+            } else if !linked.is_empty() {
+                CheckStatus::Partial
+            } else {
+                CheckStatus::Fail
+            };
+            checks.push(ComplianceCheck {
+                id: "CAC-001".into(),
+                description: "CACFILE exists when CAC algorithm filing is required".into(),
+                status,
+                evidence: linked,
+                remediation: if !unlinked.is_empty() {
+                    Some(format!(
+                        "Create a CACFILE and link via 'related' on: {}",
+                        unlinked.join(", ")
+                    ))
+                } else {
+                    None
+                },
+            });
+        }
+    }
+
+    // CAC-002: CACFILE has a status set (not silently undecided)
+    {
+        let cacfiles: Vec<&DevTrailDocument> = docs
+            .iter()
+            .filter(|d| d.doc_type == DocType::Cacfile)
+            .collect();
+        if cacfiles.is_empty() {
+            checks.push(ComplianceCheck {
+                id: "CAC-002".into(),
+                description: "CACFILE documents have an explicit cac_filing_status".into(),
+                status: CheckStatus::Pass,
+                evidence: vec!["No CACFILE documents — check not applicable".into()],
+                remediation: None,
+            });
+        } else {
+            let mut with_status = Vec::new();
+            let mut missing = Vec::new();
+            for d in &cacfiles {
+                let id = d.frontmatter.id.clone().unwrap_or_default();
+                if d.frontmatter.cac_filing_status.is_some() {
+                    with_status.push(id);
+                } else {
+                    missing.push(id);
+                }
+            }
+            let status = if missing.is_empty() {
+                CheckStatus::Pass
+            } else if !with_status.is_empty() {
+                CheckStatus::Partial
+            } else {
+                CheckStatus::Fail
+            };
+            checks.push(ComplianceCheck {
+                id: "CAC-002".into(),
+                description: "CACFILE documents have an explicit cac_filing_status".into(),
+                status,
+                evidence: with_status,
+                remediation: if !missing.is_empty() {
+                    Some(format!(
+                        "Set cac_filing_status on: {}",
+                        missing.join(", ")
+                    ))
+                } else {
+                    None
+                },
+            });
+        }
+    }
+
+    // CAC-003: Approved status implies cac_filing_number is populated
+    {
+        let approved: Vec<&DevTrailDocument> = docs
+            .iter()
+            .filter(|d| {
+                d.frontmatter
+                    .cac_filing_status
+                    .as_deref()
+                    .is_some_and(|s| CAC_APPROVED_STATUSES.contains(&s))
+            })
+            .collect();
+        if approved.is_empty() {
+            checks.push(ComplianceCheck {
+                id: "CAC-003".into(),
+                description: "Approved CAC filings have a cac_filing_number".into(),
+                status: CheckStatus::Pass,
+                evidence: vec!["No approved CAC filings yet — check not applicable".into()],
+                remediation: None,
+            });
+        } else {
+            let mut ok = Vec::new();
+            let mut missing_number = Vec::new();
+            for d in &approved {
+                let id = d.frontmatter.id.clone().unwrap_or_default();
+                if d.frontmatter
+                    .cac_filing_number
+                    .as_deref()
+                    .is_some_and(|n| !n.is_empty())
+                {
+                    ok.push(id);
+                } else {
+                    missing_number.push(id);
+                }
+            }
+            let status = if missing_number.is_empty() {
+                CheckStatus::Pass
+            } else if !ok.is_empty() {
+                CheckStatus::Partial
+            } else {
+                CheckStatus::Fail
+            };
+            checks.push(ComplianceCheck {
+                id: "CAC-003".into(),
+                description: "Approved CAC filings have a cac_filing_number".into(),
+                status,
+                evidence: ok,
+                remediation: if !missing_number.is_empty() {
+                    Some(format!(
+                        "Populate cac_filing_number on: {}",
+                        missing_number.join(", ")
+                    ))
+                } else {
+                    None
+                },
+            });
+        }
+    }
+
+    let score = calculate_score(&checks);
+    ComplianceReport {
+        standard: Standard::ChinaCac,
+        standard_label: Standard::ChinaCac.label().into(),
+        checks,
+        score,
+    }
+}
+
+// ---------------------------------------------------------------------------
+// GB/T 45652 training data security checker
+// ---------------------------------------------------------------------------
+
+pub fn check_china_gb45652(
+    docs: &[DevTrailDocument],
+    _governance_dir: &Path,
+) -> ComplianceReport {
+    let mut checks = Vec::new();
+
+    // GB45652-001: At least one SBOM declares training-data compliance
+    {
+        let sbom_docs: Vec<&DevTrailDocument> = docs
+            .iter()
+            .filter(|d| d.doc_type == DocType::Sbom)
+            .collect();
+        if sbom_docs.is_empty() {
+            checks.push(ComplianceCheck {
+                id: "GB45652-001".into(),
+                description: "Training-data security declared on at least one SBOM".into(),
+                status: CheckStatus::Fail,
+                evidence: vec![],
+                remediation: Some(
+                    "Create an SBOM and set gb45652_training_data_compliance: true after documenting the GB/T 45652 section"
+                        .into(),
+                ),
+            });
+        } else {
+            let compliant: Vec<String> = sbom_docs
+                .iter()
+                .filter(|d| d.frontmatter.gb45652_training_data_compliance == Some(true))
+                .filter_map(|d| d.frontmatter.id.clone())
+                .collect();
+            let status = if compliant.is_empty() {
+                CheckStatus::Fail
+            } else if compliant.len() == sbom_docs.len() {
+                CheckStatus::Pass
+            } else {
+                CheckStatus::Partial
+            };
+            checks.push(ComplianceCheck {
+                id: "GB45652-001".into(),
+                description: "Training-data security declared on at least one SBOM".into(),
+                status,
+                evidence: compliant,
+                remediation: if status != CheckStatus::Pass {
+                    Some(
+                        "Set gb45652_training_data_compliance: true on each SBOM after completing the GB/T 45652 section"
+                            .into(),
+                    )
+                } else {
+                    None
+                },
+            });
+        }
+    }
+
+    // GB45652-002: MCARD references training-data compliance when applicable
+    {
+        let mcards: Vec<&DevTrailDocument> = docs
+            .iter()
+            .filter(|d| d.doc_type == DocType::Mcard)
+            .collect();
+        if mcards.is_empty() {
+            checks.push(ComplianceCheck {
+                id: "GB45652-002".into(),
+                description: "MCARD declares gb45652_training_data_compliance for in-scope models"
+                    .into(),
+                status: CheckStatus::Pass,
+                evidence: vec!["No MCARD documents — check not applicable".into()],
+                remediation: None,
+            });
+        } else {
+            let compliant: Vec<String> = mcards
+                .iter()
+                .filter(|d| d.frontmatter.gb45652_training_data_compliance == Some(true))
+                .filter_map(|d| d.frontmatter.id.clone())
+                .collect();
+            let status = if compliant.is_empty() {
+                CheckStatus::Fail
+            } else if compliant.len() == mcards.len() {
+                CheckStatus::Pass
+            } else {
+                CheckStatus::Partial
+            };
+            checks.push(ComplianceCheck {
+                id: "GB45652-002".into(),
+                description: "MCARD declares gb45652_training_data_compliance for in-scope models"
+                    .into(),
+                status,
+                evidence: compliant,
+                remediation: if status != CheckStatus::Pass {
+                    Some(
+                        "Set gb45652_training_data_compliance: true on each MCARD with documented training-data security"
+                            .into(),
+                    )
+                } else {
+                    None
+                },
+            });
+        }
+    }
+
+    let score = calculate_score(&checks);
+    ComplianceReport {
+        standard: Standard::ChinaGb45652,
+        standard_label: Standard::ChinaGb45652.label().into(),
+        checks,
+        score,
+    }
+}
+
+// ---------------------------------------------------------------------------
+// CSL 2026 incident reporting checker
+// ---------------------------------------------------------------------------
+
+pub fn check_china_csl(
+    docs: &[DevTrailDocument],
+    _governance_dir: &Path,
+) -> ComplianceReport {
+    let mut checks = Vec::new();
+    let inc_docs: Vec<&DevTrailDocument> =
+        docs.iter().filter(|d| d.doc_type == DocType::Inc).collect();
+
+    // CSL-001: Every INC has csl_severity_level populated
+    if inc_docs.is_empty() {
+        checks.push(ComplianceCheck {
+            id: "CSL-001".into(),
+            description: "INC documents declare csl_severity_level".into(),
+            status: CheckStatus::Pass,
+            evidence: vec!["No incidents recorded — check not applicable".into()],
+            remediation: None,
+        });
+    } else {
+        let mut with_sev = Vec::new();
+        let mut missing = Vec::new();
+        for d in &inc_docs {
+            let id = d.frontmatter.id.clone().unwrap_or_default();
+            if d.frontmatter.csl_severity_level.is_some() {
+                with_sev.push(id);
+            } else {
+                missing.push(id);
+            }
+        }
+        let status = if missing.is_empty() {
+            CheckStatus::Pass
+        } else if !with_sev.is_empty() {
+            CheckStatus::Partial
+        } else {
+            CheckStatus::Fail
+        };
+        checks.push(ComplianceCheck {
+            id: "CSL-001".into(),
+            description: "INC documents declare csl_severity_level".into(),
+            status,
+            evidence: with_sev,
+            remediation: if !missing.is_empty() {
+                Some(format!(
+                    "Populate csl_severity_level (or 'not_applicable') on: {}",
+                    missing.join(", ")
+                ))
+            } else {
+                None
+            },
+        });
+    }
+
+    // CSL-002: Severity ↔ deadline coherence
+    if inc_docs.is_empty() {
+        checks.push(ComplianceCheck {
+            id: "CSL-002".into(),
+            description: "csl_report_deadline_hours matches csl_severity_level (1h / 4h / 24h)"
+                .into(),
+            status: CheckStatus::Pass,
+            evidence: vec!["No incidents recorded — check not applicable".into()],
+            remediation: None,
+        });
+    } else {
+        let mut coherent = Vec::new();
+        let mut incoherent = Vec::new();
+        for d in &inc_docs {
+            let id = d.frontmatter.id.clone().unwrap_or_default();
+            let sev = d.frontmatter.csl_severity_level.as_deref();
+            let hours = d.frontmatter.csl_report_deadline_hours;
+            let ok = match (sev, hours) {
+                (Some("particularly_serious"), Some(1)) => true,
+                (Some("relatively_major"), Some(4)) => true,
+                (Some("major"), Some(h)) if h <= 24 => true,
+                (Some("general"), _) => true,
+                (Some("not_applicable") | None, _) => true,
+                _ => false,
+            };
+            if ok {
+                coherent.push(id);
+            } else {
+                incoherent.push(id);
+            }
+        }
+        let status = if incoherent.is_empty() {
+            CheckStatus::Pass
+        } else if !coherent.is_empty() {
+            CheckStatus::Partial
+        } else {
+            CheckStatus::Fail
+        };
+        checks.push(ComplianceCheck {
+            id: "CSL-002".into(),
+            description: "csl_report_deadline_hours matches csl_severity_level (1h / 4h / 24h)"
+                .into(),
+            status,
+            evidence: coherent,
+            remediation: if !incoherent.is_empty() {
+                Some(format!(
+                    "particularly_serious → 1h, relatively_major → 4h. Incoherent on: {}",
+                    incoherent.join(", ")
+                ))
+            } else {
+                None
+            },
+        });
+    }
+
+    // CSL-003: Major+ incidents have a documented 30-day post-mortem (resolved_date present)
+    {
+        let major_or_above: Vec<&DevTrailDocument> = inc_docs
+            .iter()
+            .filter(|d| {
+                d.frontmatter
+                    .csl_severity_level
+                    .as_deref()
+                    .is_some_and(|s| matches!(s, "particularly_serious" | "relatively_major" | "major"))
+            })
+            .copied()
+            .collect();
+        if major_or_above.is_empty() {
+            checks.push(ComplianceCheck {
+                id: "CSL-003".into(),
+                description: "Major+ incidents have a 30-day post-mortem documented".into(),
+                status: CheckStatus::Pass,
+                evidence: vec!["No major+ incidents — check not applicable".into()],
+                remediation: None,
+            });
+        } else {
+            // We use status=accepted as a proxy for "post-mortem closed".
+            let mut closed = Vec::new();
+            let mut open = Vec::new();
+            for d in &major_or_above {
+                let id = d.frontmatter.id.clone().unwrap_or_default();
+                let is_closed = d
+                    .frontmatter
+                    .status
+                    .as_deref()
+                    .is_some_and(|s| s == "accepted" || s == "superseded");
+                if is_closed {
+                    closed.push(id);
+                } else {
+                    open.push(id);
+                }
+            }
+            let status = if open.is_empty() {
+                CheckStatus::Pass
+            } else if !closed.is_empty() {
+                CheckStatus::Partial
+            } else {
+                CheckStatus::Fail
+            };
+            checks.push(ComplianceCheck {
+                id: "CSL-003".into(),
+                description: "Major+ incidents have a 30-day post-mortem documented".into(),
+                status,
+                evidence: closed,
+                remediation: if !open.is_empty() {
+                    Some(format!(
+                        "Close the post-mortem (status: accepted) within 30 days on: {}",
+                        open.join(", ")
+                    ))
+                } else {
+                    None
+                },
+            });
+        }
+    }
+
+    let score = calculate_score(&checks);
+    ComplianceReport {
+        standard: Standard::ChinaCsl,
+        standard_label: Standard::ChinaCsl.label().into(),
+        checks,
+        score,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -690,5 +1770,153 @@ mod tests {
         ];
         let score = calculate_score(&checks);
         assert!((score - 50.0).abs() < 0.01);
+    }
+
+    // ---------- China checkers ----------
+
+    #[test]
+    fn test_china_tc260_no_docs_fails() {
+        let report = check_china_tc260(&[], &PathBuf::from("/tmp"));
+        assert_eq!(report.standard, Standard::ChinaTc260);
+        // TC260-001 fails when no TC260RA exists
+        let tc001 = report.checks.iter().find(|c| c.id == "TC260-001").unwrap();
+        assert_eq!(tc001.status, CheckStatus::Fail);
+    }
+
+    #[test]
+    fn test_china_tc260_complete() {
+        let docs = vec![make_doc(
+            "TC260RA-2026-04-25-001-test.md",
+            DocType::Tc260ra,
+            Frontmatter {
+                id: Some("TC260RA-2026-04-25-001".into()),
+                review_required: Some(true),
+                tc260_risk_level: Some("high".into()),
+                tc260_application_scenario: Some("healthcare".into()),
+                tc260_intelligence_level: Some("foundation".into()),
+                tc260_application_scale: Some("organization".into()),
+                ..Default::default()
+            },
+            "",
+        )];
+        let report = check_china_tc260(&docs, &PathBuf::from("/tmp"));
+        assert!((report.score - 100.0).abs() < 0.01);
+    }
+
+    #[test]
+    fn test_china_pipl_sensitive_data_requires_pipia() {
+        let docs = vec![make_doc(
+            "MCARD-2026-04-25-001-test.md",
+            DocType::Mcard,
+            Frontmatter {
+                id: Some("MCARD-2026-04-25-001".into()),
+                pipl_applicable: Some(true),
+                pipl_sensitive_data: Some(true),
+                ..Default::default()
+            },
+            "",
+        )];
+        let report = check_china_pipl(&docs, &PathBuf::from("/tmp"));
+        let pipl001 = report.checks.iter().find(|c| c.id == "PIPL-001").unwrap();
+        assert_eq!(pipl001.status, CheckStatus::Fail);
+    }
+
+    #[test]
+    fn test_china_pipl_retention_under_three_years() {
+        let docs = vec![make_doc(
+            "PIPIA-2026-04-25-001-test.md",
+            DocType::Pipia,
+            Frontmatter {
+                id: Some("PIPIA-2026-04-25-001".into()),
+                created: Some("2026-04-25".into()),
+                pipl_retention_until: Some("2027-04-25".into()),
+                ..Default::default()
+            },
+            "",
+        )];
+        let report = check_china_pipl(&docs, &PathBuf::from("/tmp"));
+        let pipl004 = report.checks.iter().find(|c| c.id == "PIPL-004").unwrap();
+        assert_eq!(pipl004.status, CheckStatus::Fail);
+    }
+
+    #[test]
+    fn test_china_gb45438_requires_both_tracks() {
+        let docs = vec![make_doc(
+            "AILABEL-2026-04-25-001-test.md",
+            DocType::Ailabel,
+            Frontmatter {
+                id: Some("AILABEL-2026-04-25-001".into()),
+                gb45438_explicit_label_strategy: Some("watermark".into()),
+                gb45438_implicit_metadata_format: Some("none".into()),
+                gb45438_content_types: Some(vec!["image".into()]),
+                ..Default::default()
+            },
+            "",
+        )];
+        let report = check_china_gb45438(&docs, &PathBuf::from("/tmp"));
+        let g002 = report.checks.iter().find(|c| c.id == "GB45438-002").unwrap();
+        assert_eq!(g002.status, CheckStatus::Fail);
+    }
+
+    #[test]
+    fn test_china_cac_approved_without_number_fails() {
+        let docs = vec![make_doc(
+            "CACFILE-2026-04-25-001-test.md",
+            DocType::Cacfile,
+            Frontmatter {
+                id: Some("CACFILE-2026-04-25-001".into()),
+                cac_filing_status: Some("national_approved".into()),
+                cac_filing_number: None,
+                ..Default::default()
+            },
+            "",
+        )];
+        let report = check_china_cac(&docs, &PathBuf::from("/tmp"));
+        let cac003 = report.checks.iter().find(|c| c.id == "CAC-003").unwrap();
+        assert_eq!(cac003.status, CheckStatus::Fail);
+    }
+
+    #[test]
+    fn test_china_csl_severity_deadline_coherence() {
+        let docs = vec![make_doc(
+            "INC-2026-04-25-001-test.md",
+            DocType::Inc,
+            Frontmatter {
+                id: Some("INC-2026-04-25-001".into()),
+                csl_severity_level: Some("particularly_serious".into()),
+                csl_report_deadline_hours: Some(4),
+                ..Default::default()
+            },
+            "",
+        )];
+        let report = check_china_csl(&docs, &PathBuf::from("/tmp"));
+        let csl002 = report.checks.iter().find(|c| c.id == "CSL-002").unwrap();
+        assert_eq!(csl002.status, CheckStatus::Fail);
+    }
+
+    #[test]
+    fn test_china_gb45652_requires_sbom_compliance() {
+        let docs = vec![make_doc(
+            "SBOM-2026-04-25-001-test.md",
+            DocType::Sbom,
+            Frontmatter {
+                id: Some("SBOM-2026-04-25-001".into()),
+                gb45652_training_data_compliance: Some(false),
+                ..Default::default()
+            },
+            "",
+        )];
+        let report = check_china_gb45652(&docs, &PathBuf::from("/tmp"));
+        let g001 = report.checks.iter().find(|c| c.id == "GB45652-001").unwrap();
+        assert_eq!(g001.status, CheckStatus::Fail);
+    }
+
+    #[test]
+    fn test_pipia_retention_helper_basic() {
+        assert!(pipia_retention_ok(Some("2026-04-25"), Some("2029-04-25")));
+        assert!(pipia_retention_ok(Some("2026-04-25"), Some("2030-01-01")));
+        assert!(!pipia_retention_ok(Some("2026-04-25"), Some("2027-04-25")));
+        assert!(!pipia_retention_ok(None, Some("2030-01-01")));
+        assert!(!pipia_retention_ok(Some("2026-04-25"), None));
     }
 }

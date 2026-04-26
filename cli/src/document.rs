@@ -18,6 +18,11 @@ pub enum DocType {
     Mcard,
     Sbom,
     Dpia,
+    // China regulatory artifacts (regional_scope: china)
+    Pipia,
+    Cacfile,
+    Tc260ra,
+    Ailabel,
 }
 
 impl DocType {
@@ -36,6 +41,10 @@ impl DocType {
             DocType::Mcard => "MCARD",
             DocType::Sbom => "SBOM",
             DocType::Dpia => "DPIA",
+            DocType::Pipia => "PIPIA",
+            DocType::Cacfile => "CACFILE",
+            DocType::Tc260ra => "TC260RA",
+            DocType::Ailabel => "AILABEL",
         }
     }
 
@@ -54,6 +63,10 @@ impl DocType {
             "MCARD" => Some(DocType::Mcard),
             "SBOM" => Some(DocType::Sbom),
             "DPIA" => Some(DocType::Dpia),
+            "PIPIA" => Some(DocType::Pipia),
+            "CACFILE" => Some(DocType::Cacfile),
+            "TC260RA" => Some(DocType::Tc260ra),
+            "AILABEL" => Some(DocType::Ailabel),
             _ => None,
         }
     }
@@ -62,6 +75,7 @@ impl DocType {
     pub const ALL_PREFIXES: &'static [&'static str] = &[
         "AILOG", "AIDEC", "ADR", "ETH", "REQ", "TES", "INC", "TDE",
         "SEC", "MCARD", "SBOM", "DPIA",
+        "PIPIA", "CACFILE", "TC260RA", "AILABEL",
     ];
 
     /// All DocType variants in display order
@@ -69,7 +83,20 @@ impl DocType {
         DocType::Ailog, DocType::Aidec, DocType::Adr, DocType::Eth,
         DocType::Req, DocType::Tes, DocType::Inc, DocType::Tde,
         DocType::Sec, DocType::Mcard, DocType::Sbom, DocType::Dpia,
+        DocType::Pipia, DocType::Cacfile, DocType::Tc260ra, DocType::Ailabel,
     ];
+
+    /// DocType variants that are only enabled when `regional_scope` includes
+    /// "china". They are filtered out of `devtrail new` and other UX surfaces
+    /// for projects that have not opted into Chinese regulatory coverage.
+    pub const CHINA_ONLY: &'static [DocType] = &[
+        DocType::Pipia, DocType::Cacfile, DocType::Tc260ra, DocType::Ailabel,
+    ];
+
+    /// True if this DocType requires `regional_scope` to include "china".
+    pub fn is_china_only(&self) -> bool {
+        Self::CHINA_ONLY.contains(self)
+    }
 
     /// Human-readable display name
     pub fn display_name(&self) -> &'static str {
@@ -86,6 +113,10 @@ impl DocType {
             DocType::Mcard => "Model/System Card",
             DocType::Sbom => "Software Bill of Materials",
             DocType::Dpia => "Data Protection Impact Assessment",
+            DocType::Pipia => "Personal Information Protection Impact Assessment",
+            DocType::Cacfile => "CAC Algorithm Filing",
+            DocType::Tc260ra => "TC260 Risk Assessment",
+            DocType::Ailabel => "GB 45438 Content Labeling Plan",
         }
     }
 
@@ -104,6 +135,10 @@ impl DocType {
             DocType::Mcard => "09-ai-models",
             DocType::Sbom => "07-ai-audit",
             DocType::Dpia => "07-ai-audit/ethical-reviews",
+            DocType::Pipia => "07-ai-audit/ethical-reviews",
+            DocType::Cacfile => "07-ai-audit/regulatory-filings",
+            DocType::Tc260ra => "07-ai-audit/risk-assessments",
+            DocType::Ailabel => "09-ai-models/labeling",
         }
     }
 
@@ -122,6 +157,10 @@ impl DocType {
             "mcard" => Some(DocType::Mcard),
             "sbom" => Some(DocType::Sbom),
             "dpia" => Some(DocType::Dpia),
+            "pipia" => Some(DocType::Pipia),
+            "cacfile" => Some(DocType::Cacfile),
+            "tc260ra" => Some(DocType::Tc260ra),
+            "ailabel" => Some(DocType::Ailabel),
             _ => None,
         }
     }
@@ -175,6 +214,60 @@ pub struct Frontmatter {
     pub api_changes: Option<Vec<String>>,
     // REQ-specific (OpenAPI/AsyncAPI)
     pub api_spec_path: Option<String>,
+
+    // ----- China regulatory profile (regional_scope: china) -----
+
+    // TC260 v2.0 (AI Safety Governance Framework)
+    /// One of: "low" | "medium" | "high" | "very_high" | "extremely_severe" | "not_applicable"
+    pub tc260_risk_level: Option<String>,
+    pub tc260_application_scenario: Option<String>,
+    /// One of: "narrow" | "foundation" | "agentic" | "general"
+    pub tc260_intelligence_level: Option<String>,
+    /// One of: "individual" | "organization" | "societal" | "cross_border"
+    pub tc260_application_scale: Option<String>,
+    pub tc260_endogenous_risks: Option<Vec<String>>,
+    pub tc260_application_risks: Option<Vec<String>>,
+    pub tc260_derivative_risks: Option<Vec<String>>,
+
+    // PIPL / PIPIA (Personal Information Protection Law, Art. 55-56)
+    pub pipl_applicable: Option<bool>,
+    /// One of: "sensitive_data" | "automated_decision" | "third_party_disclosure"
+    /// | "cross_border" | "public_disclosure" | "other"
+    pub pipl_article_55_trigger: Option<String>,
+    pub pipl_sensitive_data: Option<bool>,
+    pub pipl_cross_border_transfer: Option<bool>,
+    /// YYYY-MM-DD — minimum 3 years from `created` per PIPL.
+    pub pipl_retention_until: Option<String>,
+
+    // GB 45438-2025 — Cybersecurity Technology — Labeling Method for AI-Generated Content
+    pub gb45438_applicable: Option<bool>,
+    /// Subset of: "text" | "image" | "audio" | "video" | "virtual_scene"
+    pub gb45438_content_types: Option<Vec<String>>,
+    /// One of: "disclaimer" | "watermark" | "caption" | "audio_cue" | "banner"
+    pub gb45438_explicit_label_strategy: Option<String>,
+    /// One of: "C2PA" | "XMP" | "EXIF" | "custom" | "none"
+    pub gb45438_implicit_metadata_format: Option<String>,
+    pub gb45438_distributor_obligations_documented: Option<bool>,
+
+    // CAC Algorithm Filing (Cyberspace Administration of China)
+    pub cac_filing_required: Option<bool>,
+    pub cac_filing_number: Option<String>,
+    /// One of: "pending" | "provincial_submitted" | "provincial_approved"
+    /// | "national_submitted" | "national_approved" | "rejected" | "not_required"
+    pub cac_filing_status: Option<String>,
+    /// One of: "algorithm" | "generative_ai" | "dual"
+    pub cac_filing_type: Option<String>,
+    pub cac_provincial_authority: Option<String>,
+    pub cac_national_decision_date: Option<String>,
+
+    // GB/T 45652-2025 — Pre-training & fine-tuning data security
+    pub gb45652_training_data_compliance: Option<bool>,
+
+    // CSL 2026 — Cybersecurity Law amendments + incident reporting administrative measures
+    /// One of: "particularly_serious" | "relatively_major" | "major" | "general" | "not_applicable"
+    pub csl_severity_level: Option<String>,
+    /// 1 (particularly serious) | 4 (relatively major) | 24 (general)
+    pub csl_report_deadline_hours: Option<u32>,
 }
 
 /// A parsed DevTrail document
@@ -340,9 +433,65 @@ mod tests {
     }
 
     #[test]
-    fn test_doc_type_all_has_12_entries() {
-        assert_eq!(DocType::ALL.len(), 12);
-        assert_eq!(DocType::ALL_PREFIXES.len(), 12);
+    fn test_doc_type_all_has_16_entries() {
+        // 12 base types + 4 China-specific (PIPIA, CACFILE, TC260RA, AILABEL)
+        assert_eq!(DocType::ALL.len(), 16);
+        assert_eq!(DocType::ALL_PREFIXES.len(), 16);
+    }
+
+    #[test]
+    fn test_china_only_doc_types() {
+        assert_eq!(DocType::CHINA_ONLY.len(), 4);
+        assert!(DocType::Pipia.is_china_only());
+        assert!(DocType::Cacfile.is_china_only());
+        assert!(DocType::Tc260ra.is_china_only());
+        assert!(DocType::Ailabel.is_china_only());
+        assert!(!DocType::Ailog.is_china_only());
+        assert!(!DocType::Dpia.is_china_only());
+    }
+
+    #[test]
+    fn test_china_doc_type_detection() {
+        assert_eq!(detect_doc_type("PIPIA-2026-04-25-001-chatbot.md"), Some(DocType::Pipia));
+        assert_eq!(detect_doc_type("CACFILE-2026-04-25-001-chatbot.md"), Some(DocType::Cacfile));
+        assert_eq!(detect_doc_type("TC260RA-2026-04-25-001-chatbot.md"), Some(DocType::Tc260ra));
+        assert_eq!(detect_doc_type("AILABEL-2026-04-25-001-chatbot.md"), Some(DocType::Ailabel));
+    }
+
+    #[test]
+    fn test_china_doc_type_directories() {
+        assert_eq!(DocType::Pipia.directory(), "07-ai-audit/ethical-reviews");
+        assert_eq!(DocType::Cacfile.directory(), "07-ai-audit/regulatory-filings");
+        assert_eq!(DocType::Tc260ra.directory(), "07-ai-audit/risk-assessments");
+        assert_eq!(DocType::Ailabel.directory(), "09-ai-models/labeling");
+    }
+
+    #[test]
+    fn test_china_frontmatter_parsing() {
+        let content = "---\n\
+            id: PIPIA-2026-04-25-001\n\
+            title: Test PIPIA\n\
+            pipl_applicable: true\n\
+            pipl_sensitive_data: true\n\
+            pipl_cross_border_transfer: false\n\
+            pipl_retention_until: 2029-04-25\n\
+            tc260_risk_level: high\n\
+            cac_filing_number: CAC-2026-00123\n\
+            cac_filing_status: national_approved\n\
+            gb45438_content_types: [text, image]\n\
+            csl_severity_level: relatively_major\n\
+            csl_report_deadline_hours: 4\n\
+            ---\n\nbody";
+        let (fm, _) = extract_frontmatter(content).unwrap();
+        assert_eq!(fm.pipl_applicable, Some(true));
+        assert_eq!(fm.pipl_sensitive_data, Some(true));
+        assert_eq!(fm.pipl_retention_until.as_deref(), Some("2029-04-25"));
+        assert_eq!(fm.tc260_risk_level.as_deref(), Some("high"));
+        assert_eq!(fm.cac_filing_number.as_deref(), Some("CAC-2026-00123"));
+        assert_eq!(fm.cac_filing_status.as_deref(), Some("national_approved"));
+        assert_eq!(fm.gb45438_content_types.as_ref().unwrap().len(), 2);
+        assert_eq!(fm.csl_severity_level.as_deref(), Some("relatively_major"));
+        assert_eq!(fm.csl_report_deadline_hours, Some(4));
     }
 
     #[test]

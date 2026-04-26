@@ -11,6 +11,11 @@ pub struct DevTrailConfig {
     /// Complexity analysis settings
     #[serde(default)]
     pub complexity: ComplexityConfig,
+    /// Regional regulatory scope. Values: "global" (NIST + ISO 42001),
+    /// "eu" (EU AI Act + GDPR), "china" (TC260, PIPL, GB 45438, CAC, GB/T 45652, CSL).
+    /// Default `["global", "eu"]` preserves backward compatibility.
+    #[serde(default = "default_regional_scope")]
+    pub regional_scope: Vec<String>,
 }
 
 /// Configuration for the `devtrail analyze` command
@@ -37,11 +42,16 @@ fn default_language() -> String {
     "en".to_string()
 }
 
+fn default_regional_scope() -> Vec<String> {
+    vec!["global".to_string(), "eu".to_string()]
+}
+
 impl Default for DevTrailConfig {
     fn default() -> Self {
         Self {
             language: default_language(),
             complexity: ComplexityConfig::default(),
+            regional_scope: default_regional_scope(),
         }
     }
 }
@@ -57,6 +67,38 @@ impl DevTrailConfig {
             std::fs::read_to_string(&config_path).context("Failed to read config.yml")?;
         let config: Self = serde_yaml::from_str(&contents).context("Failed to parse config.yml")?;
         Ok(config)
+    }
+
+    /// True if `regional_scope` includes the given region (case-insensitive).
+    pub fn has_region(&self, region: &str) -> bool {
+        self.regional_scope
+            .iter()
+            .any(|r| r.eq_ignore_ascii_case(region))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_default_regional_scope() {
+        let cfg = DevTrailConfig::default();
+        assert!(cfg.has_region("global"));
+        assert!(cfg.has_region("eu"));
+        assert!(!cfg.has_region("china"));
+    }
+
+    #[test]
+    fn test_has_region_case_insensitive() {
+        let cfg = DevTrailConfig {
+            regional_scope: vec!["China".into(), "GLOBAL".into()],
+            ..Default::default()
+        };
+        assert!(cfg.has_region("china"));
+        assert!(cfg.has_region("CHINA"));
+        assert!(cfg.has_region("global"));
+        assert!(!cfg.has_region("eu"));
     }
 }
 

@@ -138,10 +138,12 @@ pub fn calculate_metrics(
 
     let filtered = filter_by_range(docs, start, end);
 
-    // Document counts by type
+    // Document counts by type (16 types: 12 base + 4 China-specific)
     let type_names = [
         "AILOG", "AIDEC", "ADR", "ETH", "REQ", "TES", "INC", "TDE", "SEC", "MCARD", "SBOM",
         "DPIA",
+        // China regulatory artifacts (only present when regional_scope: china)
+        "PIPIA", "CACFILE", "TC260RA", "AILABEL",
     ];
     let doc_counts: Vec<(String, usize)> = type_names
         .iter()

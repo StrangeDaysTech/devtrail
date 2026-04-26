@@ -84,6 +84,15 @@ related: []
 - **Human Oversight Measures**: [Describe human-in-the-loop or human-on-the-loop mechanisms]
 - **Transparency to Data Subjects**: [How data subjects are informed about AI involvement in processing their data]
 
+## Cross-reference: PIPIA (China)
+
+> Complete this section only if `regional_scope` includes `china` and any of the PIPL Art. 55 triggers apply (sensitive personal info, automated decision-making, third-party disclosure, cross-border transfer, public disclosure). See [PIPL-PIPIA-GUIDE.md](../00-governance/PIPL-PIPIA-GUIDE.md).
+>
+> When applicable, set `pipl_applicable: true` in this DPIA's frontmatter and create a companion **PIPIA-...** document. Link both documents bidirectionally via `related:`.
+
+- **PIPIA Reference**: [PIPIA-YYYY-MM-DD-NNN or "Not applicable — PIPL not in regional_scope"]
+- **Differences vs. this DPIA**: [Brief — PIPIA-specific elements not covered above (Art. 55 trigger, retention ≥ 3 years, cross-border mechanism)]
+
 ## Review Schedule
 
 - **Next Review Date**: [YYYY-MM-DD]
