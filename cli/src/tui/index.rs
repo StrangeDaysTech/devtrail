@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use super::document::DocFrontMatter;
+use crate::utils;
 
 /// A group in the documentation hierarchy (e.g., "02-design")
 #[derive(Debug, Clone)]
@@ -109,8 +110,15 @@ const GROUP_DEFS: &[(&str, &str, &[SubgroupDef])] = &[
 ];
 
 impl DocIndex {
-    /// Build the index by scanning the .devtrail directory
-    pub fn build(devtrail_dir: &Path) -> Self {
+    /// Build the index by scanning the .devtrail directory.
+    ///
+    /// `language` selects the preferred locale (e.g. `"en"`, `"es"`, `"zh-CN"`).
+    /// When non-`"en"`, framework files at group roots (e.g. governance docs)
+    /// are transparently swapped for their `i18n/<lang>/<filename>` counterpart
+    /// when one exists; otherwise the English original is used. User-authored
+    /// content under subgroups (`decisions/`, `incidents/`, ...) is never
+    /// localized.
+    pub fn build(devtrail_dir: &Path, language: &str) -> Self {
         let mut groups = Vec::new();
         let mut relations = RelationIndex::default();
         let mut total_docs = 0;
@@ -128,8 +136,10 @@ impl DocIndex {
                 continue;
             }
 
-            // Scan files directly in the group dir (non-recursive, subgroups scanned separately)
-            let files = scan_md_files_flat(&group_path, &mut relations);
+            // Scan files directly in the group dir. Group roots host framework
+            // docs that ship with translations under `i18n/<lang>/`, so apply
+            // localization here.
+            let files = scan_md_files_flat(&group_path, Some(language), &mut relations);
             total_docs += files.len();
 
             // Scan subgroups and their user-created subdirectories
@@ -137,8 +147,9 @@ impl DocIndex {
             for &(sg_name, sg_label) in subgroup_defs {
                 let sg_path = group_path.join(sg_name);
                 if sg_path.exists() {
-                    // Files directly in the subgroup
-                    let sg_files = scan_md_files_flat(&sg_path, &mut relations);
+                    // Subgroups hold adopter content, which has no localized
+                    // sibling to swap to.
+                    let sg_files = scan_md_files_flat(&sg_path, None, &mut relations);
                     total_docs += sg_files.len();
 
                     // Scan user-created subdirectories
@@ -279,8 +290,18 @@ fn entry_matches(filename: &str, path: &Path, ref_filename: &str, clean_ref: &st
     false
 }
 
-/// Scan only direct .md files in a directory (non-recursive, for group root dirs)
-fn scan_md_files_flat(dir: &Path, relations: &mut RelationIndex) -> Vec<DocEntry> {
+/// Scan only direct .md files in a directory (non-recursive, for group root dirs).
+///
+/// When `localize` is `Some(lang)` and a translation exists at
+/// `dir/i18n/<lang>/<filename>`, the entry's path (and therefore the title /
+/// frontmatter shown in the TUI) is taken from the translated file. Pass
+/// `None` for directories whose contents are user-authored and have no
+/// localized counterpart.
+fn scan_md_files_flat(
+    dir: &Path,
+    localize: Option<&str>,
+    relations: &mut RelationIndex,
+) -> Vec<DocEntry> {
     let mut entries = Vec::new();
 
     let Ok(read_dir) = std::fs::read_dir(dir) else {
@@ -314,11 +335,19 @@ fn scan_md_files_flat(dir: &Path, relations: &mut RelationIndex) -> Vec<DocEntry
             .unwrap_or("")
             .to_string();
 
-        let meta = quick_scan_frontmatter(&path, relations);
+        // Prefer a localized variant when this directory is a framework
+        // root that ships with translations. Falls back to the English
+        // original silently when no translation exists.
+        let resolved_path = match localize {
+            Some(lang) => utils::resolve_localized_path(dir, &filename, lang),
+            None => path,
+        };
+
+        let meta = quick_scan_frontmatter(&resolved_path, relations);
 
         entries.push(DocEntry {
             filename,
-            path,
+            path: resolved_path,
             title: meta.title,
             id: meta.id,
             doc_type: meta.doc_type,
@@ -538,5 +567,143 @@ fn quick_scan_frontmatter(path: &Path, relations: &mut RelationIndex) -> Scanned
             }
         }
         None => fallback_meta(path, Some(body)),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Build a fixture .devtrail tree with a translated and an English-only
+    /// governance doc, and verify DocIndex prefers the translation when
+    /// language=zh-CN, falling back to English silently when no translation
+    /// exists.
+    #[test]
+    fn build_zh_cn_swaps_governance_path_when_translation_present() {
+        let tmp = tempfile::TempDir::new().unwrap();
+        let devtrail_dir = tmp.path().join(".devtrail");
+        let governance = devtrail_dir.join("00-governance");
+        let zh = governance.join("i18n").join("zh-CN");
+        std::fs::create_dir_all(&zh).unwrap();
+
+        // Translated doc (governance).
+        std::fs::write(
+            governance.join("QUICK-REFERENCE.md"),
+            "# Quick Reference\n\nEnglish body.\n",
+        )
+        .unwrap();
+        std::fs::write(
+            zh.join("QUICK-REFERENCE.md"),
+            "# 快速参考\n\n中文正文。\n",
+        )
+        .unwrap();
+
+        // English-only doc (no zh-CN sibling).
+        std::fs::write(
+            governance.join("ISO-25010-2023-REFERENCE.md"),
+            "# ISO 25010\n\nEnglish only.\n",
+        )
+        .unwrap();
+
+        let index = DocIndex::build(&devtrail_dir, "zh-CN");
+
+        let governance_group = index
+            .groups
+            .iter()
+            .find(|g| g.name == "00-governance")
+            .expect("governance group present");
+
+        let quick_ref = governance_group
+            .files
+            .iter()
+            .find(|e| e.filename == "QUICK-REFERENCE.md")
+            .expect("QUICK-REFERENCE indexed");
+        assert_eq!(
+            quick_ref.path,
+            zh.join("QUICK-REFERENCE.md"),
+            "zh-CN translation should be preferred"
+        );
+        assert_eq!(quick_ref.title, "快速参考");
+
+        let iso = governance_group
+            .files
+            .iter()
+            .find(|e| e.filename == "ISO-25010-2023-REFERENCE.md")
+            .expect("ISO doc indexed");
+        assert_eq!(
+            iso.path,
+            governance.join("ISO-25010-2023-REFERENCE.md"),
+            "missing translation must fall back to English silently"
+        );
+        assert_eq!(iso.title, "ISO 25010");
+    }
+
+    #[test]
+    fn build_en_never_descends_into_i18n_subdirs() {
+        let tmp = tempfile::TempDir::new().unwrap();
+        let devtrail_dir = tmp.path().join(".devtrail");
+        let governance = devtrail_dir.join("00-governance");
+        let zh = governance.join("i18n").join("zh-CN");
+        std::fs::create_dir_all(&zh).unwrap();
+
+        std::fs::write(governance.join("AGENT-RULES.md"), "# Rules").unwrap();
+        std::fs::write(zh.join("AGENT-RULES.md"), "# 规则").unwrap();
+
+        let index = DocIndex::build(&devtrail_dir, "en");
+        let governance_group = index
+            .groups
+            .iter()
+            .find(|g| g.name == "00-governance")
+            .unwrap();
+
+        // Exactly one entry: the English root file. The translation must
+        // never appear as a separate doc (no duplication of total_docs).
+        assert_eq!(governance_group.files.len(), 1);
+        assert_eq!(
+            governance_group.files[0].path,
+            governance.join("AGENT-RULES.md")
+        );
+    }
+
+    #[test]
+    fn build_does_not_localize_user_subgroups() {
+        let tmp = tempfile::TempDir::new().unwrap();
+        let devtrail_dir = tmp.path().join(".devtrail");
+        let decisions = devtrail_dir.join("02-design").join("decisions");
+        let stray_zh = decisions.join("i18n").join("zh-CN");
+        std::fs::create_dir_all(&stray_zh).unwrap();
+
+        std::fs::write(
+            decisions.join("ADR-2026-01-01-001-foo.md"),
+            "# English ADR",
+        )
+        .unwrap();
+        // A translation file under a user subgroup must be ignored — adopter
+        // content has no canonical English<->zh mapping.
+        std::fs::write(stray_zh.join("ADR-2026-01-01-001-foo.md"), "# 中文 ADR")
+            .unwrap();
+
+        let index = DocIndex::build(&devtrail_dir, "zh-CN");
+        let design = index
+            .groups
+            .iter()
+            .find(|g| g.name == "02-design")
+            .unwrap();
+        let decisions_sg = design
+            .subgroups
+            .iter()
+            .find(|s| s.name == "decisions")
+            .unwrap();
+
+        let adr = decisions_sg
+            .files
+            .iter()
+            .find(|e| e.filename == "ADR-2026-01-01-001-foo.md")
+            .expect("ADR indexed");
+        assert_eq!(
+            adr.path,
+            decisions.join("ADR-2026-01-01-001-foo.md"),
+            "user-authored docs must not be swapped for any i18n sibling"
+        );
     }
 }

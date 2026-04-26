@@ -204,15 +204,8 @@ fn resolve_template_path(
     lang: &str,
 ) -> PathBuf {
     let template_name = format!("TEMPLATE-{}.md", doc_type.prefix());
-    if lang != "en" {
-        let i18n_path = devtrail_dir
-            .join(format!("templates/i18n/{}", lang))
-            .join(&template_name);
-        if i18n_path.exists() {
-            return i18n_path;
-        }
-    }
-    devtrail_dir.join("templates").join(&template_name)
+    let templates_dir = devtrail_dir.join("templates");
+    utils::resolve_localized_path(&templates_dir, &template_name, lang)
 }
 
 #[cfg(test)]

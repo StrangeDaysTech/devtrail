@@ -168,6 +168,10 @@ enum Commands {
         /// Target directory (default: current directory)
         #[arg(default_value = ".")]
         path: String,
+        /// Display language override (e.g., en, es, zh-CN). Defaults to
+        /// `language` from .devtrail/config.yml.
+        #[arg(long)]
+        lang: Option<String>,
     },
 }
 
@@ -219,7 +223,7 @@ fn main() {
             top,
         } => commands::analyze::run(&path, threshold, &output, top),
         #[cfg(feature = "tui")]
-        Commands::Explore { path } => commands::explore::run(&path),
+        Commands::Explore { path, lang } => commands::explore::run(&path, lang.as_deref()),
     };
 
     if let Err(e) = result {

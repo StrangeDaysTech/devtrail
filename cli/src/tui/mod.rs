@@ -21,7 +21,7 @@ use ratatui::Terminal;
 use app::App;
 
 /// Run the TUI explorer
-pub fn run(project_root: &Path, is_fallback: bool) -> anyhow::Result<()> {
+pub fn run(project_root: &Path, is_fallback: bool, language: &str) -> anyhow::Result<()> {
     // Setup terminal
     enable_raw_mode()?;
     let mut stdout = io::stdout();
@@ -30,7 +30,7 @@ pub fn run(project_root: &Path, is_fallback: bool) -> anyhow::Result<()> {
     let mut terminal = Terminal::new(backend)?;
 
     // Create app state
-    let mut app = App::new(project_root, is_fallback);
+    let mut app = App::new(project_root, is_fallback, language);
 
     // Main loop
     let result = run_loop(&mut terminal, &mut app);

@@ -96,12 +96,15 @@ pub struct App {
     pub project_root: PathBuf,
     /// Whether we're using a fallback path (repo root instead of cwd)
     pub is_fallback: bool,
+    /// Active display language ("en", "es", "zh-CN"). Persisted on the app
+    /// so refresh ('r') rebuilds the index in the same locale.
+    pub language: String,
 }
 
 impl App {
-    pub fn new(project_root: &Path, is_fallback: bool) -> Self {
+    pub fn new(project_root: &Path, is_fallback: bool, language: &str) -> Self {
         let devtrail_dir = project_root.join(".devtrail");
-        let index = DocIndex::build(&devtrail_dir);
+        let index = DocIndex::build(&devtrail_dir, language);
         let num_groups = index.groups.len();
 
         Self {
@@ -125,6 +128,7 @@ impl App {
             should_quit: false,
             project_root: project_root.to_path_buf(),
             is_fallback,
+            language: language.to_string(),
         }
     }
 

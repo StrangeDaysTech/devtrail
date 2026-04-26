@@ -1,6 +1,6 @@
 use colored::Colorize;
 use sha2::{Digest, Sha256};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
 
 /// Print a success message
@@ -102,6 +102,21 @@ pub fn resolve_project_root(path: &str) -> Option<ResolvedPath> {
     }
 
     None
+}
+
+/// Resolve `<dir>/<filename>` honoring an optional translation under
+/// `<dir>/i18n/<lang>/<filename>`. When `lang` is `"en"` (or any value where
+/// the localized variant is absent), returns the root path unchanged. This is
+/// the single source of truth for i18n file resolution shared by `devtrail
+/// new` (templates) and `devtrail explore` (governance docs).
+pub fn resolve_localized_path(dir: &Path, filename: &str, lang: &str) -> PathBuf {
+    if lang != "en" {
+        let candidate = dir.join("i18n").join(lang).join(filename);
+        if candidate.exists() {
+            return candidate;
+        }
+    }
+    dir.join(filename)
 }
 
 /// Visual width of a string in terminal columns, accounting for double-wide
@@ -227,5 +242,42 @@ mod tests {
     #[test]
     fn pad_right_visual_already_wider_returns_as_is() {
         assert_eq!(pad_right_visual("hello", 3), "hello");
+    }
+
+    #[test]
+    fn resolve_localized_path_uses_translation_when_present() {
+        let tmp = tempfile::TempDir::new().unwrap();
+        let dir = tmp.path();
+        let translated = dir.join("i18n").join("zh-CN");
+        std::fs::create_dir_all(&translated).unwrap();
+        std::fs::write(dir.join("FOO.md"), "english").unwrap();
+        std::fs::write(translated.join("FOO.md"), "中文").unwrap();
+
+        let resolved = resolve_localized_path(dir, "FOO.md", "zh-CN");
+        assert_eq!(resolved, translated.join("FOO.md"));
+    }
+
+    #[test]
+    fn resolve_localized_path_falls_back_to_english_when_translation_missing() {
+        let tmp = tempfile::TempDir::new().unwrap();
+        let dir = tmp.path();
+        std::fs::write(dir.join("FOO.md"), "english").unwrap();
+
+        let resolved = resolve_localized_path(dir, "FOO.md", "zh-CN");
+        assert_eq!(resolved, dir.join("FOO.md"));
+    }
+
+    #[test]
+    fn resolve_localized_path_for_english_skips_lookup() {
+        let tmp = tempfile::TempDir::new().unwrap();
+        let dir = tmp.path();
+        // Even if a stale i18n/en/ folder existed, "en" must always return root.
+        let stale = dir.join("i18n").join("en");
+        std::fs::create_dir_all(&stale).unwrap();
+        std::fs::write(stale.join("FOO.md"), "should not be picked").unwrap();
+        std::fs::write(dir.join("FOO.md"), "english").unwrap();
+
+        let resolved = resolve_localized_path(dir, "FOO.md", "en");
+        assert_eq!(resolved, dir.join("FOO.md"));
     }
 }
