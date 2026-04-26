@@ -75,6 +75,30 @@ impl DevTrailConfig {
             .iter()
             .any(|r| r.eq_ignore_ascii_case(region))
     }
+
+    /// Resolve the effective display language for a project, applying all
+    /// fallbacks in order:
+    ///
+    /// 1. If `.devtrail/config.yml` exists on disk, the value of its
+    ///    `language` key (defaulting to `"en"` when the field is absent).
+    ///    A configured value — even the default `"en"` — is treated as an
+    ///    explicit choice and is never overridden by env vars.
+    /// 2. If no config file exists, parse `$LC_ALL` / `$LANG` and map it
+    ///    onto a supported locale (`en`, `es`, `zh-CN`).
+    /// 3. Final fallback: `"en"`.
+    ///
+    /// This is the single entry point used by `devtrail explore`,
+    /// `devtrail new`, and `devtrail status` so they all agree on which
+    /// language to use.
+    pub fn resolve_language(project_root: &Path) -> String {
+        let config_path = project_root.join(".devtrail/config.yml");
+        if config_path.exists() {
+            return Self::load(project_root)
+                .map(|c| c.language)
+                .unwrap_or_else(|_| default_language());
+        }
+        crate::utils::detect_os_locale().unwrap_or_else(default_language)
+    }
 }
 
 #[cfg(test)]
@@ -99,6 +123,53 @@ mod tests {
         assert!(cfg.has_region("CHINA"));
         assert!(cfg.has_region("global"));
         assert!(!cfg.has_region("eu"));
+    }
+
+    #[test]
+    fn resolve_language_uses_config_value_when_present() {
+        let tmp = tempfile::TempDir::new().unwrap();
+        let dt = tmp.path().join(".devtrail");
+        std::fs::create_dir_all(&dt).unwrap();
+        std::fs::write(dt.join("config.yml"), "language: zh-CN\n").unwrap();
+
+        // Even if $LANG is set to something else, the file's explicit
+        // value must win — config is treated as a deliberate user choice.
+        let prev = std::env::var("LANG").ok();
+        unsafe { std::env::set_var("LANG", "fr_FR.UTF-8"); }
+        let lang = DevTrailConfig::resolve_language(tmp.path());
+        if let Some(p) = prev {
+            unsafe { std::env::set_var("LANG", p); }
+        } else {
+            unsafe { std::env::remove_var("LANG"); }
+        }
+        assert_eq!(lang, "zh-CN");
+    }
+
+    #[test]
+    fn resolve_language_falls_back_to_default_when_no_config_no_env() {
+        let tmp = tempfile::TempDir::new().unwrap();
+        // No .devtrail/config.yml in tmp.
+        // Clear env vars so the OS locale path can't return a real value.
+        let prev_all = std::env::var("LC_ALL").ok();
+        let prev_lang = std::env::var("LANG").ok();
+        unsafe {
+            std::env::remove_var("LC_ALL");
+            std::env::set_var("LANG", "C");
+        }
+        let lang = DevTrailConfig::resolve_language(tmp.path());
+        // Restore env.
+        unsafe {
+            if let Some(p) = prev_all {
+                std::env::set_var("LC_ALL", p);
+            }
+            if let Some(p) = prev_lang {
+                std::env::set_var("LANG", p);
+            } else {
+                std::env::remove_var("LANG");
+            }
+        }
+        // "C" maps to "en", so the result is "en".
+        assert_eq!(lang, "en");
     }
 }
 

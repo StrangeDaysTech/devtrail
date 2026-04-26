@@ -49,7 +49,7 @@ DevTrail usa **tags de versión independientes** para cada componente:
 | Componente | Prefijo de tag | Ejemplo | Qué incluye |
 |------------|---------------|---------|-------------|
 | Framework | `fw-` | `fw-4.3.0` | Plantillas (12 tipos), docs de gobernanza, directivas |
-| CLI | `cli-` | `cli-3.4.1` | El binario `devtrail` |
+| CLI | `cli-` | `cli-3.5.0` | El binario `devtrail` |
 
 Framework y CLI se publican de forma independiente. Una actualización del framework no requiere actualización del CLI, y viceversa.
 
@@ -109,7 +109,7 @@ $ devtrail update
 Updating framework...
 ✔ Framework updated to fw-4.3.0
 Updating CLI...
-✔ CLI updated to cli-3.4.1
+✔ CLI updated to cli-3.5.0
 ```
 
 ---
@@ -142,11 +142,11 @@ Usa `--method` para forzar el método: `--method=github` o `--method=cargo`.
 
 ```bash
 $ devtrail update-cli
-✔ CLI updated to cli-3.4.1
+✔ CLI updated to cli-3.5.0
 
 $ devtrail update-cli --method=cargo
 Compiling from source, this may take a few minutes...
-✔ CLI updated to cli-3.4.1
+✔ CLI updated to cli-3.5.0
 ```
 
 ---
@@ -204,7 +204,7 @@ DevTrail Status
 ───────────────
 Path:              /home/user/my-project
 Framework version: fw-4.3.0
-CLI version:       cli-3.4.1
+CLI version:       cli-3.5.0
 Language:          en
 Structure:         ✔ Complete
 
@@ -513,7 +513,14 @@ Explora y lee la documentación de DevTrail interactivamente en una interfaz de 
 
 | Flag | Default | Descripción |
 |------|---------|-------------|
-| `--lang <código>` | `language` de `.devtrail/config.yml`, si no `en` | Idioma de los docs de gobernanza del framework (`en`, `es`, `zh-CN`). Cae silenciosamente al inglés si falta la traducción. |
+| `--lang <código>` | resuelto desde el proyecto (ver abajo) | Idioma del shell del TUI y los docs de gobernanza del framework (`en`, `es`, `zh-CN`). Cae silenciosamente al inglés si falta la traducción. |
+
+**Orden de resolución del idioma** (desde cli-3.5.0):
+
+1. Flag `--lang <código>`, cuando se especifica
+2. Campo `language` en `.devtrail/config.yml`, cuando el archivo existe (un valor explícito — incluso `language: en` — se respeta como una decisión deliberada del usuario)
+3. Variables de entorno `$LC_ALL` / `$LANG`, mapeadas a un idioma soportado (p.ej., `zh_CN.UTF-8` → `zh-CN`, `es_MX.UTF-8` → `es`). Chino tradicional (`zh_TW` / `zh_HK`) y otros locales no soportados pasan al siguiente fallback.
+4. `en`
 
 **Características:**
 
@@ -534,6 +541,7 @@ Explora y lee la documentación de DevTrail interactivamente en una interfaz de 
 | `Tab` | Ciclar paneles: Navegación → Metadatos → Documento |
 | `f` | Pantalla completa del documento |
 | `/` | Buscar |
+| `L` | Cambiar idioma de la interfaz (`en → es → zh-CN`) |
 | `Esc` | Volver / Colapsar / Limpiar búsqueda |
 | `?` | Popup de ayuda con todos los atajos |
 | `q` | Salir |
@@ -559,7 +567,7 @@ Muestra información de versión, autoría y licencia.
 ```bash
 $ devtrail about
 DevTrail CLI
-  CLI version:       cli-3.4.1
+  CLI version:       cli-3.5.0
   Framework version: fw-4.3.0
   Author:            Strange Days Tech, S.A.S.
   License:           MIT

@@ -49,7 +49,7 @@ DevTrail 为每个组件使用**独立的版本标签**：
 | 组件 | 标签前缀 | 示例 | 包含内容 |
 |------|----------|------|----------|
 | Framework | `fw-` | `fw-4.3.0` | 模板（12 种类型）、治理文档、指令 |
-| CLI | `cli-` | `cli-3.4.1` | `devtrail` 二进制文件 |
+| CLI | `cli-` | `cli-3.5.0` | `devtrail` 二进制文件 |
 
 Framework 和 CLI 独立发布。Framework 更新不需要 CLI 更新，反之亦然。
 
@@ -110,7 +110,7 @@ $ devtrail update
 Updating framework...
 ✔ Framework updated to fw-4.3.0
 Updating CLI...
-✔ CLI updated to cli-3.4.1
+✔ CLI updated to cli-3.5.0
 ```
 
 ---
@@ -143,11 +143,11 @@ $ devtrail update-framework
 
 ```bash
 $ devtrail update-cli
-✔ CLI updated to cli-3.4.1
+✔ CLI updated to cli-3.5.0
 
 $ devtrail update-cli --method=cargo
 Compiling from source, this may take a few minutes...
-✔ CLI updated to cli-3.4.1
+✔ CLI updated to cli-3.5.0
 ```
 
 ---
@@ -210,7 +210,7 @@ $ devtrail status
   ┌───────────┬──────────────────────────┐
   │ Path      │ /home/user/my-project    │
   │ Framework │ fw-4.3.0                 │
-  │ CLI       │ cli-3.4.1                │
+  │ CLI       │ cli-3.5.0                │
   │ Language  │ en                       │
   └───────────┴──────────────────────────┘
 
@@ -634,7 +634,14 @@ $ devtrail audit --output markdown
 
 | 标志 | 默认值 | 描述 |
 |------|--------|------|
-| `--lang <代码>` | `.devtrail/config.yml` 中的 `language`，否则 `en` | 框架治理文档的显示语言（`en`、`es`、`zh-CN`）。缺少翻译时静默回退到英文。 |
+| `--lang <代码>` | 从项目解析（见下方） | TUI 界面与框架治理文档的显示语言（`en`、`es`、`zh-CN`）。缺少翻译时静默回退到英文。 |
+
+**语言解析顺序**（自 cli-3.5.0 起）：
+
+1. 提供 `--lang <代码>` 标志时优先
+2. `.devtrail/config.yml` 文件存在时使用其中的 `language` 字段（即便是显式的 `language: en` 也视为用户的明确选择）
+3. 环境变量 `$LC_ALL` / `$LANG`，映射到受支持的语言（如 `zh_CN.UTF-8` → `zh-CN`，`es_MX.UTF-8` → `es`）。繁体中文（`zh_TW` / `zh_HK`）及其他不受支持的 locale 会跳到下一项
+4. `en`
 
 **功能特性：**
 
@@ -655,6 +662,7 @@ $ devtrail audit --output markdown
 | `Tab` | 切换面板：导航 → 元数据 → 文档 |
 | `f` | 切换全屏文档 |
 | `/` | 搜索 |
+| `L` | 切换显示语言（`en → es → zh-CN`） |
 | `Esc` | 返回 / 折叠 / 清除搜索 |
 | `?` | 帮助弹窗，显示所有快捷键 |
 | `q` | 退出 |
@@ -680,7 +688,7 @@ $ devtrail explore --lang es             # 会话内切换到西班牙语
 ```bash
 $ devtrail about
 DevTrail CLI
-  CLI version:       cli-3.4.1
+  CLI version:       cli-3.5.0
   Framework version: fw-4.3.0
   Author:            Strange Days Tech, S.A.S.
   License:           MIT
