@@ -6,8 +6,20 @@ use ratatui::widgets::{Block, Borders, Paragraph, Widget, Wrap};
 
 use crate::tui::app::{ActivePanel, App, MetaSelection};
 use crate::tui::document::{ConfidenceLevel, DocStatus, RiskLevel};
+use crate::tui::i18n_strings::t;
 use crate::tui::theme;
-use crate::utils::truncate_visual;
+use crate::utils::{pad_right_visual, truncate_visual};
+
+/// Visual columns reserved for the field label + colon. Sized to fit the
+/// widest English label ("Confidence:" = 11 cols) plus a small gutter.
+/// Spanish ("Confianza:") and zh-CN labels (≤ 6 cols) all fit comfortably.
+const LABEL_WIDTH: usize = 13;
+
+/// Render a metadata field label padded to LABEL_WIDTH visual columns so
+/// values stay aligned across all locales.
+fn label_block(label: &str, style: ratatui::style::Style) -> ratatui::text::Span<'static> {
+    ratatui::text::Span::styled(format!(" {}", pad_right_visual(label, LABEL_WIDTH)), style)
+}
 
 pub struct MetadataPanel<'a> {
     app: &'a App,
@@ -22,6 +34,7 @@ impl<'a> MetadataPanel<'a> {
 impl Widget for MetadataPanel<'_> {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let is_active = self.app.active_panel == ActivePanel::Metadata;
+        let lang = self.app.language.as_str();
         let border_style = if is_active {
             Style::default().fg(theme::BORDER_ACTIVE)
         } else {
@@ -29,7 +42,7 @@ impl Widget for MetadataPanel<'_> {
         };
 
         let block = Block::default()
-            .title(" Metadata ")
+            .title(format!(" {} ", t("Metadata", lang)))
             .title_style(if is_active {
                 Style::default().fg(theme::ACCENT).add_modifier(Modifier::BOLD)
             } else {
@@ -47,7 +60,7 @@ impl Widget for MetadataPanel<'_> {
             Some(d) => d,
             None => {
                 let line = Line::from(Span::styled(
-                    " No document selected",
+                    format!(" {}", t("No document selected", lang)),
                     Style::default().fg(theme::TEXT_DIM),
                 ));
                 Paragraph::new(vec![line]).render(inner, buf);
@@ -60,11 +73,14 @@ impl Widget for MetadataPanel<'_> {
             None => {
                 let lines = vec![
                     Line::from(vec![
-                        Span::styled(" File:  ", Style::default().fg(theme::TEXT_DIM)),
+                        Span::styled(
+                            format!(" {}  ", t("File:", lang)),
+                            Style::default().fg(theme::TEXT_DIM),
+                        ),
                         Span::styled(doc.filename.clone(), Style::default().fg(theme::TEXT)),
                     ]),
                     Line::from(Span::styled(
-                        " No frontmatter",
+                        format!(" {}", t("No frontmatter", lang)),
                         Style::default().fg(theme::TEXT_DIM),
                     )),
                 ];
@@ -83,7 +99,7 @@ impl Widget for MetadataPanel<'_> {
         if let Some(ref status) = fm.status {
             let (indicator, color) = status_style(status);
             lines.push(Line::from(vec![
-                Span::styled(" Status:      ", l),
+                label_block(t("Status:", lang), l),
                 Span::styled(
                     format!("{indicator} {status}"),
                     Style::default().fg(color).add_modifier(Modifier::BOLD),
@@ -94,7 +110,7 @@ impl Widget for MetadataPanel<'_> {
         // Created
         if let Some(ref created) = fm.created {
             lines.push(Line::from(vec![
-                Span::styled(" Created:     ", l),
+                label_block(t("Created:", lang), l),
                 Span::styled(created.clone(), v),
             ]));
         }
@@ -102,7 +118,7 @@ impl Widget for MetadataPanel<'_> {
         // Agent
         if let Some(ref agent) = fm.agent {
             lines.push(Line::from(vec![
-                Span::styled(" Agent:       ", l),
+                label_block(t("Agent:", lang), l),
                 Span::styled(agent.clone(), v),
             ]));
         }
@@ -111,7 +127,7 @@ impl Widget for MetadataPanel<'_> {
         if let Some(ref confidence) = fm.confidence {
             let (filled, total, color, label) = confidence_bar(confidence);
             lines.push(Line::from(vec![
-                Span::styled(" Confidence:  ", l),
+                label_block(t("Confidence:", lang), l),
                 Span::styled(
                     format!("{}{}", "█".repeat(filled), "░".repeat(total - filled)),
                     Style::default().fg(color),
@@ -124,7 +140,7 @@ impl Widget for MetadataPanel<'_> {
         if let Some(ref risk) = fm.risk_level {
             let (filled, total, color, label) = risk_bar(risk);
             lines.push(Line::from(vec![
-                Span::styled(" Risk:        ", l),
+                label_block(t("Risk:", lang), l),
                 Span::styled(
                     format!("{}{}", "█".repeat(filled), "░".repeat(total - filled)),
                     Style::default().fg(color),
@@ -136,9 +152,9 @@ impl Widget for MetadataPanel<'_> {
         // Review required
         if let Some(true) = fm.review_required {
             lines.push(Line::from(vec![
-                Span::styled(" Review:      ", l),
+                label_block(t("Review:", lang), l),
                 Span::styled(
-                    "⚠ REQUIRED",
+                    t("⚠ REQUIRED", lang).to_string(),
                     Style::default()
                         .fg(theme::YELLOW)
                         .add_modifier(Modifier::BOLD),
@@ -149,12 +165,12 @@ impl Widget for MetadataPanel<'_> {
         // Tags
         if !fm.tags.is_empty() {
             let tag_hint = match self.app.meta_selection {
-                Some(MetaSelection::Tag(_)) => " (Enter: search)",
+                Some(MetaSelection::Tag(_)) => t(" (Enter: search)", lang),
                 _ => "",
             };
             lines.push(Line::from(vec![
-                Span::styled(" Tags:", l),
-                Span::styled(tag_hint, Style::default().fg(theme::TEXT_DIM)),
+                Span::styled(format!(" {}", t("Tags:", lang)), l),
+                Span::styled(tag_hint.to_string(), Style::default().fg(theme::TEXT_DIM)),
             ]));
             let tag_style = Style::default()
                 .fg(theme::TEXT_DIM)
@@ -183,12 +199,12 @@ impl Widget for MetadataPanel<'_> {
             )));
 
             let hint = match self.app.meta_selection {
-                Some(MetaSelection::Related(_)) => " (Enter: follow)",
+                Some(MetaSelection::Related(_)) => t(" (Enter: follow)", lang),
                 _ => "",
             };
             lines.push(Line::from(vec![
-                Span::styled(" Related:", l),
-                Span::styled(hint, Style::default().fg(theme::TEXT_DIM)),
+                Span::styled(format!(" {}", t("Related:", lang)), l),
+                Span::styled(hint.to_string(), Style::default().fg(theme::TEXT_DIM)),
             ]));
 
             let max_link_width = inner.width.saturating_sub(4) as usize;
