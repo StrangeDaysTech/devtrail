@@ -33,7 +33,7 @@ language: en  # Options: en, es (default: en)
 
 ---
 
-## Document Types (12)
+## Document Types (16)
 
 ### Core Types (8)
 
@@ -56,6 +56,15 @@ language: en  # Options: en, es (default: en)
 | `MCARD` | Model/System Card | `09-ai-models/` | Draft → approval (always) |
 | `SBOM` | Software Bill of Materials | `07-ai-audit/` | Create freely |
 | `DPIA` | Data Protection Impact Assessment | `07-ai-audit/ethical-reviews/` | Draft → approval (always) |
+
+### China Regulatory Types (4) — opt-in via `regional_scope: china`
+
+| Type | Name | Folder | Agent Autonomy |
+|------|------|--------|---------------|
+| `PIPIA` | Personal Information Protection Impact Assessment (PIPL Art. 55-56) | `07-ai-audit/ethical-reviews/` | Draft → approval (always) |
+| `CACFILE` | CAC Algorithm Filing | `07-ai-audit/regulatory-filings/` | Draft → approval (always) |
+| `TC260RA` | TC260 v2.0 Risk Assessment | `07-ai-audit/risk-assessments/` | Draft → approval (always) |
+| `AILABEL` | GB 45438 Content Labeling Plan | `09-ai-models/labeling/` | Draft → approval (always) |
 
 ---
 
@@ -115,7 +124,7 @@ Mark `review_required: true` when:
 
 ```
 .devtrail/
-├── 00-governance/               ← Policies, AI-GOVERNANCE-POLICY.md
+├── 00-governance/               ← Policies, AI-GOVERNANCE-POLICY.md, CHINA-REGULATORY-FRAMEWORK.md*
 ├── 01-requirements/             ← REQ
 ├── 02-design/decisions/         ← ADR
 ├── 03-implementation/           ← Guides
@@ -125,10 +134,15 @@ Mark `review_required: true` when:
 ├── 07-ai-audit/
 │   ├── agent-logs/              ← AILOG
 │   ├── decisions/               ← AIDEC
-│   └── ethical-reviews/         ← ETH, DPIA
+│   ├── ethical-reviews/         ← ETH, DPIA, PIPIA*
+│   ├── regulatory-filings/      ← CACFILE*
+│   └── risk-assessments/        ← TC260RA*
 ├── 08-security/                 ← SEC
 ├── 09-ai-models/                ← MCARD
+│   └── labeling/                ← AILABEL*
 └── templates/                   ← Templates
+
+* Only created when regional_scope: china is enabled.
 ```
 
 ---
@@ -178,6 +192,17 @@ Mark `review_required: true` when:
 | OpenTelemetry | Optional — see OBSERVABILITY-GUIDE |
 | C4 Model | ADR diagrams — see C4-DIAGRAM-GUIDE |
 
+### China — opt-in via `regional_scope: china`
+
+| Standard | Key Documents |
+|----------|--------------|
+| TC260 AI Safety Governance Framework v2.0 | TC260RA — see TC260-IMPLEMENTATION-GUIDE |
+| PIPL / PIPIA (Art. 55-56) | PIPIA — see PIPL-PIPIA-GUIDE |
+| GB 45438-2025 (AI content labeling, mandatory) | AILABEL — see GB-45438-LABELING-GUIDE |
+| CAC Algorithm Filing | CACFILE — see CAC-FILING-GUIDE |
+| GB/T 45652-2025 (training-data security) | SBOM, MCARD |
+| CSL 2026 (incident reporting amendments) | INC (CSL fields) |
+
 ---
 
 ## Skills (Claude Code)
@@ -188,4 +213,4 @@ Mark `review_required: true` when:
 
 ---
 
-*DevTrail v4.2.0 | [Strange Days Tech](https://strangedays.tech)*
+*DevTrail v4.3.0 | [Strange Days Tech](https://strangedays.tech)*

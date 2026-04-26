@@ -246,7 +246,15 @@ See also [ADR-2025-01-20-001] for architectural context.
 | ISO/IEC 23894:2023 | 2023 | AI risk management — AI-RISK-CATALOG |
 | GDPR | 2016/679 | Data protection — ETH (Data Privacy), DPIA |
 | OpenTelemetry | Current | Observability — OBSERVABILITY-GUIDE, optional |
+| TC260 AI Safety Governance Framework v2.0 *(China)* | Sept 2025 | AI risk grading — TEMPLATE-TC260RA.md (opt-in) |
+| PIPL — Personal Information Protection Law *(China)* | 2021 | Data protection / PIPIA — TEMPLATE-PIPIA.md (opt-in) |
+| GB 45438-2025 *(China, mandatory)* | Sept 2025 | AI-generated content labeling — TEMPLATE-AILABEL.md (opt-in) |
+| CAC Algorithm Filing *(China)* | 2022+ | Algorithm registration — TEMPLATE-CACFILE.md (opt-in) |
+| GB/T 45652-2025 *(China)* | Nov 2025 | Training-data security — TEMPLATE-SBOM.md, TEMPLATE-MCARD.md (opt-in) |
+| CSL 2026 Cybersecurity Law *(China)* | Jan 2026 | Incident reporting — TEMPLATE-INC.md (opt-in) |
+
+> *Opt-in standards* are evaluated only when `regional_scope: china` is enabled in `.devtrail/config.yml`. See `CHINA-REGULATORY-FRAMEWORK.md` for the full mapping.
 
 ---
 
-*DevTrail v4.2.0 | [Strange Days Tech](https://strangedays.tech)*
+*DevTrail v4.3.0 | [Strange Days Tech](https://strangedays.tech)*

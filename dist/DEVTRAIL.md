@@ -14,7 +14,16 @@ These rules operationalize **ISO/IEC 42001:2023** (AI Management System) — Dev
 - **NIST AI RMF 1.0 + 600-1** — risk management functions and generative AI risk profiles
 - **GDPR** — data protection impact assessments and privacy safeguards
 
-> See `AI-GOVERNANCE-POLICY.md` for the full ISO 42001 Annex A control mapping.
+**Optional**: when `.devtrail/config.yml` declares `regional_scope: china`, the framework additionally produces evidence for:
+
+- **TC260 AI Safety Governance Framework v2.0** — risk grading (TC260RA)
+- **PIPL** (Personal Information Protection Law) — PIPIA, retention ≥ 3 years
+- **GB 45438-2025** *(mandatory)* — AI-generated content labeling (AILABEL)
+- **CAC Algorithm Filing** — algorithm registration (CACFILE)
+- **GB/T 45652-2025** — pre-training & fine-tuning data security
+- **CSL 2026** — cybersecurity incident reporting (1h / 4h+72h+30d windows)
+
+> See `AI-GOVERNANCE-POLICY.md` for the full ISO 42001 Annex A control mapping and `CHINA-REGULATORY-FRAMEWORK.md` for the China coverage matrix.
 
 ---
 
@@ -203,6 +212,10 @@ related:
 | **TES** | Propose | Validation |
 | **INC** | Contribute analysis | Conclusions |
 | **TDE** | Identify | Prioritize |
+| **PIPIA** *(china)* | Create draft | Approval (always) |
+| **CACFILE** *(china)* | Create draft | Approval (always — counsel + compliance officer before submission) |
+| **TC260RA** *(china)* | Create draft | Approval (always) |
+| **AILABEL** *(china)* | Create draft | Approval (always — before deployment) |
 
 ---
 
@@ -246,16 +259,24 @@ related:
 │   │   └── [AILOG-*.md]
 │   ├── decisions/              # Agent decisions (AIDEC)
 │   │   └── [AIDEC-*.md]
-│   └── ethical-reviews/        # Ethical reviews (ETH, DPIA)
-│       └── [ETH-*.md]
+│   ├── ethical-reviews/        # Ethical reviews (ETH, DPIA, PIPIA*)
+│   │   └── [ETH-*.md]
+│   ├── regulatory-filings/     # CAC algorithm filings (CACFILE*)
+│   │   └── [CACFILE-*.md]
+│   └── risk-assessments/       # TC260 risk assessments (TC260RA*)
+│       └── [TC260RA-*.md]
 │
 ├── 08-security/                ← SECURITY ASSESSMENTS (SEC)
 │   └── [SEC-*.md]
 │
 ├── 09-ai-models/               ← AI MODEL CARDS (MCARD)
-│   └── [MCARD-*.md]
+│   ├── [MCARD-*.md]
+│   └── labeling/               # GB 45438 content labeling plans (AILABEL*)
+│       └── [AILABEL-*.md]
 │
-├── templates/                  ← TEMPLATES (12 types)
+├── templates/                  ← TEMPLATES (12 base + 4 China*)
+
+* Only created when regional_scope: china is enabled in .devtrail/config.yml.
 │
 └── QUICK-REFERENCE.md          ← 1-page quick reference
 ```

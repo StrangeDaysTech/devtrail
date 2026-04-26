@@ -12,6 +12,7 @@
 
 [Getting Started](#getting-started) •
 [Features](#features) •
+[China Compliance 中国合规](#china-regulatory-compliance--中国合规) •
 [Documentation](#documentation) •
 [Contributing](#contributing)
 
@@ -43,7 +44,7 @@ Teams that adopt DevTrail produce evidence compatible with **ISO/IEC 42001 certi
 
 ### 📋 Structured Documentation
 
-Twelve document types covering the full development lifecycle:
+Sixteen document types covering the full development lifecycle (twelve core + four China-specific opt-in):
 
 | Type | Purpose | Example |
 |------|---------|---------|
@@ -59,6 +60,12 @@ Twelve document types covering the full development lifecycle:
 | **MCARD** | Model/System Cards | AI model documentation |
 | **SBOM** | Software Bill of Materials | AI component inventory |
 | **DPIA** | Data Protection Impact Assessment | Privacy impact analysis |
+| **PIPIA** ⚪ | Personal Information Protection Impact Assessment (China — PIPL Art. 55-56) | Sensitive data, cross-border transfer |
+| **CACFILE** ⚪ | CAC Algorithm Filing (China) | Algorithm registration, dual filing |
+| **TC260RA** ⚪ | TC260 Risk Assessment (China) | Five-level risk grading per AI Safety Framework v2.0 |
+| **AILABEL** ⚪ | GB 45438 Content Labeling Plan (China) | Explicit + implicit labeling for generative AI |
+
+⚪ Available only when `regional_scope: china` is enabled in `.devtrail/config.yml` — see [China Regulatory Compliance](#china-regulatory-compliance--中国合规) below.
 
 ### 📐 Standards Alignment
 
@@ -72,6 +79,17 @@ Twelve document types covering the full development lifecycle:
 | **ISO/IEC/IEEE 29119-3:2021** | Test documentation in TES |
 | **GDPR** | Data protection in ETH/DPIA |
 | **OpenTelemetry** | Observability (optional) |
+
+#### China Regulatory Coverage — opt-in via `regional_scope: china`
+
+| Standard | DevTrail Integration |
+|----------|---------------------|
+| **TC260 AI Safety Governance Framework v2.0** | Five-level risk grading (TC260RA) |
+| **PIPL — Personal Information Protection Law** | Personal Information Protection Impact Assessment (PIPIA), retention ≥ 3 years |
+| **GB 45438-2025** *(mandatory)* | AI-generated content labeling — explicit + implicit (AILABEL) |
+| **CAC Algorithm Filing** | Algorithm registration, dual filing process (CACFILE) |
+| **GB/T 45652-2025** | Pre-training & fine-tuning data security (SBOM/MCARD) |
+| **CSL 2026** | Cybersecurity incident reporting (1h / 4h+72h+30d windows) on INC |
 
 ### 🤖 AI Agent Support
 
@@ -101,12 +119,51 @@ Built-in safeguards ensure humans stay in control:
 
 Built-in CLI tools for governance:
 
-- **`devtrail validate`** — 13 validation rules for document correctness
-- **`devtrail compliance`** — Regulatory compliance scoring (EU AI Act, ISO 42001, NIST AI RMF)
+- **`devtrail validate`** — 25+ validation rules for document correctness (12 China-specific are scope-aware)
+- **`devtrail compliance`** — Regulatory compliance scoring (EU AI Act, ISO 42001, NIST AI RMF; six Chinese frameworks opt-in via `--region china`)
 - **`devtrail metrics`** — Governance KPIs, review rates, risk distribution, trends
 - **`devtrail analyze`** — Code complexity analysis (cognitive + cyclomatic) powered by [arborist-metrics](https://github.com/StrangeDaysTech/arborist), our open-source Rust library for multi-language code metrics
 - **`devtrail audit`** — Audit trail reports with timeline, traceability maps, and HTML export
 - **Pre-commit hooks** + **GitHub Actions** for CI/CD validation
+
+---
+
+## China Regulatory Compliance — 中国合规
+
+DevTrail covers six Chinese AI / data regulations as an **opt-in** regional scope: **TC260 AI Safety Governance Framework v2.0**, **PIPL** (Personal Information Protection Law), **GB 45438-2025** (mandatory AI content labeling), **CAC Algorithm Filing**, **GB/T 45652-2025**, and the **CSL 2026** incident-reporting amendments. Activate by adding `regional_scope: china` to `.devtrail/config.yml`; projects without it are unaffected.
+
+When enabled, four China-specific document types (PIPIA, CACFILE, TC260RA, AILABEL) become available, twelve validation rules begin to enforce the new cross-references, and `devtrail compliance --region china` produces a per-framework score. Detailed guides live under `.devtrail/00-governance/` (`CHINA-REGULATORY-FRAMEWORK.md`, `TC260-IMPLEMENTATION-GUIDE.md`, `PIPL-PIPIA-GUIDE.md`, `CAC-FILING-GUIDE.md`, `GB-45438-LABELING-GUIDE.md`).
+
+### 中国法规支持
+
+DevTrail 现在以 **opt-in**(自愿启用)的方式覆盖六项中国 AI / 数据法规:**TC260《人工智能安全治理框架 v2.0》**(五级风险分级)、**《个人信息保护法》(PIPL)** 及其配套的 **PIPIA**(个人信息保护影响评估,留存 ≥ 3 年)、**强制性国家标准 GB 45438-2025**《网络安全技术 人工智能生成合成内容标识方法》(显式 + 隐式标识)、**CAC 算法备案**(包括省级 + 国家级双重备案)、**GB/T 45652-2025** 预训练与微调数据安全,以及自 2026-01-01 生效的 **《网络安全法》修订** 与《国家网络安全事件报告管理办法》(1 小时 / 4 小时 + 72 小时评估 + 30 天事后审查的报告窗口)。
+
+#### 启用方式
+
+在 `.devtrail/config.yml` 中添加:
+
+```yaml
+regional_scope:
+  - global   # NIST + ISO 42001(始终可用)
+  - eu       # EU AI Act + GDPR
+  - china    # 启用上述六项中国法规
+```
+
+#### 启用后获得
+
+- **4 个中国专属文档类型**:`PIPIA`、`CACFILE`、`TC260RA`、`AILABEL`(均经 `devtrail new` 生成,模板已翻译为中文,位于 `.devtrail/templates/i18n/zh-CN/`)。
+- **6 个合规检查器**:通过 `devtrail compliance --region china` 一次性运行,或单独运行 `--standard china-tc260 | china-pipl | china-gb45438 | china-cac | china-gb45652 | china-csl`。
+- **12 条新的验证规则**(`CROSS-004…011`、`TYPE-003…006`):自动校验跨文档引用一致性,例如:`cac_filing_required: true` 必须关联 CACFILE;`csl_severity_level: particularly_serious` 必须配合 `csl_report_deadline_hours: 1`;PIPIA 的 `pipl_retention_until` 必须至少为 `created` + 3 年。
+- **5 份中文治理指南**,位于 `.devtrail/00-governance/i18n/zh-CN/`:`CHINA-REGULATORY-FRAMEWORK.md`、`TC260-IMPLEMENTATION-GUIDE.md`、`PIPL-PIPIA-GUIDE.md`、`CAC-FILING-GUIDE.md`、`GB-45438-LABELING-GUIDE.md`。
+
+#### 适用人群
+
+- 在中国大陆运营 AI 服务的团队,需办理 CAC 算法备案或对外提供生成式 AI。
+- 处理中国大陆个人信息(尤其是敏感个人信息)、需进行 PIPIA 的处理者。
+- 涉及跨境数据传输,须依据 PIPL 第 38-40 条选择安全评估、认证或标准合同机制的组织。
+- 采用 ISO/IEC 42001 全球治理框架并希望在中国境内补充本地合规证据的企业。
+
+不在 `regional_scope` 中包含 `china` 的项目完全不受影响 — 这是完全向后兼容的扩展。
 
 ---
 
@@ -149,8 +206,8 @@ DevTrail uses independent version tags for each component:
 
 | Component | Tag prefix | Example | Includes |
 |-----------|-----------|---------|----------|
-| Framework | `fw-` | `fw-4.2.0` | Templates (12 types), governance, directives |
-| CLI | `cli-` | `cli-3.2.5` | The `devtrail` binary |
+| Framework | `fw-` | `fw-4.3.0` | Templates (12 types), governance, directives |
+| CLI | `cli-` | `cli-3.3.0` | The `devtrail` binary |
 
 Check installed versions with `devtrail status` or `devtrail about`.
 
@@ -180,7 +237,7 @@ See [CLI Reference](https://github.com/StrangeDaysTech/devtrail/blob/main/docs/a
 ```bash
 # Download the latest framework release ZIP from GitHub
 # Go to https://github.com/StrangeDaysTech/devtrail/releases
-# and download the latest fw-* release (e.g., fw-4.2.0)
+# and download the latest fw-* release (e.g., fw-4.3.0)
 
 # Extract and copy to your project
 unzip devtrail-fw-*.zip -d your-project/
@@ -224,7 +281,7 @@ Once adopted, DevTrail creates a `.devtrail/` directory in your project for deve
 
 ```
 .devtrail/
-├── 00-governance/           # Policies and rules
+├── 00-governance/           # Policies and rules (China guides ⚪)
 ├── 01-requirements/         # REQ documents
 ├── 02-design/decisions/     # ADR documents
 ├── 03-implementation/       # Implementation guides (incl. Git strategy)
@@ -234,10 +291,15 @@ Once adopted, DevTrail creates a `.devtrail/` directory in your project for deve
 ├── 07-ai-audit/
 │   ├── agent-logs/          # AILOG documents
 │   ├── decisions/           # AIDEC documents
-│   └── ethical-reviews/     # ETH, DPIA documents
+│   ├── ethical-reviews/     # ETH, DPIA, PIPIA ⚪
+│   ├── regulatory-filings/  # CACFILE ⚪
+│   └── risk-assessments/    # TC260RA ⚪
 ├── 08-security/             # SEC documents
 ├── 09-ai-models/            # MCARD documents
+│   └── labeling/            # AILABEL ⚪
 └── templates/               # Document templates
+
+⚪ Created only when regional_scope: china is enabled in .devtrail/config.yml
 ```
 
 ### Naming Convention

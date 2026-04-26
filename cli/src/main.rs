@@ -80,15 +80,22 @@ enum Commands {
         #[arg(long)]
         staged: bool,
     },
-    /// Check regulatory compliance (EU AI Act, ISO 42001, NIST AI RMF)
+    /// Check regulatory compliance (EU, NIST, ISO; China standards opt-in via regional_scope)
     Compliance {
         /// Target directory (default: current directory)
         #[arg(default_value = ".")]
         path: String,
         /// Check a specific standard
-        #[arg(long, value_parser = ["eu-ai-act", "iso-42001", "nist-ai-rmf"])]
+        #[arg(long, value_parser = [
+            "eu-ai-act", "iso-42001", "nist-ai-rmf",
+            "china-tc260", "china-pipl", "china-gb45438",
+            "china-cac", "china-gb45652", "china-csl",
+        ])]
         standard: Option<String>,
-        /// Check all standards
+        /// Run all standards in a region: global, eu, china, or all
+        #[arg(long, value_parser = ["global", "eu", "china", "all"])]
+        region: Option<String>,
+        /// Check all standards (equivalent to --region all, regardless of regional_scope)
         #[arg(long)]
         all: bool,
         /// Output format
@@ -187,9 +194,10 @@ fn main() {
         Commands::Compliance {
             path,
             standard,
+            region,
             all,
             output,
-        } => commands::compliance::run(&path, standard.as_deref(), all, &output),
+        } => commands::compliance::run(&path, standard.as_deref(), region.as_deref(), all, &output),
         Commands::Metrics {
             path,
             period,

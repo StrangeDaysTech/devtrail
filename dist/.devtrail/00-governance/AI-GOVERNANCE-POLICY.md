@@ -37,9 +37,15 @@
 | GDPR | [Yes/No] | [Status] | ETH (Data Privacy), DPIA |
 | NIST AI RMF | [Yes/No] | [Status] | AI-RISK-CATALOG |
 | ISO/IEC 42001 | [Yes/No] | [Status] | This document |
+| TC260 AI Safety Governance Framework v2.0 *(China)* | [Yes/No] | [Status] | TC260RA |
+| PIPL / PIPIA *(China)* | [Yes/No] | [Status] | PIPIA, ETH (Data Privacy) |
+| GB 45438-2025 — AI Content Labeling *(China, mandatory)* | [Yes/No] | [Status] | AILABEL, MCARD |
+| CAC Algorithm Filing *(China)* | [Yes/No] | [Status] | CACFILE |
+| GB/T 45652-2025 — Training Data Security *(China)* | [Yes/No] | [Status] | SBOM, MCARD |
+| CSL 2026 Incident Reporting *(China)* | [Yes/No] | [Status] | INC |
 | [Other] | [Yes/No] | [Status] | [Documents] |
 
-> **DevTrail mapping**: REQ documents capture regulatory requirements. ETH documents assess compliance gaps.
+> **DevTrail mapping**: REQ documents capture regulatory requirements. ETH documents assess compliance gaps. China rows are exposed only when `regional_scope: china` is enabled in `.devtrail/config.yml` — see [CHINA-REGULATORY-FRAMEWORK.md](CHINA-REGULATORY-FRAMEWORK.md).
 
 ---
 

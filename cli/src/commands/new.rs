@@ -16,21 +16,31 @@ pub fn run(path: &str, doc_type_arg: Option<&str>, title_arg: Option<&str>) -> R
 
     let config = DevTrailConfig::load(&target).unwrap_or_default();
     let lang = &config.language;
+    let china = config.has_region("china");
 
     // Select document type
     let doc_type = match doc_type_arg {
-        Some(t) => DocType::from_str_loose(t).ok_or_else(|| {
-            anyhow::anyhow!(
-                "Unknown document type '{}'. Valid types: {}",
-                t,
-                DocType::ALL
-                    .iter()
-                    .map(|d| d.prefix().to_lowercase())
-                    .collect::<Vec<_>>()
-                    .join(", ")
-            )
-        })?,
-        None => select_type_interactive()?,
+        Some(t) => {
+            let dt = DocType::from_str_loose(t).ok_or_else(|| {
+                anyhow::anyhow!(
+                    "Unknown document type '{}'. Valid types: {}",
+                    t,
+                    available_doc_types(china)
+                        .iter()
+                        .map(|d| d.prefix().to_lowercase())
+                        .collect::<Vec<_>>()
+                        .join(", ")
+                )
+            })?;
+            if dt.is_china_only() && !china {
+                bail!(
+                    "Document type '{}' requires `regional_scope: china` in .devtrail/config.yml",
+                    dt.prefix().to_lowercase()
+                );
+            }
+            dt
+        }
+        None => select_type_interactive(china)?,
     };
 
     // Get title
@@ -88,7 +98,11 @@ pub fn run(path: &str, doc_type_arg: Option<&str>, title_arg: Option<&str>) -> R
         .replace("id: SEC-YYYY-MM-DD-NNN", &format!("id: {}", id))
         .replace("id: MCARD-YYYY-MM-DD-NNN", &format!("id: {}", id))
         .replace("id: SBOM-YYYY-MM-DD-NNN", &format!("id: {}", id))
-        .replace("id: DPIA-YYYY-MM-DD-NNN", &format!("id: {}", id));
+        .replace("id: DPIA-YYYY-MM-DD-NNN", &format!("id: {}", id))
+        .replace("id: PIPIA-YYYY-MM-DD-NNN", &format!("id: {}", id))
+        .replace("id: CACFILE-YYYY-MM-DD-NNN", &format!("id: {}", id))
+        .replace("id: TC260RA-YYYY-MM-DD-NNN", &format!("id: {}", id))
+        .replace("id: AILABEL-YYYY-MM-DD-NNN", &format!("id: {}", id));
 
     // Write file
     let filename = format!("{}-{}-{}-{}.md", doc_type.prefix(), today, seq, slug);
@@ -115,10 +129,20 @@ pub fn run(path: &str, doc_type_arg: Option<&str>, title_arg: Option<&str>) -> R
     Ok(())
 }
 
-fn select_type_interactive() -> Result<DocType> {
-    let items: Vec<String> = DocType::ALL
+/// DocType variants exposed to the user, filtered by `regional_scope`.
+fn available_doc_types(china: bool) -> Vec<DocType> {
+    DocType::ALL
         .iter()
-        .map(|t| format!("{:<6} — {}", t.prefix().to_lowercase(), t.display_name()))
+        .copied()
+        .filter(|t| !t.is_china_only() || china)
+        .collect()
+}
+
+fn select_type_interactive(china: bool) -> Result<DocType> {
+    let types = available_doc_types(china);
+    let items: Vec<String> = types
+        .iter()
+        .map(|t| format!("{:<8} — {}", t.prefix().to_lowercase(), t.display_name()))
         .collect();
 
     let selection = Select::with_theme(&ColorfulTheme::default())
@@ -127,7 +151,7 @@ fn select_type_interactive() -> Result<DocType> {
         .default(0)
         .interact()?;
 
-    Ok(DocType::ALL[selection])
+    Ok(types[selection])
 }
 
 fn slugify(title: &str) -> String {

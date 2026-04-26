@@ -1,5 +1,6 @@
 use std::path::{Path, PathBuf};
 
+use crate::config::DevTrailConfig;
 use crate::document::{self, DevTrailDocument, DocType};
 
 /// Severity of a validation issue
@@ -63,16 +64,25 @@ const SOFT_SENSITIVE_PATTERNS: &[&str] = &[
     "token:", "Bearer ",
 ];
 
+/// True if the project's regional_scope (loaded from `.devtrail/config.yml` at the
+/// project root that contains the given `.devtrail/` directory) includes "china".
+fn china_in_scope(devtrail_dir: &Path) -> bool {
+    let project_root = devtrail_dir.parent().unwrap_or(devtrail_dir);
+    let config = DevTrailConfig::load(project_root).unwrap_or_default();
+    config.has_region("china")
+}
+
 /// Validate all documents found under a .devtrail/ directory
 pub fn validate_all(devtrail_dir: &Path) -> (ValidationResult, usize) {
     let paths = document::discover_documents(devtrail_dir);
     let doc_count = paths.len();
     let mut result = ValidationResult::default();
+    let china = china_in_scope(devtrail_dir);
 
     for path in &paths {
         match document::parse_document(path) {
             Ok(doc) => {
-                result.merge(validate_document(&doc, devtrail_dir));
+                result.merge(validate_document(&doc, devtrail_dir, china));
             }
             Err(e) => {
                 result.errors.push(ValidationIssue {
@@ -97,6 +107,7 @@ pub fn validate_all(devtrail_dir: &Path) -> (ValidationResult, usize) {
 pub fn validate_paths(paths: &[PathBuf], devtrail_dir: &Path) -> (ValidationResult, usize) {
     let mut result = ValidationResult::default();
     let mut doc_count = 0;
+    let china = china_in_scope(devtrail_dir);
 
     for path in paths {
         if !path.exists() {
@@ -109,7 +120,7 @@ pub fn validate_paths(paths: &[PathBuf], devtrail_dir: &Path) -> (ValidationResu
         match document::parse_document(path) {
             Ok(doc) => {
                 doc_count += 1;
-                result.merge(validate_document(&doc, devtrail_dir));
+                result.merge(validate_document(&doc, devtrail_dir, china));
             }
             Err(e) => {
                 doc_count += 1;
@@ -193,7 +204,11 @@ fn check_orphan_documents(result: &mut ValidationResult, paths: &[PathBuf], _dev
 }
 
 /// Validate a single parsed document
-fn validate_document(doc: &DevTrailDocument, devtrail_dir: &Path) -> ValidationResult {
+fn validate_document(
+    doc: &DevTrailDocument,
+    devtrail_dir: &Path,
+    china_in_scope: bool,
+) -> ValidationResult {
     let mut result = ValidationResult::default();
 
     check_naming(&mut result, doc);
@@ -206,6 +221,11 @@ fn validate_document(doc: &DevTrailDocument, devtrail_dir: &Path) -> ValidationR
     check_related_exist(&mut result, doc, devtrail_dir);
     check_sensitive_info(&mut result, doc);
     check_observability(&mut result, doc);
+
+    if china_in_scope {
+        check_china_cross_rules(&mut result, doc);
+        check_china_type_specific(&mut result, doc);
+    }
 
     result
 }
@@ -509,6 +529,278 @@ fn check_type_specific(result: &mut ValidationResult, doc: &DevTrailDocument) {
     }
 }
 
+/// Returns true when `related` includes any entry whose ID starts with `prefix`.
+fn related_has_prefix(doc: &DevTrailDocument, prefix: &str) -> bool {
+    doc.frontmatter
+        .related
+        .as_ref()
+        .is_some_and(|rels| rels.iter().any(|r| r.starts_with(prefix)))
+}
+
+/// CROSS-004…CROSS-011: cross-field validation rules for the China regulatory profile.
+/// Only invoked when `regional_scope` includes "china".
+fn check_china_cross_rules(result: &mut ValidationResult, doc: &DevTrailDocument) {
+    let fm = &doc.frontmatter;
+
+    // CROSS-004: tc260_risk_level high|very_high|extremely_severe ⇒ review_required: true
+    if let Some(level) = &fm.tc260_risk_level {
+        if matches!(
+            level.as_str(),
+            "high" | "very_high" | "extremely_severe"
+        ) && fm.review_required != Some(true)
+        {
+            result.add(ValidationIssue {
+                file: doc.path.clone(),
+                rule: "CROSS-004".to_string(),
+                message: format!(
+                    "tc260_risk_level is '{}' but review_required is not true",
+                    level
+                ),
+                severity: Severity::Error,
+                fix_hint: Some("Set review_required: true".to_string()),
+            });
+        }
+    }
+
+    // CROSS-005: pipl_sensitive_data: true ⇒ document is a PIPIA or links one via related
+    if fm.pipl_sensitive_data == Some(true)
+        && doc.doc_type != DocType::Pipia
+        && !related_has_prefix(doc, "PIPIA-")
+    {
+        result.add(ValidationIssue {
+            file: doc.path.clone(),
+            rule: "CROSS-005".to_string(),
+            message: "pipl_sensitive_data is true but no PIPIA is linked in 'related'".to_string(),
+            severity: Severity::Error,
+            fix_hint: Some("Create a PIPIA and add 'PIPIA-...' to related".to_string()),
+        });
+    }
+
+    // CROSS-006: cac_filing_status approved ⇒ cac_filing_number populated
+    if let Some(status) = &fm.cac_filing_status {
+        let approved =
+            matches!(status.as_str(), "provincial_approved" | "national_approved");
+        let has_number = fm
+            .cac_filing_number
+            .as_deref()
+            .is_some_and(|n| !n.is_empty());
+        if approved && !has_number {
+            result.add(ValidationIssue {
+                file: doc.path.clone(),
+                rule: "CROSS-006".to_string(),
+                message: format!(
+                    "cac_filing_status is '{}' but cac_filing_number is missing",
+                    status
+                ),
+                severity: Severity::Error,
+                fix_hint: Some(
+                    "Populate cac_filing_number with the filing reference issued by CAC"
+                        .to_string(),
+                ),
+            });
+        }
+    }
+
+    // CROSS-007: cac_filing_required: true ⇒ document is a CACFILE or links one via related
+    if fm.cac_filing_required == Some(true)
+        && doc.doc_type != DocType::Cacfile
+        && !related_has_prefix(doc, "CACFILE-")
+    {
+        result.add(ValidationIssue {
+            file: doc.path.clone(),
+            rule: "CROSS-007".to_string(),
+            message: "cac_filing_required is true but no CACFILE is linked in 'related'"
+                .to_string(),
+            severity: Severity::Error,
+            fix_hint: Some("Create a CACFILE and add 'CACFILE-...' to related".to_string()),
+        });
+    }
+
+    // CROSS-008: csl_severity_level: particularly_serious ⇒ csl_report_deadline_hours: 1
+    if fm.csl_severity_level.as_deref() == Some("particularly_serious")
+        && fm.csl_report_deadline_hours != Some(1)
+    {
+        result.add(ValidationIssue {
+            file: doc.path.clone(),
+            rule: "CROSS-008".to_string(),
+            message: "csl_severity_level 'particularly_serious' requires csl_report_deadline_hours: 1"
+                .to_string(),
+            severity: Severity::Error,
+            fix_hint: Some(
+                "CSL 2026: particularly serious incidents must be reported within 1 hour"
+                    .to_string(),
+            ),
+        });
+    }
+
+    // CROSS-009: csl_severity_level: relatively_major ⇒ csl_report_deadline_hours: 4
+    if fm.csl_severity_level.as_deref() == Some("relatively_major")
+        && fm.csl_report_deadline_hours != Some(4)
+    {
+        result.add(ValidationIssue {
+            file: doc.path.clone(),
+            rule: "CROSS-009".to_string(),
+            message: "csl_severity_level 'relatively_major' requires csl_report_deadline_hours: 4"
+                .to_string(),
+            severity: Severity::Error,
+            fix_hint: Some(
+                "CSL 2026: relatively major incidents must be reported within 4 hours"
+                    .to_string(),
+            ),
+        });
+    }
+
+    // CROSS-010: gb45438_applicable: true ⇒ document is an AILABEL or links one via related
+    if fm.gb45438_applicable == Some(true)
+        && doc.doc_type != DocType::Ailabel
+        && !related_has_prefix(doc, "AILABEL-")
+    {
+        result.add(ValidationIssue {
+            file: doc.path.clone(),
+            rule: "CROSS-010".to_string(),
+            message: "gb45438_applicable is true but no AILABEL is linked in 'related'"
+                .to_string(),
+            severity: Severity::Error,
+            fix_hint: Some(
+                "Create an AILABEL describing explicit + implicit labeling per GB 45438"
+                    .to_string(),
+            ),
+        });
+    }
+
+    // CROSS-011: pipl_cross_border_transfer: true ⇒ PIPIA documents the security review reference
+    if doc.doc_type == DocType::Pipia
+        && fm.pipl_cross_border_transfer == Some(true)
+        && !doc.body.to_lowercase().contains("security_assessment")
+        && !doc.body.to_lowercase().contains("security review")
+        && !doc.body.to_lowercase().contains("standard_contract")
+        && !doc.body.to_lowercase().contains("standard contract")
+        && !doc.body.to_lowercase().contains("certification")
+    {
+        result.add(ValidationIssue {
+            file: doc.path.clone(),
+            rule: "CROSS-011".to_string(),
+            message: "PIPIA with cross-border transfer should document the chosen mechanism (security assessment / certification / standard contract)".to_string(),
+            severity: Severity::Warning,
+            fix_hint: Some(
+                "Complete the 'Cross-Border Transfer Analysis' section of the PIPIA".to_string(),
+            ),
+        });
+    }
+}
+
+/// TYPE-003…TYPE-006: type-specific rules for China-only document types.
+/// Only invoked when `regional_scope` includes "china".
+fn check_china_type_specific(result: &mut ValidationResult, doc: &DevTrailDocument) {
+    let fm = &doc.frontmatter;
+
+    // TYPE-003: PIPIA must have pipl_retention_until ≥ created + 3 years
+    if doc.doc_type == DocType::Pipia {
+        let ok = match (fm.created.as_deref(), fm.pipl_retention_until.as_deref()) {
+            (Some(c), Some(u)) => retention_satisfies_three_years(c, u),
+            _ => false,
+        };
+        if !ok {
+            result.add(ValidationIssue {
+                file: doc.path.clone(),
+                rule: "TYPE-003".to_string(),
+                message: "PIPIA must declare pipl_retention_until at least 3 years after 'created' (PIPL Art. 56)".to_string(),
+                severity: Severity::Error,
+                fix_hint: Some(
+                    "Set pipl_retention_until: <created + 3 years or later> in YYYY-MM-DD format"
+                        .to_string(),
+                ),
+            });
+        }
+    }
+
+    // TYPE-004: CACFILE must have cac_filing_status set
+    if doc.doc_type == DocType::Cacfile && fm.cac_filing_status.is_none() {
+        result.add(ValidationIssue {
+            file: doc.path.clone(),
+            rule: "TYPE-004".to_string(),
+            message: "CACFILE documents must have a 'cac_filing_status' field".to_string(),
+            severity: Severity::Error,
+            fix_hint: Some(
+                "Add 'cac_filing_status: pending' (or the current state) to the frontmatter"
+                    .to_string(),
+            ),
+        });
+    }
+
+    // TYPE-005: TC260RA must have all three grading criteria populated
+    if doc.doc_type == DocType::Tc260ra {
+        let missing: Vec<&str> = [
+            ("tc260_application_scenario", fm.tc260_application_scenario.is_some()),
+            ("tc260_intelligence_level", fm.tc260_intelligence_level.is_some()),
+            ("tc260_application_scale", fm.tc260_application_scale.is_some()),
+        ]
+        .into_iter()
+        .filter_map(|(name, ok)| (!ok).then_some(name))
+        .collect();
+        if !missing.is_empty() {
+            result.add(ValidationIssue {
+                file: doc.path.clone(),
+                rule: "TYPE-005".to_string(),
+                message: format!(
+                    "TC260RA documents must populate all three grading criteria. Missing: {}",
+                    missing.join(", ")
+                ),
+                severity: Severity::Error,
+                fix_hint: Some(
+                    "Set tc260_application_scenario, tc260_intelligence_level, and tc260_application_scale"
+                        .to_string(),
+                ),
+            });
+        }
+    }
+
+    // TYPE-006: AILABEL must declare at least one content type
+    if doc.doc_type == DocType::Ailabel {
+        let count = fm
+            .gb45438_content_types
+            .as_ref()
+            .map(|v| v.len())
+            .unwrap_or(0);
+        if count == 0 {
+            result.add(ValidationIssue {
+                file: doc.path.clone(),
+                rule: "TYPE-006".to_string(),
+                message: "AILABEL documents must declare at least one entry in 'gb45438_content_types'".to_string(),
+                severity: Severity::Error,
+                fix_hint: Some(
+                    "Set gb45438_content_types to a subset of: text, image, audio, video, virtual_scene"
+                        .to_string(),
+                ),
+            });
+        }
+    }
+}
+
+/// Parse YYYY-MM-DD into (year, month, day). Returns None on malformed input.
+fn parse_iso_date(s: &str) -> Option<(i32, u32, u32)> {
+    if s.len() < 10 {
+        return None;
+    }
+    let y: i32 = s[..4].parse().ok()?;
+    let m: u32 = s[5..7].parse().ok()?;
+    let d: u32 = s[8..10].parse().ok()?;
+    Some((y, m, d))
+}
+
+/// Returns true when `until_date` (YYYY-MM-DD) is at least 3 years after `created` (YYYY-MM-DD).
+fn retention_satisfies_three_years(created: &str, until_date: &str) -> bool {
+    let (cy, cm, cd) = match parse_iso_date(created) {
+        Some(t) => t,
+        None => return false,
+    };
+    let (uy, um, ud) = match parse_iso_date(until_date) {
+        Some(t) => t,
+        None => return false,
+    };
+    (uy, um, ud) >= (cy + 3, cm, cd)
+}
+
 /// REF-001: Check that documents listed in related: exist
 /// Only validates references that look like DevTrail document IDs (e.g., AILOG-2025-01-27-001).
 /// Skips task IDs (T025), requirement IDs (FR-019, US2), risk IDs (RISK-001),
@@ -774,5 +1066,171 @@ mod tests {
         let mut result = ValidationResult::default();
         check_type_specific(&mut result, &doc);
         assert!(result.errors.iter().any(|e| e.rule == "TYPE-001"));
+    }
+
+    // ----- China regulatory rules -----
+
+    #[test]
+    fn test_cross_004_tc260_high_needs_review() {
+        let fm = Frontmatter {
+            id: Some("ETH-2026-04-25-001".into()),
+            tc260_risk_level: Some("very_high".into()),
+            review_required: Some(false),
+            ..Default::default()
+        };
+        let doc = make_doc("ETH-2026-04-25-001-test.md", DocType::Eth, fm, "");
+        let mut result = ValidationResult::default();
+        check_china_cross_rules(&mut result, &doc);
+        assert!(result.errors.iter().any(|e| e.rule == "CROSS-004"));
+    }
+
+    #[test]
+    fn test_cross_005_pipl_sensitive_needs_pipia_link() {
+        let fm = Frontmatter {
+            id: Some("MCARD-2026-04-25-001".into()),
+            pipl_sensitive_data: Some(true),
+            related: Some(vec!["ETH-2026-04-25-001".into()]),
+            ..Default::default()
+        };
+        let doc = make_doc("MCARD-2026-04-25-001-test.md", DocType::Mcard, fm, "");
+        let mut result = ValidationResult::default();
+        check_china_cross_rules(&mut result, &doc);
+        assert!(result.errors.iter().any(|e| e.rule == "CROSS-005"));
+    }
+
+    #[test]
+    fn test_cross_005_pipia_doc_itself_does_not_trigger() {
+        let fm = Frontmatter {
+            id: Some("PIPIA-2026-04-25-001".into()),
+            pipl_sensitive_data: Some(true),
+            ..Default::default()
+        };
+        let doc = make_doc("PIPIA-2026-04-25-001-test.md", DocType::Pipia, fm, "");
+        let mut result = ValidationResult::default();
+        check_china_cross_rules(&mut result, &doc);
+        assert!(!result.errors.iter().any(|e| e.rule == "CROSS-005"));
+    }
+
+    #[test]
+    fn test_cross_006_approved_needs_filing_number() {
+        let fm = Frontmatter {
+            id: Some("CACFILE-2026-04-25-001".into()),
+            cac_filing_status: Some("national_approved".into()),
+            cac_filing_number: None,
+            ..Default::default()
+        };
+        let doc = make_doc("CACFILE-2026-04-25-001-test.md", DocType::Cacfile, fm, "");
+        let mut result = ValidationResult::default();
+        check_china_cross_rules(&mut result, &doc);
+        assert!(result.errors.iter().any(|e| e.rule == "CROSS-006"));
+    }
+
+    #[test]
+    fn test_cross_007_filing_required_needs_cacfile() {
+        let fm = Frontmatter {
+            id: Some("MCARD-2026-04-25-001".into()),
+            cac_filing_required: Some(true),
+            ..Default::default()
+        };
+        let doc = make_doc("MCARD-2026-04-25-001-test.md", DocType::Mcard, fm, "");
+        let mut result = ValidationResult::default();
+        check_china_cross_rules(&mut result, &doc);
+        assert!(result.errors.iter().any(|e| e.rule == "CROSS-007"));
+    }
+
+    #[test]
+    fn test_cross_008_particularly_serious_must_be_one_hour() {
+        let fm = Frontmatter {
+            id: Some("INC-2026-04-25-001".into()),
+            csl_severity_level: Some("particularly_serious".into()),
+            csl_report_deadline_hours: Some(4),
+            ..Default::default()
+        };
+        let doc = make_doc("INC-2026-04-25-001-test.md", DocType::Inc, fm, "");
+        let mut result = ValidationResult::default();
+        check_china_cross_rules(&mut result, &doc);
+        assert!(result.errors.iter().any(|e| e.rule == "CROSS-008"));
+    }
+
+    #[test]
+    fn test_cross_009_relatively_major_must_be_four_hours() {
+        let fm = Frontmatter {
+            id: Some("INC-2026-04-25-001".into()),
+            csl_severity_level: Some("relatively_major".into()),
+            csl_report_deadline_hours: Some(24),
+            ..Default::default()
+        };
+        let doc = make_doc("INC-2026-04-25-001-test.md", DocType::Inc, fm, "");
+        let mut result = ValidationResult::default();
+        check_china_cross_rules(&mut result, &doc);
+        assert!(result.errors.iter().any(|e| e.rule == "CROSS-009"));
+    }
+
+    #[test]
+    fn test_cross_010_gb45438_applicable_needs_ailabel() {
+        let fm = Frontmatter {
+            id: Some("MCARD-2026-04-25-001".into()),
+            gb45438_applicable: Some(true),
+            ..Default::default()
+        };
+        let doc = make_doc("MCARD-2026-04-25-001-test.md", DocType::Mcard, fm, "");
+        let mut result = ValidationResult::default();
+        check_china_cross_rules(&mut result, &doc);
+        assert!(result.errors.iter().any(|e| e.rule == "CROSS-010"));
+    }
+
+    #[test]
+    fn test_type_003_pipia_retention_three_years() {
+        let fm = Frontmatter {
+            id: Some("PIPIA-2026-04-25-001".into()),
+            created: Some("2026-04-25".into()),
+            pipl_retention_until: Some("2027-04-25".into()), // only 1 year — must fail
+            ..Default::default()
+        };
+        let doc = make_doc("PIPIA-2026-04-25-001-test.md", DocType::Pipia, fm, "");
+        let mut result = ValidationResult::default();
+        check_china_type_specific(&mut result, &doc);
+        assert!(result.errors.iter().any(|e| e.rule == "TYPE-003"));
+    }
+
+    #[test]
+    fn test_type_003_pipia_retention_three_years_ok() {
+        let fm = Frontmatter {
+            id: Some("PIPIA-2026-04-25-001".into()),
+            created: Some("2026-04-25".into()),
+            pipl_retention_until: Some("2029-04-25".into()), // exactly 3 years
+            ..Default::default()
+        };
+        let doc = make_doc("PIPIA-2026-04-25-001-test.md", DocType::Pipia, fm, "");
+        let mut result = ValidationResult::default();
+        check_china_type_specific(&mut result, &doc);
+        assert!(!result.errors.iter().any(|e| e.rule == "TYPE-003"));
+    }
+
+    #[test]
+    fn test_type_005_tc260ra_requires_three_criteria() {
+        let fm = Frontmatter {
+            id: Some("TC260RA-2026-04-25-001".into()),
+            tc260_application_scenario: Some("healthcare".into()),
+            // missing intelligence_level and application_scale
+            ..Default::default()
+        };
+        let doc = make_doc("TC260RA-2026-04-25-001-test.md", DocType::Tc260ra, fm, "");
+        let mut result = ValidationResult::default();
+        check_china_type_specific(&mut result, &doc);
+        assert!(result.errors.iter().any(|e| e.rule == "TYPE-005"));
+    }
+
+    #[test]
+    fn test_type_006_ailabel_needs_content_type() {
+        let fm = Frontmatter {
+            id: Some("AILABEL-2026-04-25-001".into()),
+            gb45438_content_types: Some(vec![]),
+            ..Default::default()
+        };
+        let doc = make_doc("AILABEL-2026-04-25-001-test.md", DocType::Ailabel, fm, "");
+        let mut result = ValidationResult::default();
+        check_china_type_specific(&mut result, &doc);
+        assert!(result.errors.iter().any(|e| e.rule == "TYPE-006"));
     }
 }

@@ -48,8 +48,8 @@ DevTrail usa **tags de versión independientes** para cada componente:
 
 | Componente | Prefijo de tag | Ejemplo | Qué incluye |
 |------------|---------------|---------|-------------|
-| Framework | `fw-` | `fw-4.2.0` | Plantillas (12 tipos), docs de gobernanza, directivas |
-| CLI | `cli-` | `cli-3.2.5` | El binario `devtrail` |
+| Framework | `fw-` | `fw-4.3.0` | Plantillas (12 tipos), docs de gobernanza, directivas |
+| CLI | `cli-` | `cli-3.3.0` | El binario `devtrail` |
 
 Framework y CLI se publican de forma independiente. Una actualización del framework no requiere actualización del CLI, y viceversa.
 
@@ -86,7 +86,7 @@ Inicializa DevTrail en un directorio de proyecto.
 
 ```bash
 $ devtrail init .
-✔ Downloaded DevTrail fw-4.2.0
+✔ Downloaded DevTrail fw-4.3.0
 ✔ Created .devtrail/ directory structure
 ✔ Created DEVTRAIL.md
 ✔ Configured AI agent directives
@@ -107,9 +107,9 @@ Si `.devtrail/` no existe en el directorio actual, la actualización del framewo
 ```bash
 $ devtrail update
 Updating framework...
-✔ Framework updated to fw-4.2.0
+✔ Framework updated to fw-4.3.0
 Updating CLI...
-✔ CLI updated to cli-3.2.5
+✔ CLI updated to cli-3.3.0
 ```
 
 ---
@@ -124,7 +124,7 @@ Actualiza solo los archivos del framework. Busca el último release `fw-*` en Gi
 
 ```bash
 $ devtrail update-framework
-✔ Framework updated to fw-4.2.0
+✔ Framework updated to fw-4.3.0
 ```
 
 ---
@@ -142,11 +142,11 @@ Usa `--method` para forzar el método: `--method=github` o `--method=cargo`.
 
 ```bash
 $ devtrail update-cli
-✔ CLI updated to cli-3.2.5
+✔ CLI updated to cli-3.3.0
 
 $ devtrail update-cli --method=cargo
 Compiling from source, this may take a few minutes...
-✔ CLI updated to cli-3.2.5
+✔ CLI updated to cli-3.3.0
 ```
 
 ---
@@ -203,8 +203,8 @@ $ devtrail status
 DevTrail Status
 ───────────────
 Path:              /home/user/my-project
-Framework version: fw-4.2.0
-CLI version:       cli-3.2.5
+Framework version: fw-4.3.0
+CLI version:       cli-3.3.0
 Language:          en
 Structure:         ✔ Complete
 
@@ -513,8 +513,8 @@ Muestra información de versión, autoría y licencia.
 ```bash
 $ devtrail about
 DevTrail CLI
-  CLI version:       cli-3.2.5
-  Framework version: fw-4.2.0
+  CLI version:       cli-3.3.0
+  Framework version: fw-4.3.0
   Author:            Strange Days Tech, S.A.S.
   License:           MIT
   Repository:        https://github.com/StrangeDaysTech/devtrail
