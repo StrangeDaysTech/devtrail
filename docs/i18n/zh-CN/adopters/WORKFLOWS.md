@@ -157,6 +157,67 @@ DevTrail 有两个文档系统：
 
 ---
 
+## 中国合规工作流 *(opt-in)*
+
+如果项目在中国大陆运营或处理中国大陆用户的个人信息,启用 china 范围并按以下流程操作。
+
+### 一次性设置
+
+1. 编辑 `.devtrail/config.yml` 并将 `china` 加入 `regional_scope`:
+   ```yaml
+   regional_scope:
+     - global
+     - eu      # 如同时受 EU 约束
+     - china
+   ```
+2. 运行 `devtrail compliance --region china` 查看基线(在创建相应文档前所有检查都会失败)。
+3. 阅读 `.devtrail/00-governance/` 下安装的指南:
+   - `CHINA-REGULATORY-FRAMEWORK.md` — 概览与覆盖矩阵
+   - `TC260-IMPLEMENTATION-GUIDE.md` — 五级风险分级
+   - `PIPL-PIPIA-GUIDE.md` — 何时需要 PIPIA 及其内容
+   - `CAC-FILING-GUIDE.md` — 单一 vs 双重备案、状态生命周期
+   - `GB-45438-LABELING-GUIDE.md` — 显式 + 隐式标识设计
+
+### 添加生成式 AI 模型时
+
+需一并创建并通过 `related:` 互相关联的文档集:
+
+| 文档 | 用途 | 何时必需 |
+|------|------|--------|
+| `MCARD` | 含 `cac_filing_required`、`gb45438_applicable`、`tc260_risk_level` 的模型卡 | 范围内模型始终需要 |
+| `TC260RA` | 风险分级(场景 × 智能 × 规模 → 5 级) | 始终 |
+| `AILABEL` | 依据 GB 45438 的显式 + 隐式标识 | 模型生成内容时 |
+| `CACFILE` | 算法备案记录 | `cac_filing_required: true` 时 |
+| `PIPIA` | 个人信息影响评估(第55-56条) | 处理个人信息时 |
+| `SBOM` | 训练数据清单 + GB/T 45652 合规 | 始终 |
+
+`devtrail compliance --region china` 确认套件完整。
+
+### 发生事件时
+
+`INC` 模板包含 *CSL 2026 Incident Reporting* 部分。设置:
+
+```yaml
+csl_severity_level: relatively_major   # 或 particularly_serious | major | general
+csl_report_deadline_hours: 4           # particularly_serious 为 1,relatively_major 为 4
+```
+
+`devtrail validate` 强制严重程度-时限一致性(`CROSS-008`、`CROSS-009`)。major+ 事件须在 30 天内关闭(状态 `accepted`)以使 `CSL-003` 检查通过。
+
+### 跨境数据传输
+
+当过程涉及将个人信息传输至中国大陆境外时,在 PIPIA 上设置 `pipl_cross_border_transfer: true`,并在 *Cross-Border Transfer Analysis* 部分记录所选机制(CAC 安全评估 / 认证 / 标准合同)。`CROSS-011` 在未记录任何机制时发出警告。
+
+### 日常合规检查
+
+```bash
+# 在合并涉及 AI 服务的功能分支之前
+devtrail validate                    # 跨规则,包括 CROSS-004..011
+devtrail compliance --region china   # 各框架得分
+```
+
+---
+
 ## 理解版本
 
 DevTrail 为两个组件使用**独立版本管理**：

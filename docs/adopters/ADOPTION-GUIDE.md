@@ -145,6 +145,19 @@ DevTrail aligns with and supports compliance for:
 | **ISO/IEC 23894:2023** | AI risk management aligned with ETH and AI-RISK-CATALOG (Fase 3) |
 | **GDPR** | ETH documents with GDPR Legal Basis section, DPIA for privacy impact assessments |
 
+### China Regulatory Coverage *(opt-in via `regional_scope: china`)*
+
+| Standard | How DevTrail Helps |
+|----------|-------------------|
+| **TC260 AI Safety Governance Framework v2.0** | Five-level risk grading (TC260RA), `tc260_*` fields on ETH/MCARD/AILOG/SEC |
+| **PIPL — Personal Information Protection Law** | PIPIA template with PIPL Art. 55-56 sections, `pipl_*` fields, retention ≥ 3 years (`TYPE-003`) |
+| **GB 45438-2025** *(mandatory)* | AILABEL template covering explicit + implicit labeling for generative content |
+| **CAC Algorithm Filing** | CACFILE template with single + dual filing tracking; cross-checks from MCARD via `cac_filing_required` |
+| **GB/T 45652-2025** | Training-data security section in SBOM and MCARD; `gb45652_training_data_compliance` field |
+| **CSL 2026** | INC extension with `csl_severity_level`, deadline-coherence rules (1h / 4h+72h+30d windows) |
+
+> Activate by adding `china` to `regional_scope` in `.devtrail/config.yml`. See the *Configuration* section below and the installed `CHINA-REGULATORY-FRAMEWORK.md` guide for details.
+
 ### Architecture Documentation
 
 | Standard | How DevTrail Helps |
@@ -353,6 +366,28 @@ The CLI automatically:
 ---
 
 ## Configuration
+
+### Regional Regulatory Scope
+
+`.devtrail/config.yml` controls which compliance frameworks are evaluated by `devtrail compliance` and which document types are exposed by `devtrail new`:
+
+```yaml
+regional_scope:
+  - global   # NIST AI RMF + ISO/IEC 42001 (always recommended)
+  - eu       # EU AI Act + GDPR
+  - china    # TC260 v2.0, PIPL/PIPIA, GB 45438, CAC, GB/T 45652, CSL 2026
+```
+
+**Default if omitted**: `[global, eu]` — preserves the behavior of every DevTrail version prior to `fw-4.3.0`.
+
+When you add `china` to the list:
+
+- Four China-specific document types become available via `devtrail new`: `PIPIA`, `CACFILE`, `TC260RA`, `AILABEL`.
+- Six new compliance checkers run with `devtrail compliance` (or via `--region china` / `--standard china-*`).
+- Twelve scope-aware validation rules activate (`CROSS-004` to `CROSS-011`, `TYPE-003` to `TYPE-006`).
+- Five new governance guides are referenced from `.devtrail/00-governance/` (`CHINA-REGULATORY-FRAMEWORK.md`, plus per-framework guides for TC260, PIPL/PIPIA, CAC filing, and GB 45438 labeling) — all available in EN, ES, and zh-CN.
+
+A project without `china` in `regional_scope` is unaffected: no new files, no new prompts, no new rules. Adding `china` later is fully reversible.
 
 ### Customizing Agent Identifiers
 

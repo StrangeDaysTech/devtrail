@@ -145,6 +145,19 @@ DevTrail 对齐并支持以下标准的合规：
 | **ISO/IEC 23894:2023** | AI 风险管理与 ETH 和 AI-RISK-CATALOG 对齐 |
 | **GDPR** | ETH 文档含 GDPR 法律依据部分，DPIA 用于隐私影响评估 |
 
+### 中国法规覆盖 *(通过 `regional_scope: china` opt-in)*
+
+| 标准 | DevTrail 如何帮助 |
+|------|-------------------|
+| **TC260 人工智能安全治理框架 v2.0** | 五级风险分级(TC260RA),ETH/MCARD/AILOG/SEC 上的 `tc260_*` 字段 |
+| **PIPL — 个人信息保护法** | PIPIA 模板含第55-56条节,`pipl_*` 字段,留存 ≥ 3 年(`TYPE-003`) |
+| **GB 45438-2025** *(强制)* | AILABEL 模板覆盖生成式内容的显式 + 隐式标识 |
+| **CAC 算法备案** | CACFILE 模板跟踪单一/双重备案;通过 `cac_filing_required` 从 MCARD 交叉检查 |
+| **GB/T 45652-2025** | SBOM 与 MCARD 的训练数据安全部分;`gb45652_training_data_compliance` 字段 |
+| **CSL 2026** | INC 扩展含 `csl_severity_level`、时限一致性规则(1h / 4h+72h+30d 窗口) |
+
+> 在 `.devtrail/config.yml` 的 `regional_scope` 中加入 `china` 即可启用。详见下方 *配置* 章节及安装在 `.devtrail/00-governance/` 下的 `CHINA-REGULATORY-FRAMEWORK.md` 指南。
+
 ### 架构文档
 
 | 标准 | DevTrail 如何帮助 |
@@ -353,6 +366,28 @@ CLI 自动完成：
 ---
 
 ## 配置
+
+### 区域法规范围(Regional Regulatory Scope)
+
+`.devtrail/config.yml` 控制 `devtrail compliance` 评估哪些合规框架,以及 `devtrail new` 暴露哪些文档类型:
+
+```yaml
+regional_scope:
+  - global   # NIST AI RMF + ISO/IEC 42001(始终建议)
+  - eu       # EU AI Act + GDPR
+  - china    # TC260 v2.0、PIPL/PIPIA、GB 45438、CAC、GB/T 45652、CSL 2026
+```
+
+**省略时的默认值**:`[global, eu]` — 保持 `fw-4.3.0` 之前所有 DevTrail 版本的行为。
+
+将 `china` 加入列表时:
+
+- 通过 `devtrail new` 可使用 4 种中国专属文档类型:`PIPIA`、`CACFILE`、`TC260RA`、`AILABEL`。
+- `devtrail compliance` 运行 6 个新的合规检查器(也可通过 `--region china` / `--standard china-*`)。
+- 启用 12 条范围感知的验证规则(`CROSS-004` 至 `CROSS-011`、`TYPE-003` 至 `TYPE-006`)。
+- 在 `.devtrail/00-governance/` 下提供 5 份新的治理指南(`CHINA-REGULATORY-FRAMEWORK.md`,以及 TC260、PIPL/PIPIA、CAC 备案、GB 45438 标识的逐项指南)— 全部提供 EN、ES、zh-CN 三种语言。
+
+`regional_scope` 中不含 `china` 的项目不受任何影响:无新增文件、无新提示、无新规则。后续添加 `china` 完全可逆。
 
 ### 自定义 Agent 标识符
 
