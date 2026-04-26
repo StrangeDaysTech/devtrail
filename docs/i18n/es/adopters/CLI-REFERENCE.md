@@ -49,7 +49,7 @@ DevTrail usa **tags de versión independientes** para cada componente:
 | Componente | Prefijo de tag | Ejemplo | Qué incluye |
 |------------|---------------|---------|-------------|
 | Framework | `fw-` | `fw-4.3.0` | Plantillas (12 tipos), docs de gobernanza, directivas |
-| CLI | `cli-` | `cli-3.5.1` | El binario `devtrail` |
+| CLI | `cli-` | `cli-3.5.2` | El binario `devtrail` |
 
 Framework y CLI se publican de forma independiente. Una actualización del framework no requiere actualización del CLI, y viceversa.
 
@@ -109,7 +109,7 @@ $ devtrail update
 Updating framework...
 ✔ Framework updated to fw-4.3.0
 Updating CLI...
-✔ CLI updated to cli-3.5.1
+✔ CLI updated to cli-3.5.2
 ```
 
 ---
@@ -142,11 +142,11 @@ Usa `--method` para forzar el método: `--method=github` o `--method=cargo`.
 
 ```bash
 $ devtrail update-cli
-✔ CLI updated to cli-3.5.1
+✔ CLI updated to cli-3.5.2
 
 $ devtrail update-cli --method=cargo
 Compiling from source, this may take a few minutes...
-✔ CLI updated to cli-3.5.1
+✔ CLI updated to cli-3.5.2
 ```
 
 ---
@@ -204,7 +204,7 @@ DevTrail Status
 ───────────────
 Path:              /home/user/my-project
 Framework version: fw-4.3.0
-CLI version:       cli-3.5.1
+CLI version:       cli-3.5.2
 Language:          en
 Structure:         ✔ Complete
 
@@ -515,7 +515,7 @@ Explora y lee la documentación de DevTrail interactivamente en una interfaz de 
 |------|---------|-------------|
 | `--lang <código>` | resuelto desde el proyecto (ver abajo) | Idioma del shell del TUI y los docs de gobernanza del framework (`en`, `es`, `zh-CN`). Cae silenciosamente al inglés si falta la traducción. |
 
-**Orden de resolución del idioma** (desde cli-3.5.1):
+**Orden de resolución del idioma** (desde cli-3.5.2):
 
 1. Flag `--lang <código>`, cuando se especifica
 2. Campo `language` en `.devtrail/config.yml`, cuando el archivo existe (un valor explícito — incluso `language: en` — se respeta como una decisión deliberada del usuario)
@@ -529,7 +529,7 @@ Explora y lee la documentación de DevTrail interactivamente en una interfaz de 
 - Renderizado de Markdown con colores, tablas, bloques de código e indentación por niveles
 - Navegación entre documentos relacionados mediante hipervínculos
 - Búsqueda por nombre de archivo, título, tags o fecha
-- Modo pantalla completa, atajos estilo vim
+- Modo pantalla completa, con `j` / `k` como teclas alternas para `↓` / `↑`
 - Consciente de localización: los docs del framework (`QUICK-REFERENCE`, `AGENT-RULES`, guías regulatorias de China, etc.) se sirven en el idioma definido por `language` en `.devtrail/config.yml` o por `--lang`
 
 **Atajos de teclado:**
@@ -567,7 +567,7 @@ Muestra información de versión, autoría y licencia.
 ```bash
 $ devtrail about
 DevTrail CLI
-  CLI version:       cli-3.5.1
+  CLI version:       cli-3.5.2
   Framework version: fw-4.3.0
   Author:            Strange Days Tech, S.A.S.
   License:           MIT

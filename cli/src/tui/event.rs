@@ -75,7 +75,7 @@ fn handle_key(app: &mut App, key: KeyEvent) {
         },
 
         // Enter: open/expand or follow selected related link
-        KeyCode::Enter | KeyCode::Char('l') | KeyCode::Right => {
+        KeyCode::Enter | KeyCode::Right => {
             if app.active_panel == ActivePanel::Navigation {
                 app.nav_enter();
             } else if app.active_panel == ActivePanel::Metadata
@@ -86,7 +86,7 @@ fn handle_key(app: &mut App, key: KeyEvent) {
         }
 
         // Back: collapse/go back / clear search
-        KeyCode::Esc | KeyCode::Char('h') | KeyCode::Left => {
+        KeyCode::Esc | KeyCode::Left => {
             match app.active_panel {
                 ActivePanel::Document if key.code == KeyCode::Esc => {
                     if app.view_mode == ViewMode::Fullscreen {
